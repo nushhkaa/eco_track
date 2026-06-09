@@ -89,7 +89,12 @@
         <p>A comprehensive breakdown of school-wide emissions across all 5 domains over the last year.</p>
       </div>
 
-      <div class="data-table-wrapper animate-fade-up delay-1">
+      <!-- Graphical Chart Section -->
+      <div class="animate-fade-up delay-1" style="background: white; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 24px; margin-bottom: 40px;">
+        <canvas id="historyChart" style="width:100%; max-height:400px;"></canvas>
+      </div>
+
+      <div class="data-table-wrapper animate-fade-up delay-2">
         <table class="data-table">
           <thead>
             <tr>
@@ -103,7 +108,6 @@
             </tr>
           </thead>
           <tbody>
-            <!-- Hardcoded Data -->
             <tr><td>July 2025</td><td class="val-energy">145.2</td><td class="val-commute">210.5</td><td class="val-waste">85.0</td><td class="val-water">12.4</td><td class="val-paper">34.1</td><td class="val-total">487.2</td></tr>
             <tr><td>August 2025</td><td class="val-energy">150.0</td><td class="val-commute">205.0</td><td class="val-waste">88.5</td><td class="val-water">15.0</td><td class="val-paper">30.2</td><td class="val-total">488.7</td></tr>
             <tr><td>September 2025</td><td class="val-energy">135.5</td><td class="val-commute">190.2</td><td class="val-waste">80.1</td><td class="val-water">11.8</td><td class="val-paper">45.0</td><td class="val-total">462.6</td></tr>
@@ -133,5 +137,102 @@
       
     </div>
   </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const ctx = document.getElementById('historyChart').getContext('2d');
+      
+      const labels = ['Jul 2025', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan 2026', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+      
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: '⚡ Energy',
+              data: [145.2, 150.0, 135.5, 120.4, 110.2, 180.5, 195.0, 175.4, 140.2, 125.8, 130.5, 145.0],
+              borderColor: '#5B8DD9',
+              backgroundColor: 'rgba(91, 141, 217, 0.1)',
+              borderWidth: 3,
+              tension: 0.4,
+              fill: true
+            },
+            {
+              label: '🚌 Commute',
+              data: [210.5, 205.0, 190.2, 185.5, 170.8, 150.0, 160.5, 165.2, 180.0, 185.4, 190.5, 195.0],
+              borderColor: '#56C15B',
+              backgroundColor: 'rgba(86, 193, 91, 0.1)',
+              borderWidth: 3,
+              tension: 0.4,
+              fill: true
+            },
+            {
+              label: '🗑️ Waste',
+              data: [85.0, 88.5, 80.1, 75.0, 70.2, 65.5, 68.0, 72.4, 78.5, 82.0, 85.5, 80.0],
+              borderColor: '#E57373',
+              backgroundColor: 'rgba(229, 115, 115, 0.1)',
+              borderWidth: 3,
+              tension: 0.4,
+              fill: true
+            },
+            {
+              label: '💧 Water',
+              data: [12.4, 15.0, 11.8, 10.5, 9.2, 8.5, 9.0, 10.1, 12.5, 14.0, 16.5, 18.0],
+              borderColor: '#64B5F6',
+              backgroundColor: 'rgba(100, 181, 246, 0.1)',
+              borderWidth: 3,
+              tension: 0.4,
+              fill: true
+            },
+            {
+              label: '📄 Paper',
+              data: [34.1, 30.2, 45.0, 25.5, 22.0, 15.4, 18.5, 28.0, 40.5, 55.2, 35.0, 25.0],
+              borderColor: '#FBC02D',
+              backgroundColor: 'rgba(251, 192, 45, 0.1)',
+              borderWidth: 3,
+              tension: 0.4,
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                font: { family: "'Noto Sans Devanagari', sans-serif", size: 13, weight: 'bold' }
+              }
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false,
+            }
+          },
+          interaction: {
+            mode: 'nearest',
+            axis: 'x',
+            intersect: false
+          },
+          scales: {
+            x: {
+              grid: { display: false }
+            },
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'kg CO₂e',
+                font: { weight: 'bold' }
+              }
+            }
+          }
+        }
+      });
+    });
+  </script>
 </body>
 </html>
