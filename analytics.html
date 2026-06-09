@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Eco-Report Card — View your classroom's carbon footprint breakdown and achievements with Eco-Tracks Nepal.">
+  <title>Analytics Dashboard — Eco-Tracks Nepal</title>
+  <script type="module">
+    import { StorageManager } from './js/storage_manager.js';
+    if (!StorageManager.getAdminConfig()) { window.location.replace('setup.html'); }
+  </script>
+  <link rel="stylesheet" href="./css/main.css">
+  <style>
+    .report-hero h1 { color: var(--green-800); margin-bottom: 8px; }
+    .report-hero p  { color: var(--text-muted); }
+
+    .report-top-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+      margin: 32px 0;
+      align-items: start;
+    }
+
+    /* Hotspot alert card */
+    .hotspot-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 28px;
+      display: flex;
+      align-items: flex-start;
+      gap: 24px;
+      box-shadow: var(--shadow-card);
+    }
+    .hotspot-card__emoji {
+      font-size: 4.5rem;
+      flex-shrink: 0;
+    }
+    .hotspot-card__body { flex: 1; }
+    .hotspot-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #FFF0F0;
+      color: #C62828;
+      border: 1px solid rgba(229,115,115,0.3);
+      border-radius: var(--radius-pill);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      margin-bottom: 12px;
+    }
+    .hotspot-card__body h3 {
+      font-size: 1.35rem;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+    }
+    .hotspot-card__body p { font-size: 0.9rem; color: var(--text-body); line-height: 1.6; margin-bottom: 18px; }
+    .hotspot-category { color: var(--red); font-weight: 800; }
+
+    /* Quick summary box */
+    .summary-stat {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .summary-stat__icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .summary-stat__icon--energy { background: #E3F0FF; }
+    .summary-stat__icon--trees  { background: var(--green-100); }
+    .summary-stat__label { font-size: 0.78rem; font-weight: 600; color: var(--text-muted); }
+    .summary-stat__value { font-size: 1.5rem; font-weight: 900; color: var(--text-primary); line-height: 1.1; }
+
+    .see-math-btn {
+      width: 100%;
+      background: rgba(91,141,217,0.1);
+      border: 1px solid rgba(91,141,217,0.25);
+      color: var(--blue);
+      border-radius: var(--radius-md);
+      padding: 10px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+    .see-math-btn:hover { background: var(--blue-light); }
+
+    .quote-box {
+      background: var(--bg-page);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      font-size: 0.875rem;
+      font-style: italic;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 14px;
+    }
+
+    /* Category breakdown */
+    .breakdown-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 32px;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 24px;
+    }
+    .breakdown-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .breakdown-header h2 { font-size: 1.4rem; }
+    .breakdown-header p  { color: var(--text-muted); font-size: 0.875rem; margin-top: 4px; }
+
+    .bar-chart-wrap {
+      margin: 32px 0 12px;
+    }
+
+    .bar-col-inner {
+      width: 100%;
+      max-width: 64px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .bar-comparison {
+      display: flex;
+      gap: 4px;
+      align-items: flex-end;
+      width: 100%;
+      max-width: 80px;
+    }
+
+    .bar-current, .bar-past {
+      flex: 1;
+      border-radius: 8px 8px 3px 3px;
+      transition: height 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);
+      min-height: 4px;
+    }
+
+    .bar-past { opacity: 0.4; }
+
+    .bar-category-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      margin-top: 10px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    /* Legend */
+    .chart-legend {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    /* Grade badge big */
+    .grade-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    /* No data state */
+    .no-data-state {
+      text-align: center;
+      padding: 60px 24px;
+    }
+    .no-data-state .emoji { font-size: 4rem; margin-bottom: 16px; }
+
+    @media (max-width: 768px) {
+      .report-top-grid { grid-template-columns: 1fr; }
+      .hotspot-card { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Navigation ── -->
+  <nav class="nav" role="navigation" aria-label="Main navigation">
+    <div class="container nav__inner">
+      <a href="index.html" class="nav__logo" id="nav-logo">
+        <div class="nav__logo-icon">🌿</div>
+        Eco-Tracks
+      </a>
+      <ul class="nav__links" role="list">
+        <li><a href="index.html" id="nav-missions" data-i18n="nav_missions">Missions</a></li>
+        <li><a href="admin.html" id="nav-myschool" data-i18n="nav_myschool">My School</a></li>
+        
+        <li><a href="transparency.html" id="nav-badges" data-i18n="nav_badges">Badges</a></li>
+      </ul>
+      <div class="nav-actions" style="display:flex;gap:12px;align-items:center;">
+        <a href="overview.html" class="btn btn-outline btn-sm" data-i18n="footer_overview">📈 Overview</a>
+        <div class="badge badge-green" id="grade-badge-nav" aria-live="polite">—</div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Main ── -->
+  <main class="page-main" id="main-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="report-hero animate-fade-up">
+        <h1 id="report-heading">This Month's Eco-Report Card!</h1>
+        <p>Check your school's progress and help our planet smile!</p>
+      </div>
+
+      <!-- Main content area -->
+      <div id="analytics-content">
+        <!-- Injected by JS -->
+      </div>
+
+      <!-- No-data fallback -->
+      <div id="no-data-state" class="no-data-state" style="display:none">
+        <div class="emoji">📊</div>
+        <h2>No Data Yet</h2>
+        <p class="text-muted mt-8">Please complete the student tracking form first to generate your report card.</p>
+        <div class="flex justify-center gap-12 mt-24">
+          <a href="login.html" class="btn btn-gold" id="btn-go-login">🎒 Go to Student Portal</a>
+          <a href="index.html" class="btn btn-outline" id="btn-go-home-nodata">🏠 Home</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ── Footer ── -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer__inner">
+        <div>
+          <div class="footer__brand">Eco-Tracks <span>| Nepal</span></div>
+          <div class="footer__copy">© 2026 <a href="transparency.html">HimalEdge Eco-Track</a></div>
+        </div>
+        <div class="footer__actions">
+          <button class="btn btn-ghost btn-sm" id="btn-sync-footer">🔄 Sync with School Server</button>
+          <button class="btn btn-outline btn-sm" id="btn-reset-data" style="color:var(--red);border-color:var(--red)">🗑️ Reset Data</button>
+          <button class="btn btn-ghost btn-sm" id="btn-refresh-footer">↺ Refresh Data</button>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { StorageManager } from './js/storage_manager.js';
+    import { I18n } from './js/i18n.js';
+    import { CalculatorEngine } from './js/calculator_engine.js';
+
+    I18n.init();
+
+    const engine = new CalculatorEngine();
+    await engine.init();
+
+    const grade = StorageManager.getCurrentGrade();
+    document.getElementById('grade-badge-nav').textContent = grade;
+
+    const currentDataObj = StorageManager.getLatestForGrade(grade);
+    const pastDataObj    = StorageManager.getPreviousForGrade(grade);
+
+    if (!currentDataObj) {
+      document.getElementById('no-data-state').style.display = 'block';
+    } else {
+      renderReport(currentDataObj, pastDataObj);
+    }
+
+    function renderReport(current, past) {
+      const data     = current.data;
+      const prevData = past ? past.data : null;
+
+      // Find hotspot
+      let maxCat = '', maxVal = -1;
+      Object.entries(data).forEach(([cat, d]) => {
+        if (d.co2 > maxVal) { maxVal = d.co2; maxCat = cat; }
+      });
+      StorageManager.setHotspot(maxCat);
+
+      const totalCO2  = current.totalCO2 || Object.values(data).reduce((s, d) => s + d.co2, 0);
+      const prevTotalCO2 = past ? (past.totalCO2 || Object.values(prevData).reduce((s,d)=>s+d.co2,0)) : 0;
+      const trees     = engine.toTreesEquivalent(totalCO2);
+      const gradeInfo = engine.gradeFootprint(totalCO2);
+
+      const catMeta = {
+        energy:  { emoji: '⚡', label: 'Energy',  color: '#5B8DD9' },
+        commute: { emoji: '🚌', label: 'Commute', color: '#56C15B' },
+        waste:   { emoji: '🗑️', label: 'Waste',   color: '#E57373' },
+        water:   { emoji: '💧', label: 'Water',   color: '#64B5F6' },
+        paper:   { emoji: '📄', label: 'Paper',   color: '#C8A400' },
+      };
+
+      const maxBarCO2 = Math.max(...Object.values(data).map(d => d.co2), 1);
+      const maxPrevCO2 = prevData ? Math.max(...Object.values(prevData).map(d=>d.co2),1) : 1;
+      const globalMax = Math.max(maxBarCO2, maxPrevCO2, 1);
+
+      const hotspotCatLabel = catMeta[maxCat]?.label || maxCat;
+      const hotspotEmoji    = catMeta[maxCat]?.emoji || '⚠️';
+
+      const improvement = prevTotalCO2 > 0
+        ? (((prevTotalCO2 - totalCO2) / prevTotalCO2) * 100).toFixed(1)
+        : null;
+
+      const html = `
+        <div class="report-top-grid animate-fade-up">
+
+          <!-- Hotspot alert -->
+          <div class="hotspot-card">
+            <div class="hotspot-card__emoji" aria-hidden="true">
+              ${maxVal > 0 ? '😰' : '🌟'}
+            </div>
+            <div class="hotspot-card__body">
+              ${maxVal > 0 ? `
+                <div class="hotspot-badge">⚠️ Attention Required</div>
+                <h3>Emission Pain Point Found!</h3>
+                <p>Oh no! Our biggest emission pain point this ${current.timestamp ? 'session' : 'month'} is
+                  <span class="hotspot-category">${hotspotCatLabel}</span>${hotspotCatLabel === 'Waste' ? '' : '!'} Let's work together to change it!
+                </p>
+                <a href="solutions.html" class="btn btn-primary" id="btn-help-fix">Help Fix This →</a>
+              ` : `
+                <div class="hotspot-badge" style="background:var(--green-100);color:var(--green-700);border-color:var(--green-300);">🌟 Excellent!</div>
+                <h3>Zero Carbon Session!</h3>
+                <p>Amazing! Your class recorded no emissions this session. Keep up the incredible eco-work!</p>
+                <a href="solutions.html" class="btn btn-primary">🌱 View Solutions</a>
+              `}
+            </div>
+          </div>
+
+          <!-- Quick Summary -->
+          <div class="summary-box animate-fade-up delay-1">
+            <div class="summary-box__title">Quick Summary</div>
+
+            <div class="summary-stat">
+              <div class="summary-stat__icon summary-stat__icon--energy" aria-hidden="true">⚡</div>
+              <div>
+                <div class="summary-stat__label">Total CO₂e This Session</div>
+                <div class="summary-stat__value">${totalCO2.toFixed(1)} kg</div>
+              </div>
+            </div>
+
+            <div class="summary-stat">
+              <div class="summary-stat__icon summary-stat__icon--trees" aria-hidden="true">🌳</div>
+              <div>
+                <div class="summary-stat__label">Trees Equivalent</div>
+                <div class="summary-stat__value">${trees > 0 ? trees + ' Trees' : '< 1 Tree'}</div>
+              </div>
+            </div>
+
+            ${improvement !== null ? `
+              <div class="summary-stat">
+                <div class="summary-stat__icon" style="background:#FFF0F0" aria-hidden="true">${parseFloat(improvement) >= 0 ? '📉' : '📈'}</div>
+                <div>
+                  <div class="summary-stat__label">vs. Last Session</div>
+                  <div class="summary-stat__value" style="color:${parseFloat(improvement) >= 0 ? 'var(--green-600)' : 'var(--red)'}">
+                    ${parseFloat(improvement) >= 0 ? '↓' : '↑'} ${Math.abs(parseFloat(improvement))}%
+                  </div>
+                </div>
+              </div>
+            ` : ''}
+
+            <a href="transparency.html" class="see-math-btn mt-12" id="btn-see-math">
+              📐 See the Math ↗
+            </a>
+
+            <div class="quote-box">"Small acts, big impact!"</div>
+          </div>
+        </div>
+
+        <!-- Category Breakdown -->
+        <div class="breakdown-section animate-fade-up delay-2">
+          <div class="breakdown-header">
+            <div>
+              <h2>Category Breakdown</h2>
+              <p>See where we are doing great and where we can improve.</p>
+            </div>
+            <div class="flex items-center gap-12">
+              <div class="grade-circle" style="background:${gradeInfo.color}" title="${gradeInfo.label}" aria-label="Grade: ${gradeInfo.grade}">
+                ${gradeInfo.grade}
+              </div>
+              <div class="tab-group" role="group" aria-label="View toggle">
+                <button class="tab-btn active" id="tab-weekly">Weekly</button>
+                <button class="tab-btn" id="tab-monthly">Monthly</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Legend -->
+          <div class="chart-legend">
+            <div class="legend-item">
+              <div class="legend-dot" style="background:var(--green-500)"></div>
+              Current Quarter
+            </div>
+            ${prevData ? `
+              <div class="legend-item">
+                <div class="legend-dot" style="background:var(--text-caption)"></div>
+                Previous Log (Overlay)
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- Bar Chart -->
+          <div class="bar-chart bar-chart-wrap" id="bar-chart-container" role="img" aria-label="Category CO2 breakdown bar chart">
+            ${Object.keys(data).map((cat, i) => {
+              const co2     = data[cat].co2;
+              const prevCO2 = prevData ? (prevData[cat]?.co2 || 0) : 0;
+              const barHeightPct = ((co2 / globalMax) * 100).toFixed(1);
+              const barHeightPrevPct = ((prevCO2 / globalMax) * 100).toFixed(1);
+              const pct = totalCO2 > 0 ? ((co2 / totalCO2) * 100).toFixed(1) : "0.0";
+              const prevPct = prevTotalCO2 > 0 ? ((prevCO2 / prevTotalCO2) * 100).toFixed(1) : "0.0";
+              const meta    = catMeta[cat] || { emoji: '📊', label: cat, color: '#888' };
+              const isHot   = cat === maxCat && maxVal > 0;
+
+              return `
+                <div class="bar-col" data-co2="${co2}" data-cat="${cat}" style="animation-delay:${i*0.1}s">
+                  <span class="bar-pct ${isHot ? 'text-red font-bold' : ''}" aria-label="${pct}%">${pct}%</span>
+                  <div class="bar-comparison" style="height:160px;align-items:flex-end;">
+                    <div class="bar-current bar-fill bar-fill--${cat}"
+                         style="height:${barHeightPct}%;background:${isHot ? 'var(--red)' : meta.color}"
+                         title="${meta.label}: ${co2.toFixed(2)} kg CO₂e (${pct}%)">
+                    </div>
+                    ${prevData ? `
+                      <div class="bar-past bar-fill"
+                           style="height:${barHeightPrevPct}%;background:${meta.color}"
+                           title="Previous: ${prevCO2.toFixed(2)} kg CO₂e (${prevPct}%)">
+                      </div>
+                    ` : ''}
+                  </div>
+                  <div class="bar-category-label">
+                    <span aria-hidden="true">${meta.emoji}</span>
+                    <span>${meta.label}</span>
+                    <a href="solutions.html?cat=${cat}" style="font-size:0.7rem; color:var(--blue); text-decoration:underline; margin-top:4px;">💡 Fix</a>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+
+        <!-- Admin Baselines -->
+        <div class="animate-fade-up delay-2 mt-24" style="background:#E3F2FD; border:1px solid #90CAF9; border-radius:12px; padding:16px;">
+          <h4 style="margin-bottom:8px; font-size:0.95rem; color:#1565C0;">🏢 School-Wide Baselines (From Admin)</h4>
+          <div style="display:flex; gap:24px; font-size:0.85rem; color:#0D47A1;">
+            <div><strong>Municipal Waste:</strong> ${StorageManager.getAdminConfig()?.muniWaste || 'None'}</div>
+            <div><strong>Admin Paper Recycled:</strong> ${StorageManager.getAdminConfig()?.adminPaperRecycled || 0} kg</div>
+          </div>
+        </div>
+
+        <!-- Achievement Cards -->
+        <div class="achievement-row animate-fade-up delay-3">
+          <div class="achievement-card" id="ach-best-grade">
+            <div class="achievement-card__icon">🏆</div>
+            <div class="achievement-card__title">Performance Grade</div>
+            <div class="achievement-card__value">${gradeInfo.grade} — ${gradeInfo.label}</div>
+          </div>
+          <div class="achievement-card" id="ach-top-improver">
+            <div class="achievement-card__icon">📈</div>
+            <div class="achievement-card__title">Total Sessions Logged</div>
+            <div class="achievement-card__value">${StorageManager.getHistory().filter(h=>h.grade===grade).length} Session(s)</div>
+          </div>
+          <div class="achievement-card" id="ach-eco-warrior">
+            <div class="achievement-card__icon">🛡️</div>
+            <div class="achievement-card__title">Eco-Warrior Status</div>
+            <div class="achievement-card__value" style="color:var(--green-500);">${grade}</div>
+          </div>
+        </div>
+
+        <!-- Grading Scale Legend -->
+        <div class="animate-fade-up delay-3 mt-24 p-16" style="background:var(--bg-card); border-radius:12px; border:1px solid #eee;">
+          <h4 style="margin-bottom:12px; font-size:0.95rem; color:var(--text-primary);">📊 Grade Scale Reference (kg CO₂e)</h4>
+          <div style="display:flex; flex-wrap:wrap; gap:12px; font-size:0.8rem; color:var(--text-muted);">
+            <div style="display:flex; align-items:center; gap:6px;"><span class="badge" style="background:#2E7D32;color:white">A+</span> 0 kg</div>
+            <div style="display:flex; align-items:center; gap:6px;"><span class="badge" style="background:#4CAF50;color:white">A</span> 1 - 50 kg</div>
+            <div style="display:flex; align-items:center; gap:6px;"><span class="badge" style="background:#8BC34A;color:white">B</span> 51 - 100 kg</div>
+            <div style="display:flex; align-items:center; gap:6px;"><span class="badge" style="background:#FFC107;color:white">C</span> 101 - 150 kg</div>
+            <div style="display:flex; align-items:center; gap:6px;"><span class="badge" style="background:#FF9800;color:white">D</span> 151 - 200 kg</div>
+            <div style="display:flex; align-items:center; gap:6px;"><span class="badge" style="background:#E53935;color:white">E</span> > 200 kg</div>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="flex justify-center gap-16 mt-32 animate-fade-up delay-4">
+          <a href="solutions.html" class="btn btn-primary btn-lg" id="btn-proceed-solutions">🌱 View Geographic Solutions</a>
+          <a href="student.html" class="btn btn-outline" id="btn-log-again">📝 Log Another Session</a>
+        </div>
+      `;
+
+      document.getElementById('analytics-content').innerHTML = html;
+
+      // Tab toggle (cosmetic)
+      document.getElementById('tab-weekly')?.addEventListener('click', (e) => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+      });
+      document.getElementById('tab-monthly')?.addEventListener('click', (e) => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+      });
+    }
+
+    // Footer
+    document.getElementById('btn-sync-footer').addEventListener('click', () => {
+      const ok = StorageManager.downloadCSV();
+      showToast(ok ? '✅ Data exported!' : '⚠️ No data yet.', ok ? 'success' : 'error');
+    });
+    document.getElementById('btn-refresh-footer').addEventListener('click', () => location.reload());
+
+    function showToast(msg, type = 'success') {
+      const t = document.createElement('div');
+      t.className = `toast toast--${type}`;
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3500);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Transparency Ledger — The Math Behind the Magic. Understand how Eco-Tracks Nepal calculates your school's carbon footprint.">
+  <title>Transparency Ledger — Eco-Tracks Nepal</title>
+  <script type="module">
+    import { StorageManager } from './js/storage_manager.js';
+    if (!StorageManager.getAdminConfig()) { window.location.replace('setup.html'); }
+  </script>
+  <link rel="stylesheet" href="./css/main.css">
+  <style>
+    .transparency-hero {
+      text-align: center;
+      padding: 48px 24px 40px;
+    }
+
+    .transparency-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--blue-light);
+      color: var(--blue);
+      border: 1px solid rgba(91,141,217,0.25);
+      border-radius: var(--radius-pill);
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 5px 16px;
+      margin-bottom: 20px;
+    }
+
+    .transparency-hero h1 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      color: var(--green-800);
+      margin-bottom: 16px;
+    }
+
+    .transparency-hero p {
+      font-size: 1rem;
+      color: var(--text-muted);
+      max-width: 540px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* Formula section */
+    .formula-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 36px;
+      margin-bottom: 28px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .formula-section__header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .formula-section__icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      background: var(--green-100);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .formula-section__title { font-size: 1.2rem; font-weight: 800; }
+
+    /* Formula visual */
+    .formula-visual {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin: 24px 0;
+    }
+
+    .fv-box {
+      flex: 1;
+      min-width: 130px;
+      border-radius: var(--radius-md);
+      padding: 20px 16px;
+      text-align: center;
+    }
+
+    .fv-box--input  { background: var(--bg-page); border: 1.5px dashed var(--border); }
+    .fv-box--factor { background: var(--gold-bg);  border: 1.5px solid rgba(200,164,0,0.4); }
+    .fv-box--result { background: var(--green-500); color: #fff; border: none; box-shadow: 0 4px 14px rgba(76,175,80,0.3); }
+
+    .fv-box__icon  { font-size: 1.5rem; margin-bottom: 8px; display: block; }
+    .fv-box__title { font-size: 0.82rem; font-weight: 700; margin-bottom: 4px; }
+    .fv-box__desc  { font-size: 0.75rem; opacity: 0.7; }
+
+    .fv-op {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    /* Quote blockquote */
+    .formula-quote {
+      background: var(--bg-page);
+      border-left: 4px solid var(--green-400);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      padding: 16px 20px;
+      margin-top: 20px;
+      font-style: italic;
+      font-size: 0.9rem;
+      color: var(--text-body);
+      line-height: 1.7;
+    }
+
+    /* Emission factors table */
+    .table-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 36px;
+      margin-bottom: 28px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .table-section__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .category-row-header td {
+      background: var(--bg-page) !important;
+      font-weight: 700;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      padding: 10px 16px;
+    }
+
+    .cat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    /* Source & download row */
+    .source-row {
+      background: var(--blue-light);
+      border: 1px solid rgba(91,141,217,0.2);
+      border-radius: var(--radius-md);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 0.85rem;
+      color: var(--text-body);
+    }
+
+    /* Two-image row */
+    .visual-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+
+    .visual-card {
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      position: relative;
+      min-height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .visual-card--forest {
+      background: linear-gradient(135deg, #1A3D1C, #2D6A2F);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 36px;
+      text-align: center;
+    }
+
+    .visual-card--trust {
+      background: linear-gradient(135deg, var(--blue), #3A7AD9);
+      color: #fff;
+      padding: 36px;
+      text-align: center;
+    }
+
+    .visual-card__icon { font-size: 3rem; margin-bottom: 16px; }
+    .visual-card__title { font-size: 1.2rem; font-weight: 800; margin-bottom: 8px; }
+    .visual-card__desc  { font-size: 0.875rem; opacity: 0.85; line-height: 1.6; }
+
+    @media (max-width: 768px) {
+      .formula-visual { flex-direction: column; }
+      .visual-row { grid-template-columns: 1fr; }
+      .table-section__header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Navigation ── -->
+  <nav class="nav" role="navigation" aria-label="Main navigation">
+    <div class="container nav__inner">
+      <a href="index.html" class="nav__logo" id="nav-logo">
+        <div class="nav__logo-icon">🌿</div>
+        Eco-Tracks
+      </a>
+      <ul class="nav__links" role="list">
+        <li><a href="index.html" id="nav-missions" data-i18n="nav_missions">Missions</a></li>
+        <li><a href="admin.html" id="nav-myschool" data-i18n="nav_myschool">My School</a></li>
+        
+        <li><a href="transparency.html" class="active" id="nav-badges" data-i18n="nav_badges">Badges</a></li>
+      </ul>
+      <div class="nav__user" aria-label="User profile" id="nav-user-btn">👤</div>
+    </div>
+  </nav>
+
+  <!-- ── Main ── -->
+  <main class="page-main" id="main-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="transparency-hero animate-fade-up">
+        <div class="transparency-label">📐 Transparency Ledger</div>
+        <h1>The Math Behind the Magic</h1>
+        <p>Ever wondered how your daily choices turn into eco-points? We use science-backed emission factors to measure your footprint accurately and fairly.</p>
+      </div>
+
+      <!-- How We Calculate -->
+      <div class="formula-section animate-fade-up delay-1">
+        <div class="formula-section__header">
+          <div class="formula-section__icon">🧮</div>
+          <div class="formula-section__title">How We Calculate</div>
+        </div>
+
+        <div class="formula-visual" role="img" aria-label="Carbon calculation formula: Activity Data × Emission Factor = Carbon Footprint">
+          <div class="fv-box fv-box--input">
+            <span class="fv-box__icon">⚡</span>
+            <div class="fv-box__title">Activity Data</div>
+            <div class="fv-box__desc">Amount used<br>(e.g. 50 kWh)</div>
+          </div>
+          <div class="fv-op" aria-hidden="true">×</div>
+          <div class="fv-box fv-box--factor">
+            <span class="fv-box__icon">🧪</span>
+            <div class="fv-box__title">Emission Factor</div>
+            <div class="fv-box__desc">CO₂ per unit<br>(e.g. 0.2 kg)</div>
+          </div>
+          <div class="fv-op" aria-hidden="true">=</div>
+          <div class="fv-box fv-box--result">
+            <span class="fv-box__icon">☁️</span>
+            <div class="fv-box__title">Carbon Footprint</div>
+            <div class="fv-box__desc">Total kg CO₂e</div>
+          </div>
+        </div>
+
+        <div class="formula-quote">
+          "This formula is the global standard for carbon accounting. It helps us understand the hidden impact of our actions on the atmosphere."
+        </div>
+      </div>
+
+      <!-- Emission Factors Table -->
+      <div class="table-section animate-fade-up delay-2">
+        <div class="table-section__header">
+          <div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+              <div style="width:36px;height:36px;background:var(--green-100);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;">⬛</div>
+              <h2 style="font-size:1.3rem">Current Emission Factors</h2>
+            </div>
+            <p class="text-muted text-sm">Nepal-localized values. Compliance: IPCC 2006/2019 & AR6-GWP100.</p>
+          </div>
+          <button class="btn btn-outline btn-sm" id="btn-download-csv-factors">
+            ⬇️ Download Full Methodology
+          </button>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="factor-table" id="factors-table" aria-label="Emission factors by category">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Activity</th>
+                <th>Unit</th>
+                <th>Factor (kg CO₂e)</th>
+              </tr>
+            </thead>
+            <tbody id="factors-tbody">
+              <!-- Injected by JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Source row -->
+        <div class="source-row mt-24">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span>ℹ️</span>
+            <span>Data sourced from IPCC AR6 (2022), DEFRA/EPN, IEA (2024), and localized Nepal hydropower studies. Factors are updated quarterly.</span>
+          </div>
+          <a href="#" class="text-blue font-bold text-sm" id="link-download-methodology">
+            Download full methodology ⬇️
+          </a>
+        </div>
+      </div>
+
+      <!-- Visual row -->
+      <div class="visual-row animate-fade-up delay-3">
+        <div class="visual-card visual-card--forest">
+          <div>
+            <div class="visual-card__icon" aria-hidden="true">🌲</div>
+            <div class="visual-card__title">Your actions protect the Earth's lungs.</div>
+            <div class="visual-card__desc">Every tracked reduction contributes to Nepal's national net-zero pledge by 2045.</div>
+          </div>
+        </div>
+        <div class="visual-card visual-card--trust">
+          <div>
+            <div class="visual-card__icon" aria-hidden="true">✨</div>
+            <div class="visual-card__title">Transparency is Trust</div>
+            <div class="visual-card__desc">By sharing our math, we ensure every eco-mission completed by your school is meaningful and real.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Back button -->
+      <div class="flex justify-center mt-8 mb-16">
+        <a href="analytics.html" class="btn btn-primary btn-lg" id="btn-back-to-report">
+          ← Back to Report Card
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ── Footer ── -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer__inner">
+        <div>
+          <div class="footer__brand">Eco-Tracks <span>| Nepal</span></div>
+          <div class="footer__copy">© 2026 <a href="transparency.html">HimalEdge Eco-Track</a></div>
+        </div>
+        <div class="footer__actions">
+          <button class="btn btn-ghost btn-sm" id="btn-sync-footer">🔄 Sync with School Server</button>
+          <button class="btn btn-outline btn-sm" id="btn-reset-data" style="color:var(--red);border-color:var(--red)">🗑️ Reset Data</button>
+          <button class="btn btn-ghost btn-sm" id="btn-refresh-footer">↺ Refresh Data</button>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { StorageManager } from './js/storage_manager.js';
+    import { I18n } from './js/i18n.js';
+
+    I18n.init();
+
+    // Hardcoded factors table data (mirrors CSV / JSON)
+    const factorsData = [
+      // Energy
+      { category: 'Energy', emoji: '⚡', color: '#5B8DD9', bg: '#EEF4FF', activity: 'Firewood (Biomass)', unit: 'kg CO₂e / kg', factor: 0.006 },
+      { category: 'Energy', emoji: '⚡', color: '#5B8DD9', bg: '#EEF4FF', activity: 'LPG Cylinder (14.2 kg)', unit: 'kg CO₂e / cylinder', factor: 42.3 },
+      { category: 'Energy', emoji: '⚡', color: '#5B8DD9', bg: '#EEF4FF', activity: 'LPG Cooking Gas (weight)', unit: 'kg CO₂e / kg', factor: 2.98 },
+      { category: 'Energy', emoji: '⚡', color: '#5B8DD9', bg: '#EEF4FF', activity: 'NEA Hydro Grid Electricity', unit: 'kg CO₂e / kWh', factor: 0.0124 },
+      // Commute
+      { category: 'Commute', emoji: '🚌', color: '#56C15B', bg: '#EDFAEE', activity: 'Staff / Student Motorbike', unit: 'kg CO₂e / km', factor: 0.113 },
+      { category: 'Commute', emoji: '🚌', color: '#56C15B', bg: '#EDFAEE', activity: 'Local Public Bus / Microbus', unit: 'kg CO₂e / pass-km', factor: 0.089 },
+      // Waste
+      { category: 'Waste', emoji: '🗑️', color: '#E57373', bg: '#FFF0F0', activity: 'Open-Air Plastic Burning', unit: 'kg CO₂e / kg', factor: 2.89 },
+      { category: 'Waste', emoji: '🗑️', color: '#E57373', bg: '#FFF0F0', activity: 'Unmanaged Anaerobic Pit Burial', unit: 'kg CO₂e / kg', factor: 0.71 },
+      // Water
+      { category: 'Water', emoji: '💧', color: '#64B5F6', bg: '#EBF5FF', activity: 'Groundwater (Borehole Pump)', unit: 'kg CO₂e / m³', factor: 0.04 },
+      { category: 'Water', emoji: '💧', color: '#64B5F6', bg: '#EBF5FF', activity: 'Municipal Piped Water Supply', unit: 'kg CO₂e / m³', factor: 0.34 },
+      { category: 'Water', emoji: '💧', color: '#64B5F6', bg: '#EBF5FF', activity: 'Water Tanker Supply', unit: 'kg CO₂e / m³', factor: 1.02 },
+      { category: 'Water', emoji: '💧', color: '#64B5F6', bg: '#EBF5FF', activity: 'Rainwater Harvesting', unit: 'kg CO₂e / m³', factor: 0 },
+      // Paper
+      { category: 'Paper', emoji: '📄', color: '#C8A400', bg: '#FFFBEB', activity: 'Textbooks & Ledger (Virgin)', unit: 'kg CO₂e / kg', factor: 1.84 },
+      { category: 'Paper', emoji: '📄', color: '#C8A400', bg: '#FFFBEB', activity: 'Textbooks & Ledger (Recycled)', unit: 'kg CO₂e / kg', factor: 0.92 },
+    ];
+
+    const tbody = document.getElementById('factors-tbody');
+    let lastCat = '';
+
+    factorsData.forEach(row => {
+      // Category header row
+      if (row.category !== lastCat) {
+        const headerRow = document.createElement('tr');
+        headerRow.className = 'category-row-header';
+        headerRow.innerHTML = `<td colspan="4">
+          <span class="cat-pill" style="background:${row.bg};color:${row.color}">
+            ${row.emoji} ${row.category}
+          </span>
+        </td>`;
+        tbody.appendChild(headerRow);
+        lastCat = row.category;
+      }
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td></td>
+        <td>${row.activity}</td>
+        <td class="text-muted text-sm">${row.unit}</td>
+        <td class="factor-value">${row.factor}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // Download methodology
+    const downloadFactors = () => {
+      const header = 'Category,Activity,Unit,Factor_kgCO2e\n';
+      const rows = factorsData.map(r => `${r.category},${r.activity},${r.unit},${r.factor}`).join('\n');
+      const csv = 'data:text/csv;charset=utf-8,' + encodeURIComponent(header + rows);
+      const link = document.createElement('a');
+      link.href = csv;
+      link.download = 'ecotracks_emission_factors.csv';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('✅ Methodology CSV downloaded!', 'success');
+    };
+
+    document.getElementById('btn-download-csv-factors').addEventListener('click', downloadFactors);
+    document.getElementById('link-download-methodology').addEventListener('click', (e) => { e.preventDefault(); downloadFactors(); });
+
+    // Footer
+    document.getElementById('btn-sync-footer').addEventListener('click', () => {
+      const ok = StorageManager.downloadCSV();
+      showToast(ok ? '✅ Data exported!' : '⚠️ No data yet.', ok ? 'success' : 'error');
+    });
+    document.getElementById('btn-refresh-footer').addEventListener('click', () => location.reload());
+
+    function showToast(msg, type = 'success') {
+      const t = document.createElement('div');
+      t.className = `toast toast--${type}`;
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3500);
+    }
+  </script>
+</body>
+</html>

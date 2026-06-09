@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Teacher's Operations Ledger — Log your school's environmental data to configure Eco-Tracks Nepal.">
+  <title>Teacher's Operations Ledger — Eco-Tracks Nepal</title>
+  <script type="module">
+    import { StorageManager } from './js/storage_manager.js';
+    if (!StorageManager.getAdminConfig()) { window.location.replace('setup.html'); }
+  </script>
+  <link rel="stylesheet" href="./css/main.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    .admin-hero {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 32px;
+      margin-bottom: 40px;
+    }
+    .admin-hero__content h1 {
+      color: var(--green-800);
+      margin-bottom: 10px;
+    }
+    .admin-hero__content p {
+      font-size: 1rem;
+      color: var(--text-muted);
+    }
+    .admin-hero__img {
+      font-size: 5rem;
+      flex-shrink: 0;
+    }
+
+    .admin-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .card-header__icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .card-header__icon--globe { background: var(--blue-light); }
+    .card-header__icon--chart { background: var(--green-100); }
+
+    .card-header__title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .metric-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .metric-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .sync-info {
+      font-size: 0.8rem;
+      color: var(--text-caption);
+      text-align: center;
+      margin-top: 12px;
+    }
+
+    .district-info-box {
+      background: var(--bg-page);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 10px;
+      display: none;
+      border: 1px solid var(--border);
+    }
+
+    .district-info-box.visible { display: block; }
+
+    .district-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .success-panel {
+      display: none;
+      background: linear-gradient(135deg, var(--green-50), #fff);
+      border: 1.5px solid var(--green-300);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .success-panel.visible { display: block; animation: fadeUp 0.4s ease; }
+    .success-panel h3 { color: var(--green-700); margin-bottom: 8px; }
+    .success-panel p  { color: var(--text-muted); font-size: 0.9rem; }
+
+    @media (max-width: 768px) {
+      .admin-grid { grid-template-columns: 1fr; }
+      .metrics-grid { grid-template-columns: 1fr; }
+      .admin-hero { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Navigation ── -->
+  <nav class="nav" role="navigation" aria-label="Main navigation">
+    <div class="container nav__inner">
+      <a href="index.html" class="nav__logo" id="nav-logo">
+        <div class="nav__logo-icon">🌿</div>
+        Eco-Tracks
+      </a>
+      <ul class="nav__links" role="list">
+        <li><a href="index.html" id="nav-missions" data-i18n="nav_missions">Missions</a></li>
+        <li><a href="admin.html" class="active" id="nav-myschool" data-i18n="nav_myschool">My School</a></li>
+        
+        <li><a href="transparency.html" id="nav-badges" data-i18n="nav_badges">Badges</a></li>
+      </ul>
+      <a href="index.html" class="btn btn-ghost btn-sm" id="nav-home-btn" data-i18n="nav_home">🏠 Home</a>
+    </div>
+  </nav>
+
+  <!-- ── Main ── -->
+  <main class="page-main" id="main-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="admin-hero animate-fade-up">
+        <div class="admin-hero__content">
+          <h1 id="admin-heading" data-i18n="admin_title">Teacher's Operations Ledger</h1>
+          <p data-i18n="admin_desc">Log your school's environmental data to unlock new adventure missions for your students!</p>
+        </div>
+        <div class="admin-hero__img" aria-hidden="true">📚</div>
+      </div>
+
+      <!-- Form -->
+      <form id="admin-form" novalidate>
+        <div class="admin-grid">
+
+          <!-- School Identity Card -->
+          <div class="card animate-fade-up delay-1">
+            <div class="card-header">
+              <div class="card-header__icon card-header__icon--globe">🌐</div>
+              <div class="card-header__title" data-i18n="nav_myschool">School Identity</div>
+            </div>
+
+            <div class="flex-col gap-16">
+              <div class="form-group">
+                <label class="form-label" for="district-select" data-i18n="setup_district">Region / District</label>
+                <select class="form-select" id="district-select" required aria-required="true">
+                  <option value="" data-i18n="loading">Loading...</option>
+                </select>
+
+                <!-- Dynamic district info -->
+                <div class="district-info-box" id="district-info-box" role="status" aria-live="polite">
+                  <div id="district-badge-wrap"></div>
+                  <div id="district-challenge-text"></div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="school-name" data-i18n="setup_school_name">School Name</label>
+                <input class="form-input" type="text" id="school-name" placeholder="Greenwood Elementary" autocomplete="organization">
+              </div>
+              <div class="form-group mb-16">
+                <label class="form-label" for="student-count">Student Count</label>
+                <input class="form-input" type="number" id="student-count" placeholder="450" min="1" max="5000">
+              </div>
+              
+              <h3 class="mb-16 mt-24">🏫 School Environment Details</h3>
+              <div class="form-group mb-16">
+                <label class="form-label" for="config-muni-waste">School Municipal Waste Collection</label>
+                <select class="form-select" id="config-muni-waste">
+                  <option value="none">None (Local burning/pit only)</option>
+                  <option value="mixed">Single Mixed Collection</option>
+                  <option value="separated">Separated Collection (Recycling/Compost)</option>
+                </select>
+              </div>
+              <div class="form-group mb-16">
+                <label class="form-label" for="config-admin-paper">Admin Paper Recycled (kg/month)</label>
+                <input type="number" id="config-admin-paper" class="form-input" min="0" value="0" placeholder="e.g. 5">
+                <p class="text-sm text-muted mt-8">Amount of school/office paper given to collectors</p>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="report-month" data-i18n="setup_month">Reporting Month</label>
+                <select id="report-month" class="form-select" required>
+                  <option value="January">January</option>
+                  <option value="February">February</option>
+                  <option value="March">March</option>
+                  <option value="April">April</option>
+                  <option value="May">May</option>
+                  <option value="June">June</option>
+                  <option value="July">July</option>
+                  <option value="August">August</option>
+                  <option value="September">September</option>
+                  <option value="October">October</option>
+                  <option value="November">November</option>
+                  <option value="December">December</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Quote -->
+            <div class="blockquote mt-24">
+              "Accurate data helps us tailor your students' eco-quest levels. Every number counts toward a greener tomorrow!"
+              <cite>— Professor Pine</cite>
+            </div>
+          </div>
+
+          <!-- Consumption Metrics Card -->
+          <div class="card animate-fade-up delay-2">
+            <div class="card-header">
+              <div class="card-header__icon card-header__icon--chart">📊</div>
+              <div class="card-header__title" data-i18n="admin_metrics_title">Consumption Metrics</div>
+            </div>
+
+            <p class="text-muted text-sm mb-16" data-i18n="admin_metrics_desc">Enter whole-school monthly data.</p>
+
+            <div class="metrics-grid">
+              <div class="metric-field">
+                <label class="metric-label" for="input-elec" data-i18n="admin_elec">⚡ Electricity (kWh)</label>
+                <input class="form-input" type="number" id="input-elec" placeholder="e.g. 120" min="0" step="0.1">
+              </div>
+              <div class="metric-field">
+                <label class="metric-label" for="input-water" data-i18n="admin_water">💧 Water (Litres)</label>
+                <input class="form-input" type="number" id="input-water" placeholder="e.g. 5000" min="0" step="1">
+              </div>
+              <div class="metric-field">
+                <label class="metric-label" for="input-diesel" data-i18n="admin_diesel">⛽ Diesel/Petrol (L)</label>
+                <input class="form-input" type="number" id="input-diesel" placeholder="e.g. 40" min="0" step="0.1">
+              </div>
+              <div class="metric-field">
+                <label class="metric-label" for="input-lpg" data-i18n="admin_lpg">🔥 LPG Cylinders</label>
+                <input class="form-input" type="number" id="input-lpg" placeholder="e.g. 2" min="0" step="1">
+              </div>
+            </div>
+            
+            <div class="form-group mt-16">
+              <label class="metric-label" for="input-waste-primary" data-i18n="admin_waste_type">🗑️ Primary Waste Disposal</label>
+              <select class="form-select" id="input-waste-primary">
+                <option value="burning">Open-Air Burning</option>
+                <option value="municipal">Municipal Collection</option>
+                <option value="compost">Composting & Recycling</option>
+                <option value="pit">Anaerobic Pit Burial</option>
+              </select>
+            </div>
+
+            <!-- Live CO2 preview -->
+            <div class="alert alert--info mt-24" id="co2-preview-box" style="display:none">
+              <span class="alert__icon">🌿</span>
+              <div>
+                <div class="font-bold text-sm">Estimated Monthly School CO₂e:</div>
+                <div id="co2-preview-val" class="font-extrabold" style="font-size:1.3rem;color:var(--green-700);margin-top:4px;"></div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg mt-24" id="btn-save-admin" style="width:100%" data-i18n="admin_btn_save">
+              💾 Save School Parameters
+            </button>
+
+            <p class="sync-info" id="last-sync-text">Last synced: Never</p>
+          </div>
+
+        </div>
+
+        <!-- Success Panel -->
+        <div class="success-panel" id="success-panel">
+          <div style="font-size:3rem;margin-bottom:12px">✅</div>
+          <h3>School Profile Saved!</h3>
+          <p>Configuration updated successfully. Students can now start their eco-missions!</p>
+          <div class="flex justify-center gap-12 mt-24">
+            <a href="index.html" class="btn btn-outline btn-sm" id="btn-go-home">🏠 Go Home</a>
+            <a href="student.html" class="btn btn-primary btn-sm" id="btn-go-student">🎒 Launch Student Portal</a>
+          </div>
+        </div>
+
+      </form>
+
+    </div>
+  </main>
+
+  <!-- ── Footer ── -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer__inner">
+        <div>
+          <div class="footer__brand">Eco-Tracks <span>| Nepal</span></div>
+          <div class="footer__copy">© 2026 <a href="transparency.html">HimalEdge Eco-Track</a></div>
+        </div>
+        <div class="footer__actions">
+          <button class="btn btn-ghost btn-sm" id="btn-sync-footer" data-i18n="footer_sync">🔄 Sync with School Server</button>
+          <button class="btn btn-outline btn-sm" id="btn-reset-data" style="color:var(--red);border-color:var(--red)">🗑️ Reset Data</button>
+          <a href="overview.html" class="btn btn-primary btn-sm" data-i18n="footer_overview">📈 Sync with my school</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { StorageManager } from './js/storage_manager.js';
+    import { CalculatorEngine } from './js/calculator_engine.js';
+    import { I18n } from './js/i18n.js';
+
+    I18n.init();
+
+    const engine = new CalculatorEngine();
+    engine.init();
+
+    let allDistricts = {};
+
+    async function loadDistricts() {
+      try {
+        const res = await fetch('./data/geographic_matrix.json');
+        const data = await res.json();
+        allDistricts = data.districts;
+        const sel = document.getElementById('district-select');
+        sel.innerHTML = '<option value="">Select a district...</option>';
+        Object.keys(data.districts).sort().forEach(key => {
+          const opt = document.createElement('option');
+          opt.value = key;
+          opt.textContent = `${data.districts[key].name} (${data.districts[key].region})`;
+          sel.appendChild(opt);
+        });
+        
+        // Load saved config after fetch
+        loadSavedConfig();
+      } catch(e) { console.error("Error loading districts", e); }
+    }
+
+    function loadSavedConfig() {
+      const cfg = StorageManager.getAdminConfig();
+      if(cfg) {
+        document.getElementById('district-select').value = cfg.district || '';
+        document.getElementById('school-name').value = cfg.schoolName || '';
+        document.getElementById('student-count').value = cfg.studentCount || '';
+        document.getElementById('report-month').value = cfg.reportMonth || 'January';
+        
+        if (cfg.muniWaste) document.getElementById('config-muni-waste').value = cfg.muniWaste;
+        document.getElementById('config-admin-paper').value = cfg.adminPaperRecycled || 0;
+        document.getElementById('input-elec').value = cfg.electricity || 0;
+        document.getElementById('input-water').value = cfg.water || 0;
+        document.getElementById('input-diesel').value = cfg.diesel || 0;
+        document.getElementById('input-lpg').value = cfg.lpg || 0;
+        document.getElementById('input-waste-primary').value = cfg.wasteType || 'burning';
+        
+        if (cfg.savedAt) {
+          const d = new Date(cfg.savedAt);
+          document.getElementById('last-sync-text').textContent = `Last updated: ${d.toLocaleDateString()} at ${d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}`;
+        }
+        updateDistrictInfo(cfg.district);
+        updateCO2Preview();
+      }
+    }
+
+    loadDistricts();
+
+    // District dropdown change
+    document.getElementById('district-select').addEventListener('change', (e) => {
+      updateDistrictInfo(e.target.value);
+    });
+
+    function updateDistrictInfo(distKey) {
+      const box = document.getElementById('district-info-box');
+      const data = allDistricts[distKey];
+      if (!data) { box.classList.remove('visible'); return; }
+      
+      const colors = { Mountain: '#7986CB', Hilly: '#56C15B', Terai: '#FFB74D' };
+      const color = colors[data.region] || '#888';
+      
+      document.getElementById('district-badge-wrap').innerHTML =
+        `<span class="district-badge" style="background:${color}22;color:${color};">📍 ${data.region} Region</span>`;
+      document.getElementById('district-challenge-text').textContent = data.climate_challenge;
+      box.classList.add('visible');
+    }
+
+    // Live CO2 preview on input change
+    ['input-elec', 'input-lpg', 'input-water', 'input-diesel'].forEach(id => {
+      document.getElementById(id).addEventListener('input', updateCO2Preview);
+    });
+
+    function updateCO2Preview() {
+      const elec = parseFloat(document.getElementById('input-elec').value) || 0;
+      const lpg  = parseFloat(document.getElementById('input-lpg').value) || 0;
+      const waterL = parseFloat(document.getElementById('input-water').value) || 0;
+
+      const co2Elec  = engine.calculateModule('energy', 'electricity_kwh', elec);
+      const co2LPG   = engine.calculateModule('energy', 'lpg_cylinder', lpg);
+      const co2Water = engine.calculateModule('water', 'municipal_piped_m3', waterL / 1000);
+      const total = co2Elec + co2LPG + co2Water;
+
+      if (total > 0) {
+        document.getElementById('co2-preview-box').style.display = 'flex';
+        document.getElementById('co2-preview-val').textContent = `${total.toFixed(2)} kg CO₂e / month`;
+      } else {
+        document.getElementById('co2-preview-box').style.display = 'none';
+      }
+    }
+
+    // Form submit
+    document.getElementById('admin-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const district = document.getElementById('district-select').value;
+      if (!district) {
+        showToast('⚠️ Please select a district.', 'error');
+        return;
+      }
+
+      const config = {
+        district,
+        schoolName:   document.getElementById('school-name').value.trim() || 'My School',
+        studentCount: parseInt(document.getElementById('student-count').value) || 30,
+        reportMonth:  document.getElementById('report-month').value,
+        reportYear:   StorageManager.getAdminConfig()?.reportYear || new Date().getFullYear(),
+        muniWaste:    document.getElementById('config-muni-waste').value,
+        adminPaperRecycled: parseFloat(document.getElementById('config-admin-paper').value) || 0,
+        electricity:  parseFloat(document.getElementById('input-elec').value) || 0,
+        water:        parseFloat(document.getElementById('input-water').value) || 0,
+        diesel:       parseFloat(document.getElementById('input-diesel').value) || 0,
+        lpg:          parseFloat(document.getElementById('input-lpg').value) || 0,
+        wasteType:    document.getElementById('input-waste-primary').value,
+        savedAt:      new Date().toISOString()
+      };
+
+      StorageManager.saveAdminConfig(config);
+      document.getElementById('success-panel').classList.add('visible');
+      document.getElementById('success-panel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      const now = new Date();
+      document.getElementById('last-sync-text').textContent =
+        `Last updated: Today at ${now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}`;
+
+      showToast('✅ School configuration saved!', 'success');
+    });
+
+    // Footer
+    document.getElementById('btn-sync-footer').addEventListener('click', async () => {
+      const result = await StorageManager.syncWithServer();
+      showToast(result.message, result.success ? 'success' : 'error');
+    });
+
+    function showToast(msg, type = 'success') {
+      const t = document.createElement('div');
+      t.className = `toast toast--${type}`;
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3500);
+    }
+  </script>
+</body>
+</html>

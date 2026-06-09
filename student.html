@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Class Data Portal — Eco-Tracks Nepal</title>
+  <script type="module">
+    import { StorageManager } from './js/storage_manager.js';
+    const config = StorageManager.getAdminConfig();
+    if (!config) { window.location.replace('setup.html'); }
+    else if (config.electricity === undefined) {
+      alert("Admin must input school details first.");
+      window.location.replace('index.html');
+    }
+  </script>
+  <link rel="stylesheet" href="./css/main.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* Same styles as before, slightly condensed */
+    .student-hero { display: flex; align-items: flex-start; justify-content: space-between; gap: 32px; margin-bottom: 24px; }
+    .student-hero__content h1 { color: var(--green-800); margin-bottom: 10px; }
+    .student-hero__content p { color: var(--text-body); font-size: 1rem; line-height: 1.7; }
+    .student-hero__badge { display: inline-flex; align-items: center; gap: 8px; background: var(--green-100); color: var(--green-700); font-weight: 700; font-size: 0.85rem; padding: 6px 16px; border-radius: var(--radius-pill); margin-bottom: 14px; }
+    .student-hero__img { flex-shrink: 0; width: 200px; height: 200px; border-radius: var(--radius-xl); background: linear-gradient(135deg, #E8F5E9, #FFF9C4); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 6rem; }
+    .school-metrics-banner { background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--green-500); border-radius: var(--radius-md); padding: 16px 20px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 20px; box-shadow: var(--shadow-sm); }
+    .school-metrics-banner h4 { color: var(--green-800); margin-bottom: 4px; }
+    .school-metrics-data { display: flex; gap: 24px; flex-wrap: wrap; font-size: 0.85rem; }
+    .active-mission-banner { background: linear-gradient(135deg, #FFF9C4, #FFE082); border: 1px solid #FFCA28; border-radius: var(--radius-md); padding: 16px 20px; margin-bottom: 32px; display: none; align-items: center; gap: 16px; }
+    .active-mission-banner h4 { color: #A17900; margin-bottom: 4px; }
+    .form-sections { display: flex; flex-direction: column; gap: 24px; background:var(--bg-card); padding:32px; border-radius:var(--radius-xl); border:1px solid var(--border); }
+    .wizard-step { display: none; }
+    .wizard-step.active { display: block; animation: fadeUp 0.4s ease forwards; }
+    .wizard-nav { display: flex; justify-content: space-between; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border); }
+    @media (max-width: 768px) { .student-hero { flex-direction: column; } .student-hero__img { width: 100%; height: 180px; } .school-metrics-banner { flex-direction: column; align-items: flex-start; } }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav" role="navigation">
+    <div class="container nav__inner">
+      <a href="index.html" class="nav__logo" id="nav-logo">
+        <div class="nav__logo-icon">🌿</div>
+        Eco-Tracks
+      </a>
+      <ul class="nav__links" role="list">
+        <li><a href="index.html" id="nav-missions" data-i18n="nav_missions">Missions</a></li>
+        <li><a href="admin.html" id="nav-myschool" data-i18n="nav_myschool">My School</a></li>
+        <li><a href="transparency.html" id="nav-badges" data-i18n="nav_badges">Badges</a></li>
+      </ul>
+      <div class="nav-actions" style="display:flex;gap:12px;align-items:center;">
+        <a href="overview.html" class="btn btn-outline btn-sm" data-i18n="footer_overview">📈 Overview</a>
+        <div class="badge badge-green" id="grade-badge-nav">—</div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="page-main" id="main-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="student-hero animate-fade-up">
+        <div class="student-hero__content">
+          <div class="student-hero__badge" id="grade-badge-hero">
+            🎒 <span id="grade-text">Loading...</span>
+          </div>
+          <h1 id="page-title" data-i18n="student_title_primary">Class Data Portal</h1>
+          <p id="page-subtitle" data-i18n="student_subtitle">Every small action adds up to a huge change. Help your class climb the leaderboard!</p>
+        </div>
+        <div class="student-hero__img" aria-hidden="true" id="hero-emoji">🌱</div>
+      </div>
+
+      <!-- School Metrics Banner -->
+      <div class="school-metrics-banner animate-fade-up delay-1" id="school-metrics-banner" style="display:none;">
+        <div>
+          <h4 data-i18n="student_school_metrics">School Metrics Overview</h4>
+          <p class="text-sm text-muted">Values provided by Admin</p>
+        </div>
+        <div class="school-metrics-data" id="school-metrics-data"></div>
+      </div>
+
+      <!-- Active Mission Banner -->
+      <div class="active-mission-banner animate-fade-up delay-1" id="active-mission-banner">
+        <div style="font-size:2rem">🎯</div>
+        <div>
+          <h4>Current Active Mission</h4>
+          <p class="text-sm" style="color:#A17900" id="mission-title">Loading...</p>
+        </div>
+      </div>
+
+      <!-- Form container -->
+      <form id="metrics-form" novalidate>
+        
+        <div class="form-sections">
+          <!-- Step 1: Demographics -->
+          <div class="wizard-step active" id="step-1">
+            <div class="cat-section__header"><div class="cat-icon cat-icon--paper">🧑‍🤝‍🧑</div><div><div class="cat-section__title" data-i18n="std_step_1_title">Step 1: Demographic Info</div><div class="cat-section__subtitle" data-i18n="std_step_1_sub">Who is tracking today?</div></div></div>
+            <div class="form-group mb-16">
+              <label class="form-label" data-i18n="std_total_students">Total Students Present Today</label>
+              <input class="form-input" type="number" id="input-demo-students" value="30" min="1">
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="std_teacher_name">Class Teacher's Name</label>
+              <input class="form-input" type="text" id="input-demo-teacher" placeholder="Mr. Sharma">
+            </div>
+            <div class="wizard-nav">
+              <div></div>
+              <button type="button" class="btn btn-primary next-step" data-i18n="student_wizard_next">Next Step ➔</button>
+            </div>
+          </div>
+
+          <!-- Step 2: Commute -->
+          <div class="wizard-step" id="step-2">
+            <div class="cat-section__header"><div class="cat-icon cat-icon--commute">🚌</div><div><div class="cat-section__title" data-i18n="std_step_2_title">Step 2: Commute Log</div><div class="cat-section__subtitle" data-i18n="std_step_2_sub">Aggregate classroom travel data</div></div></div>
+            
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+              <div style="background:var(--bg-card);border:1px solid #A5D6A7;border-radius:12px;padding:16px;text-align:center;">
+                <div style="font-size:2.5rem;margin-bottom:8px;">🚶</div>
+                <label class="form-label text-sm" style="margin-bottom:8px;display:block;" data-i18n="std_walk_travel">Walking (km)</label>
+                <input class="form-input" type="number" id="input-commute-walk" value="0" min="0">
+              </div>
+              <div style="background:var(--bg-card);border:1px solid #81C784;border-radius:12px;padding:16px;text-align:center;">
+                <div style="font-size:2.5rem;margin-bottom:8px;">🚲</div>
+                <label class="form-label text-sm" style="margin-bottom:8px;display:block;" data-i18n="std_cycle_travel">Cycling (km)</label>
+                <input class="form-input" type="number" id="input-commute-cycle" value="0" min="0">
+              </div>
+              <div style="background:var(--bg-card);border:1px solid #FFE082;border-radius:12px;padding:16px;text-align:center;">
+                <div style="font-size:2.5rem;margin-bottom:8px;">🚌</div>
+                <label class="form-label text-sm" style="margin-bottom:8px;display:block;" data-i18n="std_bus_travel">Bus (passenger-km)</label>
+                <input class="form-input" type="number" id="input-commute-bus" value="0" min="0">
+              </div>
+              <div style="background:var(--bg-card);border:1px solid #FFAB91;border-radius:12px;padding:16px;text-align:center;">
+                <div style="font-size:2.5rem;margin-bottom:8px;">🏍️</div>
+                <label class="form-label text-sm" style="margin-bottom:8px;display:block;" data-i18n="std_bike_travel">Motorbike (km)</label>
+                <input class="form-input" type="number" id="input-commute-bike" value="0" min="0">
+              </div>
+              <div style="grid-column:1/-1;background:var(--bg-card);border:1px solid #EF9A9A;border-radius:12px;padding:16px;text-align:center;">
+                <div style="font-size:2.5rem;margin-bottom:8px;">🚗</div>
+                <label class="form-label text-sm" style="margin-bottom:8px;display:block;" data-i18n="std_car_travel">Private Car (km)</label>
+                <input class="form-input" type="number" id="input-commute-car" value="0" min="0">
+              </div>
+            </div>
+
+            <div class="wizard-nav">
+              <button type="button" class="btn btn-ghost prev-step" data-i18n="student_wizard_prev">← Previous</button>
+              <button type="button" class="btn btn-primary next-step" data-i18n="student_wizard_next">Next Step ➔</button>
+            </div>
+          </div>
+
+          <!-- Step 3: Paper -->
+          <div class="wizard-step" id="step-3">
+            <div class="cat-section__header"><div class="cat-icon cat-icon--paper">📄</div><div><div class="cat-section__title" data-i18n="std_step_3_title">Step 3: Resource Log</div><div class="cat-section__subtitle" data-i18n="std_step_3_sub">Paper & Exam consumption</div></div></div>
+            
+            <div style="display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px;">
+              <div class="form-group">
+                <label class="form-label" data-i18n="std_copies_new" style="font-weight:700;font-size:1.05rem;">How many new copies (notebooks) were used this month?</label>
+                <input class="form-input form-input-lg" type="number" id="input-paper-copies-new" value="0" min="0" style="font-size:1.2rem;padding:12px;">
+              </div>
+              <div class="form-group">
+                <label class="form-label" data-i18n="std_books_recycled" style="font-weight:700;font-size:1.05rem;">Did you recycle old books/copies (to juniors or collectors)?</label>
+                <select class="form-select form-input-lg" id="input-paper-recycled" style="font-size:1.1rem;padding:12px;">
+                  <option value="yes" data-i18n="opt_yes">Yes, we recycled</option>
+                  <option value="no" data-i18n="opt_no">No, we threw them away</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="wizard-nav">
+              <button type="button" class="btn btn-ghost prev-step" data-i18n="student_wizard_prev">← Previous</button>
+              <button type="button" class="btn btn-primary next-step" data-i18n="student_wizard_next">Next Step ➔</button>
+            </div>
+          </div>
+
+          <!-- Step 4: Waste -->
+          <div class="wizard-step" id="step-4">
+            <div class="cat-section__header"><div class="cat-icon cat-icon--waste">🗑️</div><div><div class="cat-section__title" data-i18n="std_step_4_title">Step 4: Waste Path</div><div class="cat-section__subtitle" data-i18n="std_step_4_sub">Disposal frequency</div></div></div>
+            
+            <div style="display:flex;flex-direction:column;gap:16px;margin-bottom:24px;">
+              
+              <div style="background:var(--bg-card);border:1px solid #EF9A9A;border-radius:12px;padding:16px;">
+                <label class="form-label text-sm" style="margin-bottom:12px;display:block;" data-i18n="std_waste_burn">🔥 Open Burning</label>
+                <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+                  <label><input type="radio" name="waste-scale-burn" value="0" checked> <span>Never</span></label>
+                  <label><input type="radio" name="waste-scale-burn" value="1"> <span>Rarely</span></label>
+                  <label><input type="radio" name="waste-scale-burn" value="2"> <span>Sometimes</span></label>
+                  <label><input type="radio" name="waste-scale-burn" value="3"> <span>Often</span></label>
+                  <label><input type="radio" name="waste-scale-burn" value="4"> <span>Always</span></label>
+                </div>
+              </div>
+
+              <div style="background:var(--bg-card);border:1px solid #B0BEC5;border-radius:12px;padding:16px;">
+                <label class="form-label text-sm" style="margin-bottom:12px;display:block;" data-i18n="std_waste_pit">🕳️ Pit Burial</label>
+                <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+                  <label><input type="radio" name="waste-scale-pit" value="0" checked> <span>Never</span></label>
+                  <label><input type="radio" name="waste-scale-pit" value="1"> <span>Rarely</span></label>
+                  <label><input type="radio" name="waste-scale-pit" value="2"> <span>Sometimes</span></label>
+                  <label><input type="radio" name="waste-scale-pit" value="3"> <span>Often</span></label>
+                  <label><input type="radio" name="waste-scale-pit" value="4"> <span>Always</span></label>
+                </div>
+              </div>
+
+              <div style="background:var(--bg-card);border:1px solid #81C784;border-radius:12px;padding:16px;">
+                <label class="form-label text-sm" style="margin-bottom:12px;display:block;" data-i18n="std_waste_comp">🌱 Composting</label>
+                <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+                  <label><input type="radio" name="waste-scale-comp" value="0" checked> <span>Never</span></label>
+                  <label><input type="radio" name="waste-scale-comp" value="1"> <span>Rarely</span></label>
+                  <label><input type="radio" name="waste-scale-comp" value="2"> <span>Sometimes</span></label>
+                  <label><input type="radio" name="waste-scale-comp" value="3"> <span>Often</span></label>
+                  <label><input type="radio" name="waste-scale-comp" value="4"> <span>Always</span></label>
+                </div>
+              </div>
+
+              <div style="background:var(--bg-card);border:1px solid #64B5F6;border-radius:12px;padding:16px;">
+                <label class="form-label text-sm" style="margin-bottom:12px;display:block;" data-i18n="std_waste_recycle">♻️ Recycle to Collectors</label>
+                <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
+                  <label><input type="radio" name="waste-scale-recyc" value="0" checked> <span>Never</span></label>
+                  <label><input type="radio" name="waste-scale-recyc" value="1"> <span>Rarely</span></label>
+                  <label><input type="radio" name="waste-scale-recyc" value="2"> <span>Sometimes</span></label>
+                  <label><input type="radio" name="waste-scale-recyc" value="3"> <span>Often</span></label>
+                  <label><input type="radio" name="waste-scale-recyc" value="4"> <span>Always</span></label>
+                </div>
+              </div>
+            </div>
+
+            <div class="wizard-nav">
+              <button type="button" class="btn btn-ghost prev-step" data-i18n="student_wizard_prev">← Previous</button>
+              <button type="button" class="btn btn-primary submit-btn" data-i18n="student_btn_compile">📊 Compile Footprint</button>
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </main>
+
+  <script type="module">
+    import { CalculatorEngine } from './js/calculator_engine.js';
+    import { StorageManager } from './js/storage_manager.js';
+    import { I18n } from './js/i18n.js';
+
+    I18n.init();
+    const engine = new CalculatorEngine();
+    await engine.init();
+
+    // Fetch region data to determine avg daily distance
+    let avgDist = 8; // Default Hilly
+    try {
+      const res = await fetch('./data/geographic_matrix.json');
+      const matrix = await res.json();
+      const distKey = StorageManager.getAdminConfig()?.district;
+      if (distKey && matrix.districts[distKey]) {
+        const region = matrix.districts[distKey].region;
+        if (region === 'Terai') avgDist = 4;
+        else if (region === 'Hilly') avgDist = 8;
+        else if (region === 'Mountain') avgDist = 12;
+      }
+    } catch(e) { console.error("Could not load geographic matrix", e); }
+
+    // Grade setup
+    const currentGrade = StorageManager.getCurrentGrade();
+    document.getElementById('grade-badge-nav').textContent = currentGrade;
+    document.getElementById('grade-text').textContent = currentGrade;
+
+    // Inject School Metrics
+    const adminConfig = StorageManager.getAdminConfig();
+    if (adminConfig) {
+      document.getElementById('school-metrics-banner').style.display = 'flex';
+      const mbox = document.getElementById('school-metrics-data');
+      mbox.innerHTML = `
+        <span>⚡ ${adminConfig.electricity || 0} kWh</span>
+        <span>💧 ${adminConfig.water || 0} L</span>
+        <span>⛽ ${adminConfig.diesel || 0} L</span>
+        <span>🗑️ ${adminConfig.wasteType || 'burning'}</span>
+      `;
+    }
+
+    // Inject Active Mission
+    const activeMission = StorageManager.getActiveMission(currentGrade);
+    if (activeMission) {
+      document.getElementById('active-mission-banner').style.display = 'flex';
+      document.getElementById('mission-title').textContent = activeMission.title;
+    }
+
+    // Wizard logic
+    const steps = document.querySelectorAll('.wizard-step');
+    let currentStep = 0;
+
+    document.querySelectorAll('.next-step').forEach(btn => {
+      btn.addEventListener('click', () => {
+        steps[currentStep].classList.remove('active');
+        currentStep++;
+        steps[currentStep].classList.add('active');
+      });
+    });
+
+    document.querySelectorAll('.prev-step').forEach(btn => {
+      btn.addEventListener('click', () => {
+        steps[currentStep].classList.remove('active');
+        currentStep--;
+        steps[currentStep].classList.add('active');
+      });
+    });
+
+    // Submit Logic
+    document.querySelector('.submit-btn').addEventListener('click', () => {
+      const walkStudents = parseFloat(document.getElementById('input-commute-walk')?.value) || 0;
+      const cycleStudents = parseFloat(document.getElementById('input-commute-cycle')?.value) || 0;
+      const busStudents = parseFloat(document.getElementById('input-commute-bus')?.value) || 0;
+      const bikeStudents = parseFloat(document.getElementById('input-commute-bike')?.value) || 0;
+      const carStudents = parseFloat(document.getElementById('input-commute-car')?.value) || 0;
+
+      // Calculate monthly km (assuming 22 school days/month)
+      const days = 22;
+      const walk = walkStudents * avgDist * days;
+      const cycle = cycleStudents * avgDist * days;
+      const bus = busStudents * avgDist * days;
+      const bike = bikeStudents * avgDist * days;
+      const car = carStudents * avgDist * days;
+
+      const cNew = parseFloat(document.getElementById('input-paper-copies-new')?.value) || 0;
+      const isRecycled = document.getElementById('input-paper-recycled')?.value === 'yes';
+      
+      // assuming 1 copy/notebook is ~0.1kg of paper
+      let pVirg = cNew * 0.1;
+      let paperCO2 = 0;
+      
+      // If they recycle, we reward them by using the recycled emission factor for their copies.
+      if (isRecycled) {
+        paperCO2 = engine.calculateModule('paper', 'recycled_paper_kg', pVirg);
+      } else {
+        paperCO2 = engine.calculateModule('paper', 'virgin_paper_kg', pVirg);
+      }
+
+      // Waste Calculation (5-point scale distribution, 4 categories)
+      const students = parseFloat(document.getElementById('input-demo-students')?.value) || 30;
+      const totalWasteMonthly = students * 1.2; // 1.2kg per student per month
+      
+      const sBurn = parseInt(document.querySelector('input[name="waste-scale-burn"]:checked')?.value) || 0;
+      const sPit = parseInt(document.querySelector('input[name="waste-scale-pit"]:checked')?.value) || 0;
+      const sComp = parseInt(document.querySelector('input[name="waste-scale-comp"]:checked')?.value) || 0;
+      const sRecyc = parseInt(document.querySelector('input[name="waste-scale-recyc"]:checked')?.value) || 0;
+      
+      const totalScale = sBurn + sPit + sComp + sRecyc;
+      
+      let wasteCO2 = 0;
+      let wasteVal = 0;
+
+      if (totalScale > 0) {
+        const wBurn = (sBurn / totalScale) * totalWasteMonthly;
+        const wPit = (sPit / totalScale) * totalWasteMonthly;
+        
+        wasteVal = wBurn + wPit; // Tracking non-neutral waste for display
+        wasteCO2 = engine.calculateModule('waste', 'open_plastic_burning_kg', wBurn) + 
+                   engine.calculateModule('waste', 'anaerobic_pit_burial_kg', wPit);
+      }
+
+      const commuteVal = walk + cycle + bus + bike + car;
+      const commuteCO2 = engine.calculateModule('commute', 'public_bus_pkm', bus) 
+                       + engine.calculateModule('commute', 'motorbike_km', bike)
+                       + engine.calculateModule('commute', 'private_car_km', car);
+
+      const payload = {
+        energy: { value: 0, co2: 0 },
+        commute: { value: commuteVal, co2: commuteCO2 },
+        waste: { value: wasteVal, co2: wasteCO2 },
+        water: { value: 0, co2: 0 },
+        paper: { value: pVirg, co2: paperCO2 }
+      };
+
+      StorageManager.saveQuarterlyLog(currentGrade, payload);
+      window.location.href = 'analytics.html';
+    });
+  </script>
+</body>
+</html>

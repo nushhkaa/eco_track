@@ -1,0 +1,596 @@
+/goal: Act as an autonomous lead full-stack engineer and build "Eco-Tracks Nepal" from scratch. Read any visual styles or .png design references inside the workspace directory using your multi-modal vision capabilities to infer card radii, pastel color rules, and layout structures. Create a fully functioning, completely client-side, offline-first web application. Do not stop for intermediate confirmations. Write every single file completely without abbreviations or placeholder comments.
+
+### ── SYSTEM OVERVIEW & ARCHITECTURE ──
+"Eco-Tracks Nepal" is an offline-first carbon accounting system built with vanilla HTML5, CSS3 variables, and vanilla modular JavaScript. It relies strictly on browser `localStorage` for cross-page persistence, updates its calculation factors dynamically from an internal decoupled JSON file, and features a global footer sync system that packages local datasets into downloadable CSV files without calling external APIs.
+
+The folder structure to generate is:
+├── data/
+│   ├── emission_factors.json
+│   └── geographic_matrix.json
+├── css/
+│   └── main.css
+├── js/
+│   ├── calculator_engine.js
+│   ├── storage_manager.js
+│   └── solutions.js
+├── index.html
+├── login.html
+├── admin.html
+├── student.html
+├── analytics.html
+└── solutions.html
+
+---
+
+### ── DATA LAYER GENERATION ──
+
+#### Create File: `data/emission_factors.json`
+{
+  "meta": {
+    "compliance": "UNFCCC Decision 18/CMA.1",
+    "methodology": "IPCC 2006/2019 Refinement",
+    "gwp_metric": "AR6-GWP100"
+  },
+  "factors": {
+    "energy": {
+      "firewood_kg": 0.0060,
+      "lpg_cylinder": 42.3000,
+      "electricity_kwh": 0.0124
+    },
+    "commute": {
+      "motorbike_km": 0.1130,
+      "public_bus_pkm": 0.0890,
+      "walking_km": 0.0000
+    },
+    "waste": {
+      "open_plastic_burning_kg": 2.8900,
+      "anaerobic_pit_burial_kg": 0.7100
+    },
+    "water": {
+      "groundwater_pump_m3": 0.0400,
+      "municipal_piped_m3": 0.3400,
+      "water_tanker_m3": 1.0200,
+      "rainwater_harvest_m3": 0.0000
+    },
+    "paper": {
+      "virgin_paper_kg": 1.8400,
+      "recycled_paper_kg": 0.9200
+    }
+  }
+}
+
+#### Create File: `data/geographic_matrix.json`
+{
+  "districts": {
+    "mustang": { "region": "Mountain", "climate_challenge": "Freezing conditions and biomass dependence" },
+    "solukhumbu": { "region": "Mountain", "climate_challenge": "High transport cost, fragile eco-zones" },
+    "kaski": { "region": "Hilly", "climate_challenge": "Irregular step trails and monsoon runoffs" },
+    "kathmandu": { "region": "Hilly", "climate_challenge": "Dense urban public transit and high waste volume" },
+    "chitwan": { "region": "Terai", "climate_challenge": "Extreme summer heat waves and high groundwater pumping" },
+    "jhapa": { "region": "Terai", "climate_challenge": "Flat terrain, potential for bicycle clusters" }
+  }
+}
+
+---
+
+### ── ENGINE LOGIC INTERFACES ──
+
+#### Create File: `js/calculator_engine.js`
+export class CalculatorEngine {
+  constructor() {
+    this.factors = null;
+  }
+
+  async init() {
+    const res = await fetch('./data/emission_factors.json');
+    const data = await res.json();
+    this.factors = data.factors;
+  }
+
+  calculateModule(category, subKey, value) {
+    if (!this.factors || !this.factors[category]) return 0;
+    const factor = this.factors[category][subKey] || 0;
+    return value * factor; // outputs directly in kg CO2e
+  }
+}
+
+#### Create File: `js/storage_manager.js`
+export class StorageManager {
+  static saveQuarterlyLog(grade, dataPayload) {
+    const history = this.getHistory();
+    const timestamp = new Date().toISOString().substring(0, 10);
+    history.push({ timestamp, grade, data: dataPayload });
+    localStorage.setItem('ecotracks_history', JSON.stringify(history));
+  }
+
+  static getHistory() {
+    return JSON.parse(localStorage.getItem('ecotracks_history')) || [];
+  }
+
+  static getLatestForGrade(grade) {
+    const history = this.getHistory();
+    const filtered = history.filter(item => item.grade === grade);
+    return filtered.length ? filtered[filtered.length - 1] : null;
+  }
+
+  static getPreviousForGrade(grade) {
+    const history = this.getHistory();
+    const filtered = history.filter(item => item.grade === grade);
+    return filtered.length > 1 ? filtered[filtered.length - 2] : null;
+  }
+
+  static exportToCSV() {
+    const history = this.getHistory();
+    if (!history.length) return "No data available";
+    
+    let csvContent = "data:text/csv;charset=utf-8,Timestamp,Grade,Category,MetricValue,Computed_kgCO2e\n";
+    history.forEach(row => {
+      Object.keys(row.data).forEach(cat => {
+        csvContent += `${row.timestamp},${row.grade},${cat},${row.data[cat].value},${row.data[cat].co2}\n`;
+      });
+    });
+    return encodeURI(csvContent);
+  }
+}
+
+#### Create File: `js/solutions.js`
+export const geoSolutionsMatrix = {
+  "Mountain": {
+    "energy": "High wood usage for heating detected. Target: Swap open cookstoves for passive solar wall attachments and thermal-brick insulations inside rooms.",
+    "commute": "Rugged trails limit vehicles. Target: Form communal student walking pairs or columns ('Walking Buses') to guarantee safety along mountain pathways.",
+    "waste": "Cold climates stall breakdown. Target: Build enclosed, leaf-insulated composting chambers to safely process organics without burning synthetic waste wraps.",
+    "water": "Freezing lines cause cooking fuel to be wasted thawing ice. Target: Wrap exposed gravity pipes in thick layers of jute and dry grass insulations.",
+    "paper": "High procurement shipping footprints. Target: Set up a classroom logbook return pool where scrap margins are bound together for scratchbooks."
+  },
+  "Hilly": {
+    "energy": "Heavy reliance on open flames. Target: Transition the kitchen completely to community-scale anaerobic biogas systems or institutional biomass gasifier stoves.",
+    "commute": "Hilly terrain increases fuel loads on climbs. Target: Support or create safe trail paths specifically dedicated to cycling or student foot traffic.",
+    "waste": "Trash easily catches wind down ridges. Target: Establish distinct class sorting bins and organize upcycling collections instead of open-pit burning behind walls.",
+    "water": "Electric pumps run heavily for elevation lifting. Target: Setup large bamboo roof rainwater harvesting structures to supply toilets completely via gravity feed.",
+    "paper": "High classroom material waste. Target: Create a handmade recycling screen kit to transform shredded old assignment books into artistic cardstocks."
+  },
+  "Terai": {
+    "energy": "High summer heat waves trigger cooling draw. Target: Plant native broad-leaf shade trees outside south windows and construct simple vertical bamboo screen sunshades.",
+    "commute": "Flat terrain makes vehicle travel unnecessary. Target: Organize a student-led flat-terrain bicycle sharing network using older, shared community frames.",
+    "waste": "Agricultural byproduct burning is common. Target: Collect discarded rice husks and stalks to transform into structural classroom compost bedding or board blocks.",
+    "water": "Shallow wells risk arsenic or microbial exposure, using fuel to boil. Target: Install gravity-fed bio-sand and charcoal filter layers to clean water without fuel.",
+    "paper": "High resource turnover. Target: Advocate for switching school supply inventories to local, fast-growing banana-fiber or elephant grass alternative papers."
+  }
+};
+
+---
+
+### ── WEB PAGE MARKUPS (HTML) ──
+
+#### Create File: `index.html`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Eco-Tracks Nepal</title>
+</head>
+<body>
+  <header>
+    <div><h1>🌍 Eco-Tracks Nepal</h1></div>
+    <div>Status: Offline-Ready</div>
+  </header>
+
+  <main>
+    <div>
+      <h2>Track, Learn, and Transform Your School's Footprint</h2>
+      <p>Welcome! Eco-Tracks is custom-tailored to help regional schools across Nepal chart their emissions baseline and discover structural paths to sustainability.</p>
+      
+      <div>
+        <div>
+          <h3>School Operations Setup</h3>
+          <p>For teachers and staff to log institutional baselines (bills, regional metrics, utilities).</p>
+          <button onclick="window.location.href='admin.html'">Go to Admin Panel</button>
+        </div>
+        <div>
+          <h3>Student Activity Portal</h3>
+          <p>For classes and student clubs to track transport, material metrics, and daily lifestyle profiles.</p>
+          <button onclick="window.location.href='login.html'">Enter Student Portal</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div>🟢 All components initialized entirely offline</div>
+    <button id="btn-manual-sync">🔄 Sync with School Server</button>
+  </footer>
+  <script type="module">
+    import { StorageManager } from './js/storage_manager.js';
+    document.getElementById('btn-manual-sync').onclick = () => {
+      const href = StorageManager.exportToCSV();
+      const link = document.createElement("a");
+      link.setAttribute("href", href);
+      link.setAttribute("download", "ecotracks_school_sync.csv");
+      document.body.appendChild(link);
+      link.click();
+    };
+  </script>
+</body>
+</html>
+
+#### Create File: `admin.html`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Setup - Eco-Tracks</title>
+</head>
+<body>
+  <header>
+    <div><h1>⚙️ School Administration Panel</h1></div>
+    <button onclick="window.location.href='index.html'">🏠 Home</button>
+  </header>
+
+  <main>
+    <div>
+      <h2>Configure Regional & Macro Parameters</h2>
+      <form id="admin-form">
+        <label>Select School District Geography:</label>
+        <select id="district-select" required>
+          <option value="mustang">Mustang (Mountain Region)</option>
+          <option value="solukhumbu">Solukhumbu (Mountain Region)</option>
+          <option value="kaski">Kaski (Hilly Region)</option>
+          <option value="kathmandu">Kathmandu (Hilly Region)</option>
+          <option value="chitwan">Chitwan (Terai Region)</option>
+          <option value="jhapa">Jhapa (Terai Region)</option>
+        </select>
+
+        <h3>Monthly Structural Baseline Inputs</h3>
+        <div>
+          <div>
+            <label>Electricity Consumption (kWh):</label>
+            <input type="number" id="input-elec" value="120" required>
+          </div>
+          <div>
+            <label>Kitchen LPG Cylinders Used:</label>
+            <input type="number" id="input-lpg" value="2" required>
+          </div>
+        </div>
+
+        <button type="submit">💾 Save System Configuration</button>
+      </form>
+    </div>
+  </main>
+
+  <script type="module">
+    document.getElementById('admin-form').onsubmit = (e) => {
+      e.preventDefault();
+      const config = {
+        district: document.getElementById('district-select').value,
+        electricity: parseFloat(document.getElementById('input-elec').value),
+        lpg: parseFloat(document.getElementById('input-lpg').value)
+      };
+      localStorage.setItem('ecotracks_admin_config', JSON.stringify(config));
+      alert('School profile configurations initialized successfully!');
+      window.location.href = 'index.html';
+    };
+  </script>
+</body>
+</html>
+
+#### Create File: `login.html`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Identity Gateway</title>
+</head>
+<body>
+  <header>
+    <div><h1>🔐 Student Access Dashboard</h1></div>
+  </header>
+
+  <main>
+    <div>
+      <h2>Select Your Classroom Hub</h2>
+      <p>Choose your grade level to launch the custom question cards.</p>
+      
+      <select id="grade-selector">
+        <option value="Grade 3">Grade 3 (Primary Module)</option>
+        <option value="Grade 5">Grade 5 (Primary Module)</option>
+        <option value="Grade 7">Grade 7 (Advanced Module)</option>
+        <option value="Grade 9">Grade 9 (Advanced Module)</option>
+      </select>
+
+      <button id="btn-login-enter">🚀 Enter Mission Control</button>
+    </div>
+  </main>
+
+  <script type="module">
+    document.getElementById('btn-login-enter').onclick = () => {
+      const selectedGrade = document.getElementById('grade-selector').value;
+      sessionStorage.setItem('ecotracks_current_grade', selectedGrade);
+      window.location.href = 'student.html';
+    };
+  </script>
+</body>
+</html>
+
+#### Create File: `student.html`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Classroom Data Intake</title>
+</head>
+<body>
+  <header>
+    <div><h1 id="headline-title">✍️ Tracking Metrics</h1></div>
+    <div id="grade-badge">Loading...</div>
+  </header>
+
+  <main>
+    <div>
+      <h2 id="interface-subhead">Fill out your weekly/seasonal tracking logs</h2>
+      <form id="metrics-form">
+        
+        <div>
+          <h3>🏃 1. Commuting Habits</h3>
+          <p id="commute-desc">How does our classroom look today? Input typical tracking units:</p>
+          <div id="commute-dynamic-ui"></div>
+        </div>
+
+        <div>
+          <h3>🔥 2. Thermal Energy & Kitchen Cooking</h3>
+          <p>Estimate the amount of firewood used this tracking block:</p>
+          <label>Total Firewood Consumed (kg):</label>
+          <input type="number" id="input-wood" value="20" required>
+        </div>
+
+        <div>
+          <h3>🗑️ 3. Waste Pathways</h3>
+          <p>What happens to our discarded wrappers and packaging plastics?</p>
+          <label>Amount of open plastic burning conducted (kg):</label>
+          <input type="number" id="input-waste-burn" value="5" required>
+        </div>
+
+        <div>
+          <h3>🚰 4. Water Sourcing Delivery</h3>
+          <p>How much water was delivered via carbon-intensive tanker distribution?</p>
+          <label>Tanker Supplied Volume (m³):</label>
+          <input type="number" id="input-water-tank" value="1" required>
+        </div>
+
+        <div>
+          <h3>📝 5. Books & Paper Stocks</h3>
+          <p>Total fresh notebooks or logging manuals issued to students this quarter:</p>
+          <label>Weight of total virgin white paper issued (kg):</label>
+          <input type="number" id="input-paper-virgin" value="15" required>
+        </div>
+
+        <button type="submit">📊 Compile and View Footprint</button>
+      </form>
+    </div>
+  </main>
+
+  <script type="module">
+    import { CalculatorEngine } from './js/calculator_engine.js';
+    import { StorageManager } from './js/storage_manager.js';
+
+    const currentGrade = sessionStorage.getItem('ecotracks_current_grade') || "Grade 5";
+    document.getElementById('grade-badge').innerText = `Class: ${currentGrade}`;
+
+    const commuteContainer = document.getElementById('commute-dynamic-ui');
+    const isPrimary = currentGrade.includes("Grade 3") || currentGrade.includes("Grade 5");
+
+    if (isPrimary) {
+      document.getElementById('interface-subhead').innerText = "Kid-Friendly Quick Tally Dashboard 🎨";
+      commuteContainer.innerHTML = `
+        <label>How did the class travel today? (Count of students):</label>
+        <div>
+          <div>
+            <div>🚶 Walkers / Bikes</div>
+            <input type="number" id="input-commute-walk" value="25">
+          </div>
+          <div>
+            <div>🚌 Public Bus</div>
+            <input type="number" id="input-commute-bus" value="5">
+          </div>
+          <div>
+            <div>🏍️ Motorbike</div>
+            <input type="number" id="input-commute-bike" value="2">
+          </div>
+        </div>
+      `;
+    } else {
+      commuteContainer.innerHTML = `
+        <div>
+          <div>
+            <label>Aggregate Student Bus Travel (Passenger-km):</label>
+            <input type="number" id="input-commute-bus-pkm" value="50">
+          </div>
+          <div>
+            <label>Aggregate Staff Motorbike Travel (km):</label>
+            <input type="number" id="input-commute-bike-km" value="20">
+          </div>
+        </div>
+      `;
+    }
+
+    const engine = new CalculatorEngine();
+    await engine.init();
+
+    document.getElementById('metrics-form').onsubmit = (e) => {
+      e.preventDefault();
+      let busKm = 0; let bikeKm = 0;
+      
+      if (isPrimary) {
+        busKm = parseFloat(document.getElementById('input-commute-bus').value) * 5; 
+        bikeKm = parseFloat(document.getElementById('input-commute-bike').value) * 6;
+      } else {
+        busKm = parseFloat(document.getElementById('input-commute-bus-pkm').value);
+        bikeKm = parseFloat(document.getElementById('input-commute-bike-km').value);
+      }
+
+      const firewoodVal = parseFloat(document.getElementById('input-wood').value);
+      const burnVal = parseFloat(document.getElementById('input-waste-burn').value);
+      const tankerVal = parseFloat(document.getElementById('input-water-tank').value);
+      const paperVal = parseFloat(document.getElementById('input-paper-virgin').value);
+
+      const computedPayload = {
+        energy: { value: firewoodVal, co2: engine.calculateModule('energy', 'firewood_kg', firewoodVal) },
+        commute: { value: busKm + bikeKm, co2: engine.calculateModule('commute', 'public_bus_pkm', busKm) + engine.calculateModule('commute', 'motorbike_km', bikeKm) },
+        waste: { value: burnVal, co2: engine.calculateModule('waste', 'open_plastic_burning_kg', burnVal) },
+        water: { value: tankerVal, co2: engine.calculateModule('water', 'water_tanker_m3', tankerVal) },
+        paper: { value: paperVal, co2: engine.calculateModule('paper', 'virgin_paper_kg', paperVal) }
+      };
+
+      StorageManager.saveQuarterlyLog(currentGrade, computedPayload);
+      window.location.href = 'analytics.html';
+    };
+  </script>
+</body>
+</html>
+
+#### Create File: `analytics.html`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Comparative Analytics Engine</title>
+</head>
+<body>
+  <header>
+    <div><h1>📊 Multi-Period Environmental Analytics</h1></div>
+    <div id="grade-badge">Class Profile</div>
+  </header>
+
+  <main>
+    <div id="hotspot-alert-card" style="display:none;">
+      <h3>🔥 Direct System Hotspot Alert!</h3>
+      <p id="hotspot-statement"></p>
+    </div>
+
+    <div>
+      <h2>Class Performance Optimization Matrix</h2>
+      <div>
+        <div>Current Quarter Footprint</div>
+        <div>Previous Log Baseline (Overlay)</div>
+      </div>
+
+      <div id="charts-wrapper-container"></div>
+      <button onclick="window.location.href='solutions.html'">🌱 Proceed to Geographic Solution Strategy</button>
+    </div>
+  </main>
+
+  <script type="module">
+    import { StorageManager } from './js/storage_manager.js';
+
+    const grade = sessionStorage.getItem('ecotracks_current_grade') || "Grade 5";
+    document.getElementById('grade-badge').innerText = grade;
+
+    const currentDataObj = StorageManager.getLatestForGrade(grade);
+    const pastDataObj = StorageManager.getPreviousForGrade(grade);
+
+    if (currentDataObj) {
+      const data = currentDataObj.data;
+      const prevData = pastDataObj ? pastDataObj.data : null;
+      const wrapper = document.getElementById('charts-wrapper-container');
+
+      let maxCat = ""; let maxVal = -1;
+      Object.keys(data).forEach(cat => {
+        if (data[cat].co2 > maxVal) {
+          maxVal = data[cat].co2;
+          maxCat = cat;
+        }
+      });
+
+      sessionStorage.setItem('ecotracks_highest_hotspot', maxCat);
+
+      if (maxVal > 0) {
+        document.getElementById('hotspot-alert-card').style.display = 'block';
+        document.getElementById('hotspot-statement').innerText = `Your single highest environmental tracking pain point is currently [${maxCat.toUpperCase()}], producing ${maxVal.toFixed(2)} kg CO₂e.`;
+      }
+
+      Object.keys(data).forEach(cat => {
+        const currentKg = data[cat].co2;
+        const pastKg = prevData ? prevData[cat].co2 : 0;
+
+        const block = document.createElement('div');
+        block.innerHTML = `
+          <div>
+            <span>📍 ${cat}</span>
+            <span>Current: ${currentKg.toFixed(2)} kg CO₂e | Past: ${pastKg.toFixed(2)} kg CO₂e</span>
+          </div>
+        `;
+        wrapper.appendChild(block);
+      });
+    }
+  </script>
+</body>
+</html>
+
+#### Create File: `solutions.html`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tailored Structural Solutions</title>
+</head>
+<body>
+  <header>
+    <div><h1>🌱 Geographically Contextual Solutions</h1></div>
+    <button onclick="window.location.href='index.html'">🏠 Return to Hub</button>
+  </header>
+
+  <main>
+    <div id="geo-banner-theme">
+      <h2 id="geo-headline">Analyzing Local District Topography...</h2>
+      <p id="geo-subline">Mapping climate alternatives tailored directly to your environmental zone.</p>
+    </div>
+
+    <div id="solutions-injection-zone"></div>
+  </main>
+
+  <script type="module">
+    import { geoSolutionsMatrix } from './js/solutions.js';
+
+    const adminConfig = JSON.parse(localStorage.getItem('ecotracks_admin_config')) || { district: "kathmandu" };
+    const hotspotCat = sessionStorage.getItem('ecotracks_highest_hotspot') || "energy";
+    
+    async function initSolutions() {
+      const res = await fetch('./data/geographic_matrix.json');
+      const geoMatrix = await res.json();
+      
+      const districtInfo = geoMatrix.districts[adminConfig.district] || { region: "Hilly" };
+      const region = districtInfo.region;
+
+      document.getElementById('geo-headline').innerText = `Custom Action Plan: ${region} Eco-Zone`;
+      document.getElementById('geo-subline').innerText = `Targeted mitigation tactics for ${adminConfig.district.toUpperCase()} District.`;
+
+      const solutionPool = geoSolutionsMatrix[region];
+      const displayContainer = document.getElementById('solutions-injection-zone');
+
+      Object.keys(solutionPool).forEach(category => {
+        const text = solutionPool[category];
+        const isPrimaryHotspot = (category === hotspotCat);
+
+        const card = document.createElement('div');
+        card.innerHTML = `
+          <div>
+            <h3>🔹 ${category} Mitigation Strategy</h3>
+            ${isPrimaryHotspot ? '<span>🔥 PRIMARY CRITICAL HOTSPOT</span>' : ''}
+          </div>
+          <p>${text}</p>
+        `;
+        displayContainer.appendChild(card);
+      });
+    }
+
+    initSolutions();
+  </script>
+
+
+---
+
+### ── VALIDATION & COMPLIANCE PIPELINE ──
+Execute the following verification steps on the workspace terminal to confirm deployment:
+1. Run a local web server (e.g., `python -m http.server 8080`) within the folder.
+2. Open `admin.html`, select a district, save parameters, and open the developer tools console to verify that `ecotracks_admin_config` is written successfully.
+3. Access `student.html` using a primary grade token, enter sample counts, and verify that the calculated output flows seamlessly to the dual-colored comparison bars inside `analytics.html`.
+4. Confirm that `solutions.html` correctly applies the region-specific canvas background and maps the target solutions matching the specific local district.

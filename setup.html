@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>School Setup — Eco-Tracks Nepal</title>
+  <link rel="stylesheet" href="./css/main.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: radial-gradient(ellipse at top left, #C8F0CA 0%, #F4F7F4 40%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 0;
+    }
+    .setup-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      padding: 40px;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: var(--shadow-lg);
+    }
+    .setup-hero {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .setup-hero__icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  </style>
+</head>
+<body>
+  <div class="container" style="display:flex;justify-content:center;">
+    <div class="setup-card animate-fade-up">
+      <div class="setup-hero">
+        <div class="setup-hero__icon">🏫</div>
+        <h1 data-i18n="setup_title">School Initialization Protocol</h1>
+        <p class="text-muted mt-8" data-i18n="setup_subtitle">Welcome! Please set up your school profile. Admin access uses the default password "admin123".</p>
+      </div>
+
+      <form id="setup-form">
+        <!-- School Info -->
+        <h3 class="mb-16 text-green" data-i18n="setup_section_info">1. School Information</h3>
+        <div class="grid-2 mb-24">
+          <div class="form-group">
+            <label class="form-label" data-i18n="setup_school_name">School Name</label>
+            <input type="text" id="setup-school" class="form-input" required placeholder="Everest High School">
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-i18n="setup_district">Region / District</label>
+            <select id="setup-district" class="form-select" required></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-i18n="setup_month">Reporting Month</label>
+            <select id="setup-month" class="form-select" required>
+              <option value="January" data-i18n="month_jan">January</option>
+              <option value="February" data-i18n="month_feb">February</option>
+              <option value="March" data-i18n="month_mar">March</option>
+              <option value="April" data-i18n="month_apr">April</option>
+              <option value="May" data-i18n="month_may">May</option>
+              <option value="June" data-i18n="month_jun">June</option>
+              <option value="July" data-i18n="month_jul">July</option>
+              <option value="August" data-i18n="month_aug">August</option>
+              <option value="September" data-i18n="month_sep">September</option>
+              <option value="October" data-i18n="month_oct">October</option>
+              <option value="November" data-i18n="month_nov">November</option>
+              <option value="December" data-i18n="month_dec">December</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-i18n="setup_year">Reporting Year</label>
+            <input type="number" id="setup-year" class="form-input" required value="2024" min="2020">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" style="width:100%" data-i18n="setup_btn_save">
+          💾 Initialize School Profile
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import { StorageManager } from './js/storage_manager.js';
+    import { I18n } from './js/i18n.js';
+
+    I18n.init();
+
+    // Populate districts dynamically
+    async function loadDistricts() {
+      try {
+        const res = await fetch('./data/geographic_matrix.json');
+        const data = await res.json();
+        const sel = document.getElementById('setup-district');
+        sel.innerHTML = '<option value="" data-i18n="setup_select_dist">Select District...</option>';
+        Object.keys(data.districts).sort().forEach(key => {
+          const opt = document.createElement('option');
+          opt.value = key;
+          opt.textContent = `${data.districts[key].name} (${data.districts[key].region})`;
+          sel.appendChild(opt);
+        });
+        I18n.applyTranslations(); // re-apply for new options
+      } catch(e) { console.error("Error loading districts", e); }
+    }
+    loadDistricts();
+
+    document.getElementById('setup-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const config = {
+        schoolName: document.getElementById('setup-school').value,
+        district: document.getElementById('setup-district').value,
+        reportMonth: document.getElementById('setup-month').value,
+        reportYear: document.getElementById('setup-year').value
+      };
+
+      StorageManager.saveAdminConfig(config);
+
+      alert(I18n.currentLang === 'ne' ? 'सफलतापूर्वक सेट अप गरियो! अब विद्यालय मेट्रिक्स प्रविष्ट गर्नुहोस्।' : 'Setup completed! Now please input the school metrics.');
+      window.location.href = 'admin.html';
+    });
+  </script>
+</body>
+</html>
