@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Past Analytics — Eco-Tracks Nepal</title>
+  <link rel="stylesheet" href="./css/main.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    .analytics-hero { text-align: center; margin: 40px 0; }
+    .analytics-hero h1 { color: var(--green-800); font-size: 2.2rem; margin-bottom: 12px; }
+    .analytics-hero p { color: var(--text-muted); font-size: 1.1rem; }
+    
+    .data-table-wrapper {
+      background: white;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow-x: auto;
+      margin-bottom: 40px;
+    }
+    
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 800px;
+    }
+    
+    .data-table th, .data-table td {
+      padding: 16px;
+      text-align: right;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .data-table th {
+      background: var(--bg-page);
+      color: var(--text-primary);
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+    }
+    
+    .data-table th:first-child, .data-table td:first-child {
+      text-align: left;
+      font-weight: 700;
+    }
+    
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tbody tr:hover { background: #f9fdf9; }
+    
+    .val-energy { color: #5B8DD9; font-weight: 600; }
+    .val-commute { color: #56C15B; font-weight: 600; }
+    .val-waste { color: #E57373; font-weight: 600; }
+    .val-water { color: #64B5F6; font-weight: 600; }
+    .val-paper { color: #C8A400; font-weight: 600; }
+    .val-total { color: var(--text-primary); font-weight: 800; }
+    
+    .table-footer {
+      background: var(--green-50);
+      font-weight: 800;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav" role="navigation">
+    <div class="container nav__inner">
+      <a href="index.html" class="nav__logo">
+        <div class="nav__logo-icon">🌿</div>
+        Eco-Tracks
+      </a>
+      <ul class="nav__links" role="list">
+        <li><a href="index.html">Missions</a></li>
+        <li><a href="admin.html">My School</a></li>
+        <li><a href="transparency.html">Badges</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="overview.html" class="btn btn-outline btn-sm">📉 Back to Overview</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="page-main">
+    <div class="container">
+      <div class="analytics-hero animate-fade-up">
+        <h1>12-Month Historical Analytics</h1>
+        <p>A comprehensive breakdown of school-wide emissions across all 5 domains over the last year.</p>
+      </div>
+
+      <div class="data-table-wrapper animate-fade-up delay-1">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>⚡ Energy (kg)</th>
+              <th>🚌 Commute (kg)</th>
+              <th>🗑️ Waste (kg)</th>
+              <th>💧 Water (kg)</th>
+              <th>📄 Paper (kg)</th>
+              <th>🌍 Total CO₂e</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Hardcoded Data -->
+            <tr><td>July 2025</td><td class="val-energy">145.2</td><td class="val-commute">210.5</td><td class="val-waste">85.0</td><td class="val-water">12.4</td><td class="val-paper">34.1</td><td class="val-total">487.2</td></tr>
+            <tr><td>August 2025</td><td class="val-energy">150.0</td><td class="val-commute">205.0</td><td class="val-waste">88.5</td><td class="val-water">15.0</td><td class="val-paper">30.2</td><td class="val-total">488.7</td></tr>
+            <tr><td>September 2025</td><td class="val-energy">135.5</td><td class="val-commute">190.2</td><td class="val-waste">80.1</td><td class="val-water">11.8</td><td class="val-paper">45.0</td><td class="val-total">462.6</td></tr>
+            <tr><td>October 2025</td><td class="val-energy">120.4</td><td class="val-commute">185.5</td><td class="val-waste">75.0</td><td class="val-water">10.5</td><td class="val-paper">25.5</td><td class="val-total">416.9</td></tr>
+            <tr><td>November 2025</td><td class="val-energy">110.2</td><td class="val-commute">170.8</td><td class="val-waste">70.2</td><td class="val-water">9.2</td><td class="val-paper">22.0</td><td class="val-total">382.4</td></tr>
+            <tr><td>December 2025</td><td class="val-energy">180.5</td><td class="val-commute">150.0</td><td class="val-waste">65.5</td><td class="val-water">8.5</td><td class="val-paper">15.4</td><td class="val-total">419.9</td></tr>
+            <tr><td>January 2026</td><td class="val-energy">195.0</td><td class="val-commute">160.5</td><td class="val-waste">68.0</td><td class="val-water">9.0</td><td class="val-paper">18.5</td><td class="val-total">451.0</td></tr>
+            <tr><td>February 2026</td><td class="val-energy">175.4</td><td class="val-commute">165.2</td><td class="val-waste">72.4</td><td class="val-water">10.1</td><td class="val-paper">28.0</td><td class="val-total">451.1</td></tr>
+            <tr><td>March 2026</td><td class="val-energy">140.2</td><td class="val-commute">180.0</td><td class="val-waste">78.5</td><td class="val-water">12.5</td><td class="val-paper">40.5</td><td class="val-total">451.7</td></tr>
+            <tr><td>April 2026</td><td class="val-energy">125.8</td><td class="val-commute">185.4</td><td class="val-waste">82.0</td><td class="val-water">14.0</td><td class="val-paper">55.2</td><td class="val-total">462.4</td></tr>
+            <tr><td>May 2026</td><td class="val-energy">130.5</td><td class="val-commute">190.5</td><td class="val-waste">85.5</td><td class="val-water">16.5</td><td class="val-paper">35.0</td><td class="val-total">458.0</td></tr>
+            <tr><td>June 2026</td><td class="val-energy">145.0</td><td class="val-commute">195.0</td><td class="val-waste">80.0</td><td class="val-water">18.0</td><td class="val-paper">25.0</td><td class="val-total">463.0</td></tr>
+          </tbody>
+          <tfoot class="table-footer">
+            <tr>
+              <td>12-Month Average</td>
+              <td class="val-energy">146.1</td>
+              <td class="val-commute">182.4</td>
+              <td class="val-waste">77.6</td>
+              <td class="val-water">12.3</td>
+              <td class="val-paper">31.2</td>
+              <td class="val-total">449.6</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      
+    </div>
+  </main>
+</body>
+</html>
