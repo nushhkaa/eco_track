@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>School Overview — Eco-Tracks Nepal</title>
-  <script type="module">
-    import { StorageManager } from './js/storage_manager.js';
+  <script src="./js/storage_manager.js"></script>
+  <script>
     if (!StorageManager.getAdminConfig()) { window.location.replace('setup.html'); }
   </script>
   <link rel="stylesheet" href="./css/main.css">
@@ -44,6 +44,8 @@
     .total-box h2 { color: #fff; font-size: 1.2rem; margin-bottom: 8px; }
     .total-box .huge-val { font-size: 3rem; font-weight: 900; }
   </style>
+  <script src="./js/geographic_matrix.js"></script>
+  <script src="./js/emission_factors.js"></script>
 </head>
 <body>
 
@@ -106,10 +108,8 @@
     </div>
   </footer>
 
-  <script type="module">
-    import { StorageManager } from './js/storage_manager.js';
-    import { I18n } from './js/i18n.js';
-
+  <script src="./js/i18n.js"></script>
+  <script>
     I18n.init();
 
     const history = StorageManager.getHistory();

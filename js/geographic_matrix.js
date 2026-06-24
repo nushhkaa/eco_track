@@ -1,0 +1,891 @@
+window.GEOGRAPHIC_MATRIX = {
+  "districts": {
+    "taplejung": {
+      "name": "Taplejung",
+      "region": "Mountain",
+      "climate_challenge": "Freezing conditions, difficult terrain, high transport cost, biomass dependence.",
+      "altitude": "High altitude - 2,000 to 8,848 m",
+      "primary_issues": [
+        "energy",
+        "waste",
+        "commute"
+      ]
+    },
+    "sankhuwasabha": {
+      "name": "Sankhuwasabha",
+      "region": "Mountain",
+      "climate_challenge": "Freezing conditions, difficult terrain, high transport cost, biomass dependence.",
+      "altitude": "High altitude - 2,000 to 8,848 m",
+      "primary_issues": [
+        "energy",
+        "waste",
+        "commute"
+      ]
+    },
+    "solukhumbu": {
+      "name": "Solukhumbu",
+      "region": "Mountain",
+      "climate_challenge": "Freezing conditions, difficult terrain, high transport cost, biomass dependence.",
+      "altitude": "High altitude - 2,000 to 8,848 m",
+      "primary_issues": [
+        "energy",
+        "waste",
+        "commute"
+      ]
+    },
+    "dolakha": {
+      "name": "Dolakha",
+      "region": "Mountain",
+      "climate_challenge": "Freezing conditions, difficult terrain, high transport cost, biomass dependence.",
+      "altitude": "High altitude - 2,000 to 8,848 m",
+      "primary_issues": [
+        "energy",
+        "waste",
+        "commute"
+      ]
+    },
+    "sindhupalchok": {
+      "name": "Sindhupalchok",
+      "region": "Mountain",
+      "climate_challenge": "Freezing conditions, difficult terrain, high transport cost, biomass dependence.",
+      "altitude": "High altitude - 2,000 to 8,848 m",
+      "primary_issues": [
+        "energy",
+        "waste",
+        "commute"
+      ]
+    },
+    "rasuwa": {
+      "name": "Rasuwa",
+      "region": "Mountain",
+      "climate_challenge": "Freezing conditions, difficult terrain, high transport cost, biomass dependence.",
+      "altitude": "High altitude - 2,000 to 8,848 m",
+      "primary_issues": [
+        "energy",
+        "waste",
+        "commute"
+      ]
+    },
+    "manang": {
+      "name": "Manang",
+      "region": "Mountain",
+      "climate_challenge": "Freezing conditions, difficult terrain, high transport cost, biomass dependence.",
+      "altitude": "High altitude - 2,000 to 8,848 m",
+      "primary_issues": [
+        "energy",
+        "waste",
+        "commute"
+      ]
+    },
+    "mustang": {
+      "name": "Mustang",
+      "region": "Mountain",
+      "climate_challenge": "Freezing conditions, difficult terrain, high transport cost, biomass dependence.",
+      "altitude": "High altitude - 2,000 to 8,848 m",
+      "primary_issues": [
+        "energy",
+        "waste",
+        "commute"
+      ]
+    },
+    "dolpa": {
+      "name": "Dolpa",
+      "region": "Mountain",
+      "climate_challenge": "Freezing conditions, difficult terrain, high transport cost, biomass dependence.",
+      "altitude": "High altitude - 2,000 to 8,848 m",
+      "primary_issues": [
+        "energy",
+        "waste",
+        "commute"
+      ]
+    },
+    "jumla": {
+      "name": "Jumla",
+      "region": "Mountain",
+      "climate_challenge": "Freezing conditions, difficult terrain, high transport cost, biomass dependence.",
+      "altitude": "High altitude - 2,000 to 8,848 m",
+      "primary_issues": [
+        "energy",
+        "waste",
+        "commute"
+      ]
+    },
+    "mugu": {
+      "name": "Mugu",
+      "region": "Mountain",
+      "climate_challenge": "Freezing conditions, difficult terrain, high transport cost, biomass dependence.",
+      "altitude": "High altitude - 2,000 to 8,848 m",
+      "primary_issues": [
+        "energy",
+        "waste",
+        "commute"
+      ]
+    },
+    "humla": {
+      "name": "Humla",
+      "region": "Mountain",
+      "climate_challenge": "Freezing conditions, difficult terrain, high transport cost, biomass dependence.",
+      "altitude": "High altitude - 2,000 to 8,848 m",
+      "primary_issues": [
+        "energy",
+        "waste",
+        "commute"
+      ]
+    },
+    "kalikot": {
+      "name": "Kalikot",
+      "region": "Mountain",
+      "climate_challenge": "Freezing conditions, difficult terrain, high transport cost, biomass dependence.",
+      "altitude": "High altitude - 2,000 to 8,848 m",
+      "primary_issues": [
+        "energy",
+        "waste",
+        "commute"
+      ]
+    },
+    "bajura": {
+      "name": "Bajura",
+      "region": "Mountain",
+      "climate_challenge": "Freezing conditions, difficult terrain, high transport cost, biomass dependence.",
+      "altitude": "High altitude - 2,000 to 8,848 m",
+      "primary_issues": [
+        "energy",
+        "waste",
+        "commute"
+      ]
+    },
+    "bajhang": {
+      "name": "Bajhang",
+      "region": "Mountain",
+      "climate_challenge": "Freezing conditions, difficult terrain, high transport cost, biomass dependence.",
+      "altitude": "High altitude - 2,000 to 8,848 m",
+      "primary_issues": [
+        "energy",
+        "waste",
+        "commute"
+      ]
+    },
+    "darchula": {
+      "name": "Darchula",
+      "region": "Mountain",
+      "climate_challenge": "Freezing conditions, difficult terrain, high transport cost, biomass dependence.",
+      "altitude": "High altitude - 2,000 to 8,848 m",
+      "primary_issues": [
+        "energy",
+        "waste",
+        "commute"
+      ]
+    },
+    "rukum_east": {
+      "name": "Rukum East",
+      "region": "Mountain",
+      "climate_challenge": "Freezing conditions, difficult terrain, high transport cost, biomass dependence.",
+      "altitude": "High altitude - 2,000 to 8,848 m",
+      "primary_issues": [
+        "energy",
+        "waste",
+        "commute"
+      ]
+    },
+    "gorkha": {
+      "name": "Gorkha",
+      "region": "Mountain",
+      "climate_challenge": "Freezing conditions, difficult terrain, high transport cost, biomass dependence.",
+      "altitude": "High altitude - 2,000 to 8,848 m",
+      "primary_issues": [
+        "energy",
+        "waste",
+        "commute"
+      ]
+    },
+    "myagdi": {
+      "name": "Myagdi",
+      "region": "Mountain",
+      "climate_challenge": "Freezing conditions, difficult terrain, high transport cost, biomass dependence.",
+      "altitude": "High altitude - 2,000 to 8,848 m",
+      "primary_issues": [
+        "energy",
+        "waste",
+        "commute"
+      ]
+    },
+    "okhaldhunga": {
+      "name": "Okhaldhunga",
+      "region": "Mountain",
+      "climate_challenge": "Freezing conditions, difficult terrain, high transport cost, biomass dependence.",
+      "altitude": "High altitude - 2,000 to 8,848 m",
+      "primary_issues": [
+        "energy",
+        "waste",
+        "commute"
+      ]
+    },
+    "khotang": {
+      "name": "Khotang",
+      "region": "Mountain",
+      "climate_challenge": "Freezing conditions, difficult terrain, high transport cost, biomass dependence.",
+      "altitude": "High altitude - 2,000 to 8,848 m",
+      "primary_issues": [
+        "energy",
+        "waste",
+        "commute"
+      ]
+    },
+    "ilam": {
+      "name": "Ilam",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "panchthar": {
+      "name": "Panchthar",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "terhathum": {
+      "name": "Terhathum",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "dhankuta": {
+      "name": "Dhankuta",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "bhojpur": {
+      "name": "Bhojpur",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "udayapur": {
+      "name": "Udayapur",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "sindhuli": {
+      "name": "Sindhuli",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "ramechhap": {
+      "name": "Ramechhap",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "kavrepalanchok": {
+      "name": "Kavrepalanchok",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "lalitpur": {
+      "name": "Lalitpur",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "bhaktapur": {
+      "name": "Bhaktapur",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "kathmandu": {
+      "name": "Kathmandu",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "nuwakot": {
+      "name": "Nuwakot",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "dhading": {
+      "name": "Dhading",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "makwanpur": {
+      "name": "Makwanpur",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "lamjung": {
+      "name": "Lamjung",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "tanahun": {
+      "name": "Tanahun",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "syangja": {
+      "name": "Syangja",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "kaski": {
+      "name": "Kaski",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "parbat": {
+      "name": "Parbat",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "baglung": {
+      "name": "Baglung",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "gulmi": {
+      "name": "Gulmi",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "palpa": {
+      "name": "Palpa",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "arghakhanchi": {
+      "name": "Arghakhanchi",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "pyuthan": {
+      "name": "Pyuthan",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "rolpa": {
+      "name": "Rolpa",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "rukum_west": {
+      "name": "Rukum West",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "salyan": {
+      "name": "Salyan",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "jajarkot": {
+      "name": "Jajarkot",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "dailekh": {
+      "name": "Dailekh",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "surkhet": {
+      "name": "Surkhet",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "achham": {
+      "name": "Achham",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "doti": {
+      "name": "Doti",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "dadeldhura": {
+      "name": "Dadeldhura",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "baitadi": {
+      "name": "Baitadi",
+      "region": "Hilly",
+      "climate_challenge": "Irregular step trails, dense urban clusters, water pumping needs, waste volume.",
+      "altitude": "Mid-hill - 800 to 4,000 m",
+      "primary_issues": [
+        "water",
+        "energy",
+        "commute",
+        "waste"
+      ]
+    },
+    "jhapa": {
+      "name": "Jhapa",
+      "region": "Terai",
+      "climate_challenge": "Extreme summer heat waves, flat terrain, high groundwater pumping, agricultural waste.",
+      "altitude": "Lowland - 60 to 300 m",
+      "primary_issues": [
+        "water",
+        "paper",
+        "energy"
+      ]
+    },
+    "morang": {
+      "name": "Morang",
+      "region": "Terai",
+      "climate_challenge": "Extreme summer heat waves, flat terrain, high groundwater pumping, agricultural waste.",
+      "altitude": "Lowland - 60 to 300 m",
+      "primary_issues": [
+        "water",
+        "paper",
+        "energy"
+      ]
+    },
+    "sunsari": {
+      "name": "Sunsari",
+      "region": "Terai",
+      "climate_challenge": "Extreme summer heat waves, flat terrain, high groundwater pumping, agricultural waste.",
+      "altitude": "Lowland - 60 to 300 m",
+      "primary_issues": [
+        "water",
+        "paper",
+        "energy"
+      ]
+    },
+    "saptari": {
+      "name": "Saptari",
+      "region": "Terai",
+      "climate_challenge": "Extreme summer heat waves, flat terrain, high groundwater pumping, agricultural waste.",
+      "altitude": "Lowland - 60 to 300 m",
+      "primary_issues": [
+        "water",
+        "paper",
+        "energy"
+      ]
+    },
+    "siraha": {
+      "name": "Siraha",
+      "region": "Terai",
+      "climate_challenge": "Extreme summer heat waves, flat terrain, high groundwater pumping, agricultural waste.",
+      "altitude": "Lowland - 60 to 300 m",
+      "primary_issues": [
+        "water",
+        "paper",
+        "energy"
+      ]
+    },
+    "dhanusha": {
+      "name": "Dhanusha",
+      "region": "Terai",
+      "climate_challenge": "Extreme summer heat waves, flat terrain, high groundwater pumping, agricultural waste.",
+      "altitude": "Lowland - 60 to 300 m",
+      "primary_issues": [
+        "water",
+        "paper",
+        "energy"
+      ]
+    },
+    "mahottari": {
+      "name": "Mahottari",
+      "region": "Terai",
+      "climate_challenge": "Extreme summer heat waves, flat terrain, high groundwater pumping, agricultural waste.",
+      "altitude": "Lowland - 60 to 300 m",
+      "primary_issues": [
+        "water",
+        "paper",
+        "energy"
+      ]
+    },
+    "sarlahi": {
+      "name": "Sarlahi",
+      "region": "Terai",
+      "climate_challenge": "Extreme summer heat waves, flat terrain, high groundwater pumping, agricultural waste.",
+      "altitude": "Lowland - 60 to 300 m",
+      "primary_issues": [
+        "water",
+        "paper",
+        "energy"
+      ]
+    },
+    "rautahat": {
+      "name": "Rautahat",
+      "region": "Terai",
+      "climate_challenge": "Extreme summer heat waves, flat terrain, high groundwater pumping, agricultural waste.",
+      "altitude": "Lowland - 60 to 300 m",
+      "primary_issues": [
+        "water",
+        "paper",
+        "energy"
+      ]
+    },
+    "bara": {
+      "name": "Bara",
+      "region": "Terai",
+      "climate_challenge": "Extreme summer heat waves, flat terrain, high groundwater pumping, agricultural waste.",
+      "altitude": "Lowland - 60 to 300 m",
+      "primary_issues": [
+        "water",
+        "paper",
+        "energy"
+      ]
+    },
+    "parsa": {
+      "name": "Parsa",
+      "region": "Terai",
+      "climate_challenge": "Extreme summer heat waves, flat terrain, high groundwater pumping, agricultural waste.",
+      "altitude": "Lowland - 60 to 300 m",
+      "primary_issues": [
+        "water",
+        "paper",
+        "energy"
+      ]
+    },
+    "chitwan": {
+      "name": "Chitwan",
+      "region": "Terai",
+      "climate_challenge": "Extreme summer heat waves, flat terrain, high groundwater pumping, agricultural waste.",
+      "altitude": "Lowland - 60 to 300 m",
+      "primary_issues": [
+        "water",
+        "paper",
+        "energy"
+      ]
+    },
+    "nawalpur": {
+      "name": "Nawalpur",
+      "region": "Terai",
+      "climate_challenge": "Extreme summer heat waves, flat terrain, high groundwater pumping, agricultural waste.",
+      "altitude": "Lowland - 60 to 300 m",
+      "primary_issues": [
+        "water",
+        "paper",
+        "energy"
+      ]
+    },
+    "parasi": {
+      "name": "Parasi",
+      "region": "Terai",
+      "climate_challenge": "Extreme summer heat waves, flat terrain, high groundwater pumping, agricultural waste.",
+      "altitude": "Lowland - 60 to 300 m",
+      "primary_issues": [
+        "water",
+        "paper",
+        "energy"
+      ]
+    },
+    "rupandehi": {
+      "name": "Rupandehi",
+      "region": "Terai",
+      "climate_challenge": "Extreme summer heat waves, flat terrain, high groundwater pumping, agricultural waste.",
+      "altitude": "Lowland - 60 to 300 m",
+      "primary_issues": [
+        "water",
+        "paper",
+        "energy"
+      ]
+    },
+    "kapilvastu": {
+      "name": "Kapilvastu",
+      "region": "Terai",
+      "climate_challenge": "Extreme summer heat waves, flat terrain, high groundwater pumping, agricultural waste.",
+      "altitude": "Lowland - 60 to 300 m",
+      "primary_issues": [
+        "water",
+        "paper",
+        "energy"
+      ]
+    },
+    "dang": {
+      "name": "Dang",
+      "region": "Terai",
+      "climate_challenge": "Extreme summer heat waves, flat terrain, high groundwater pumping, agricultural waste.",
+      "altitude": "Lowland - 60 to 300 m",
+      "primary_issues": [
+        "water",
+        "paper",
+        "energy"
+      ]
+    },
+    "banke": {
+      "name": "Banke",
+      "region": "Terai",
+      "climate_challenge": "Extreme summer heat waves, flat terrain, high groundwater pumping, agricultural waste.",
+      "altitude": "Lowland - 60 to 300 m",
+      "primary_issues": [
+        "water",
+        "paper",
+        "energy"
+      ]
+    },
+    "bardiya": {
+      "name": "Bardiya",
+      "region": "Terai",
+      "climate_challenge": "Extreme summer heat waves, flat terrain, high groundwater pumping, agricultural waste.",
+      "altitude": "Lowland - 60 to 300 m",
+      "primary_issues": [
+        "water",
+        "paper",
+        "energy"
+      ]
+    },
+    "kailali": {
+      "name": "Kailali",
+      "region": "Terai",
+      "climate_challenge": "Extreme summer heat waves, flat terrain, high groundwater pumping, agricultural waste.",
+      "altitude": "Lowland - 60 to 300 m",
+      "primary_issues": [
+        "water",
+        "paper",
+        "energy"
+      ]
+    },
+    "kanchanpur": {
+      "name": "Kanchanpur",
+      "region": "Terai",
+      "climate_challenge": "Extreme summer heat waves, flat terrain, high groundwater pumping, agricultural waste.",
+      "altitude": "Lowland - 60 to 300 m",
+      "primary_issues": [
+        "water",
+        "paper",
+        "energy"
+      ]
+    }
+  },
+  "region_colors": {
+    "Mountain": "#7986CB",
+    "Hilly": "#56C15B",
+    "Terai": "#FFB74D"
+  }
+};

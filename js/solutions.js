@@ -2,8 +2,7 @@
  * solutions.js — Eco-Tracks Nepal
  * Geographically adaptive solutions matrix keyed by region type.
  */
-
-export const geoSolutionsMatrix = {
+const geoSolutionsMatrix = {
   "Mountain": {
     "energy": {
       "title": "Thermal Energy — Mountain Zone",
@@ -131,16 +130,14 @@ export const geoSolutionsMatrix = {
     }
   }
 };
-
-export const categoryLabels = {
+const categoryLabels = {
   energy:  { emoji: '⚡', label: 'Energy',  color: '#5B8DD9', bg: '#EEF4FF' },
   commute: { emoji: '🚌', label: 'Commute', color: '#56C15B', bg: '#EDFAEE' },
   waste:   { emoji: '🗑️', label: 'Waste',   color: '#E57373', bg: '#FFF0F0' },
   water:   { emoji: '💧', label: 'Water',   color: '#64B5F6', bg: '#EBF5FF' },
   paper:   { emoji: '📄', label: 'Paper',   color: '#C8A400', bg: '#FFFBEB' },
 };
-
-export const effortColors = {
+const effortColors = {
   'Low':    '#56C15B',
   'Medium': '#FFC107',
   'High':   '#FF9800',

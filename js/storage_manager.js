@@ -2,7 +2,7 @@
  * StorageManager — Eco-Tracks Nepal
  * Data persistence via localStorage & network syncing.
  */
-export class StorageManager {
+class StorageManager {
 
   static KEYS = {
     HISTORY:      'ecotracks_history',

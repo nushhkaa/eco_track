@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Teacher's Operations Ledger — Log your school's environmental data to configure Eco-Tracks Nepal.">
   <title>Teacher's Operations Ledger — Eco-Tracks Nepal</title>
-  <script type="module">
-    import { StorageManager } from './js/storage_manager.js';
+  <script src="./js/storage_manager.js"></script>
+  <script>
     if (!StorageManager.getAdminConfig()) { window.location.replace('setup.html'); }
   </script>
   <link rel="stylesheet" href="./css/main.css">
@@ -137,6 +137,8 @@
       .admin-hero { flex-direction: column; }
     }
   </style>
+  <script src="./js/geographic_matrix.js"></script>
+  <script src="./js/emission_factors.js"></script>
 </head>
 <body>
 
@@ -171,77 +173,80 @@
       </div>
 
       <!-- Form -->
-      <form id="admin-form" novalidate>
+      <form id="admin-form" novalidate onsubmit="event.preventDefault();">
         <div class="admin-grid">
 
-          <!-- School Identity Card -->
-          <div class="card animate-fade-up delay-1">
-            <div class="card-header">
-              <div class="card-header__icon card-header__icon--globe">🌐</div>
-              <div class="card-header__title" data-i18n="nav_myschool">School Identity</div>
-            </div>
-
-            <div class="flex-col gap-16">
-              <div class="form-group">
-                <label class="form-label" for="district-select" data-i18n="setup_district">Region / District</label>
-                <select class="form-select" id="district-select" required aria-required="true">
-                  <option value="" data-i18n="loading">Loading...</option>
-                </select>
-
+          <!-- Left Column Cards -->
+          <div style="display:flex; flex-direction:column; gap:24px;">
+            <!-- School Profile (Read-Only) -->
+            <div class="card animate-fade-up delay-1">
+              <div class="card-header">
+                <div class="card-header__icon card-header__icon--globe">🌐</div>
+                <div class="card-header__title">School Profile</div>
+              </div>
+              <div style="background: var(--bg-page); border-radius: 8px; padding: 16px; border: 1px solid var(--border);">
+                <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">School Name</div>
+                <div id="display-school-name" style="font-size: 1.2rem; font-weight: 800; color: var(--text-primary); margin-bottom: 16px;">-</div>
+                
+                <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Region / District</div>
+                <div id="display-district-name" style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">
+                  -
+                </div>
                 <!-- Dynamic district info -->
-                <div class="district-info-box" id="district-info-box" role="status" aria-live="polite">
+                <div class="district-info-box" id="district-info-box" role="status" aria-live="polite" style="margin-top: 12px;">
                   <div id="district-badge-wrap"></div>
                   <div id="district-challenge-text"></div>
                 </div>
               </div>
-
-              <div class="form-group">
-                <label class="form-label" for="school-name" data-i18n="setup_school_name">School Name</label>
-                <input class="form-input" type="text" id="school-name" placeholder="Greenwood Elementary" autocomplete="organization">
-              </div>
-              <div class="form-group mb-16">
-                <label class="form-label" for="student-count">Student Count</label>
-                <input class="form-input" type="number" id="student-count" placeholder="450" min="1" max="5000">
-              </div>
-              
-              <h3 class="mb-16 mt-24">🏫 School Environment Details</h3>
-              <div class="form-group mb-16">
-                <label class="form-label" for="config-muni-waste">School Municipal Waste Collection</label>
-                <select class="form-select" id="config-muni-waste">
-                  <option value="none">None (Local burning/pit only)</option>
-                  <option value="mixed">Single Mixed Collection</option>
-                  <option value="separated">Separated Collection (Recycling/Compost)</option>
-                </select>
-              </div>
-              <div class="form-group mb-16">
-                <label class="form-label" for="config-admin-paper">Admin Paper Recycled (kg/month)</label>
-                <input type="number" id="config-admin-paper" class="form-input" min="0" value="0" placeholder="e.g. 5">
-                <p class="text-sm text-muted mt-8">Amount of school/office paper given to collectors</p>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label" for="report-month" data-i18n="setup_month">Reporting Month</label>
-                <select id="report-month" class="form-select" required>
-                  <option value="January">January</option>
-                  <option value="February">February</option>
-                  <option value="March">March</option>
-                  <option value="April">April</option>
-                  <option value="May">May</option>
-                  <option value="June">June</option>
-                  <option value="July">July</option>
-                  <option value="August">August</option>
-                  <option value="September">September</option>
-                  <option value="October">October</option>
-                  <option value="November">November</option>
-                  <option value="December">December</option>
-                </select>
-              </div>
             </div>
 
-            <!-- Quote -->
-            <div class="blockquote mt-24">
-              "Accurate data helps us tailor your students' eco-quest levels. Every number counts toward a greener tomorrow!"
-              <cite>— Professor Pine</cite>
+            <!-- Environment Details Card -->
+            <div class="card animate-fade-up delay-1">
+              <h3 class="mb-16">🏫 Environment Details</h3>
+              <div class="flex-col gap-16">
+                <div class="form-group mb-16">
+                  <label class="form-label" for="student-count">Student Count</label>
+                  <input class="form-input" type="number" id="student-count" placeholder="450" min="1" max="5000">
+                </div>
+              
+                <div class="form-group mb-16">
+                  <label class="form-label" for="config-muni-waste">School Municipal Waste Collection</label>
+                  <select class="form-select" id="config-muni-waste">
+                    <option value="none">None (Local burning/pit only)</option>
+                    <option value="mixed">Single Mixed Collection</option>
+                    <option value="separated">Separated Collection (Recycling/Compost)</option>
+                  </select>
+                </div>
+                <div class="form-group mb-16">
+                  <label class="form-label" for="config-admin-paper">Admin Paper Recycled (kg/month)</label>
+                  <input type="number" id="config-admin-paper" class="form-input" min="0" value="0" placeholder="e.g. 5">
+                  <p class="text-sm text-muted mt-8">Amount of school/office paper given to collectors</p>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="report-month" data-i18n="setup_month">Reporting Month</label>
+                  <select id="report-month" class="form-select" required>
+                    <option value="January">January</option>
+                    <option value="February">February</option>
+                    <option value="March">March</option>
+                    <option value="April">April</option>
+                    <option value="May">May</option>
+                    <option value="June">June</option>
+                    <option value="July">July</option>
+                    <option value="August">August</option>
+                    <option value="September">September</option>
+                    <option value="October">October</option>
+                    <option value="November">November</option>
+                    <option value="December">December</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Quote -->
+              <div class="blockquote mt-24">
+                "Accurate data helps us tailor your students' eco-quest levels. Every number counts toward a greener tomorrow!"
+                <cite>— Professor Pine</cite>
+              </div>
             </div>
           </div>
 
@@ -334,11 +339,9 @@
     </div>
   </footer>
 
-  <script type="module">
-    import { StorageManager } from './js/storage_manager.js';
-    import { CalculatorEngine } from './js/calculator_engine.js';
-    import { I18n } from './js/i18n.js';
-
+  <script src="./js/calculator_engine.js"></script>
+  <script src="./js/i18n.js"></script>
+  <script>
     I18n.init();
 
     const engine = new CalculatorEngine();
@@ -348,19 +351,9 @@
 
     async function loadDistricts() {
       try {
-        const res = await fetch('./data/geographic_matrix.json');
-        const data = await res.json();
+        const data = window.GEOGRAPHIC_MATRIX;
         allDistricts = data.districts;
-        const sel = document.getElementById('district-select');
-        sel.innerHTML = '<option value="">Select a district...</option>';
-        Object.keys(data.districts).sort().forEach(key => {
-          const opt = document.createElement('option');
-          opt.value = key;
-          opt.textContent = `${data.districts[key].name} (${data.districts[key].region})`;
-          sel.appendChild(opt);
-        });
-        
-        // Load saved config after fetch
+        // Load saved config
         loadSavedConfig();
       } catch(e) { console.error("Error loading districts", e); }
     }
@@ -368,8 +361,10 @@
     function loadSavedConfig() {
       const cfg = StorageManager.getAdminConfig();
       if(cfg) {
-        document.getElementById('district-select').value = cfg.district || '';
-        document.getElementById('school-name').value = cfg.schoolName || '';
+        document.getElementById('display-school-name').textContent = cfg.schoolName || 'Unknown School';
+        const distData = allDistricts[cfg.district];
+        document.getElementById('display-district-name').textContent = distData ? `${distData.name} (${distData.region})` : (cfg.district || 'Unknown District');
+        
         document.getElementById('student-count').value = cfg.studentCount || '';
         document.getElementById('report-month').value = cfg.reportMonth || 'January';
         
@@ -392,10 +387,7 @@
 
     loadDistricts();
 
-    // District dropdown change
-    document.getElementById('district-select').addEventListener('change', (e) => {
-      updateDistrictInfo(e.target.value);
-    });
+    // District info is static now, handled in loadSavedConfig
 
     function updateDistrictInfo(distKey) {
       const box = document.getElementById('district-info-box');
@@ -437,15 +429,16 @@
     // Form submit
     document.getElementById('admin-form').addEventListener('submit', (e) => {
       e.preventDefault();
-      const district = document.getElementById('district-select').value;
+      const cfg = StorageManager.getAdminConfig();
+      const district = cfg ? cfg.district : null;
       if (!district) {
-        showToast('⚠️ Please select a district.', 'error');
+        showToast('⚠️ Please select a district in setup.', 'error');
         return;
       }
 
       const config = {
         district,
-        schoolName:   document.getElementById('school-name').value.trim() || 'My School',
+        schoolName:   cfg ? cfg.schoolName : 'My School',
         studentCount: parseInt(document.getElementById('student-count').value) || 30,
         reportMonth:  document.getElementById('report-month').value,
         reportYear:   StorageManager.getAdminConfig()?.reportYear || new Date().getFullYear(),

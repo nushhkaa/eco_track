@@ -3,7 +3,7 @@
  * Loads emission_factors.json and computes kgCO2e for each input module.
  * Compliant with IPCC 2006/2019 Refinement & AR6-GWP100.
  */
-export class CalculatorEngine {
+class CalculatorEngine {
   constructor() {
     this.factors = null;
     this.meta = null;
@@ -12,9 +12,7 @@ export class CalculatorEngine {
 
   async init() {
     try {
-      const res = await fetch('./data/emission_factors.json');
-      if (!res.ok) throw new Error('Failed to load emission factors');
-      const data = await res.json();
+      const data = window.EMISSION_FACTORS;
       this.factors = data.factors;
       this.meta = data.meta;
       this.display = data.display;

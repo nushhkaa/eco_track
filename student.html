@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Class Data Portal — Eco-Tracks Nepal</title>
-  <script type="module">
-    import { StorageManager } from './js/storage_manager.js';
+  <script src="./js/storage_manager.js"></script>
+  <script>
     const config = StorageManager.getAdminConfig();
     if (!config) { window.location.replace('setup.html'); }
     else if (config.electricity === undefined) {
@@ -33,6 +33,8 @@
     .wizard-nav { display: flex; justify-content: space-between; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border); }
     @media (max-width: 768px) { .student-hero { flex-direction: column; } .student-hero__img { width: 100%; height: 180px; } .school-metrics-banner { flex-direction: column; align-items: flex-start; } }
   </style>
+  <script src="./js/geographic_matrix.js"></script>
+  <script src="./js/emission_factors.js"></script>
 </head>
 <body>
 
@@ -90,7 +92,7 @@
       </div>
 
       <!-- Form container -->
-      <form id="metrics-form" novalidate>
+      <form id="metrics-form" novalidate onsubmit="event.preventDefault();">
         
         <div class="form-sections">
           <!-- Step 1: Demographics -->
@@ -225,7 +227,7 @@
 
             <div class="wizard-nav">
               <button type="button" class="btn btn-ghost prev-step" data-i18n="student_wizard_prev">← Previous</button>
-              <button type="button" class="btn btn-primary submit-btn" data-i18n="student_btn_compile">📊 Compile Footprint</button>
+              <button type="submit" class="btn btn-primary submit-btn" data-i18n="student_btn_compile">📊 Compile Footprint</button>
             </div>
           </div>
         </div>
@@ -234,143 +236,143 @@
     </div>
   </main>
 
-  <script type="module">
-    import { CalculatorEngine } from './js/calculator_engine.js';
-    import { StorageManager } from './js/storage_manager.js';
-    import { I18n } from './js/i18n.js';
+  <script src="./js/calculator_engine.js"></script>
+  <script src="./js/i18n.js"></script>
+  <script>
+    (async function() {
+      I18n.init();
+      const engine = new CalculatorEngine();
+      await engine.init();
 
-    I18n.init();
-    const engine = new CalculatorEngine();
-    await engine.init();
+      // Fetch region data to determine avg daily distance
+      let avgDist = 8; // Default Hilly
+      try {
+        const matrix = window.GEOGRAPHIC_MATRIX;
+        const distKey = StorageManager.getAdminConfig()?.district;
+        if (distKey && matrix.districts[distKey]) {
+          const region = matrix.districts[distKey].region;
+          if (region === 'Terai') avgDist = 4;
+          else if (region === 'Hilly') avgDist = 8;
+          else if (region === 'Mountain') avgDist = 12;
+        }
+      } catch(e) { console.error("Could not load geographic matrix", e); }
 
-    // Fetch region data to determine avg daily distance
-    let avgDist = 8; // Default Hilly
-    try {
-      const res = await fetch('./data/geographic_matrix.json');
-      const matrix = await res.json();
-      const distKey = StorageManager.getAdminConfig()?.district;
-      if (distKey && matrix.districts[distKey]) {
-        const region = matrix.districts[distKey].region;
-        if (region === 'Terai') avgDist = 4;
-        else if (region === 'Hilly') avgDist = 8;
-        else if (region === 'Mountain') avgDist = 12;
-      }
-    } catch(e) { console.error("Could not load geographic matrix", e); }
+      // Grade setup
+      const currentGrade = StorageManager.getCurrentGrade();
+      document.getElementById('grade-badge-nav').textContent = currentGrade;
+      document.getElementById('grade-text').textContent = currentGrade;
 
-    // Grade setup
-    const currentGrade = StorageManager.getCurrentGrade();
-    document.getElementById('grade-badge-nav').textContent = currentGrade;
-    document.getElementById('grade-text').textContent = currentGrade;
-
-    // Inject School Metrics
-    const adminConfig = StorageManager.getAdminConfig();
-    if (adminConfig) {
-      document.getElementById('school-metrics-banner').style.display = 'flex';
-      const mbox = document.getElementById('school-metrics-data');
-      mbox.innerHTML = `
-        <span>⚡ ${adminConfig.electricity || 0} kWh</span>
-        <span>💧 ${adminConfig.water || 0} L</span>
-        <span>⛽ ${adminConfig.diesel || 0} L</span>
-        <span>🗑️ ${adminConfig.wasteType || 'burning'}</span>
-      `;
-    }
-
-    // Inject Active Mission
-    const activeMission = StorageManager.getActiveMission(currentGrade);
-    if (activeMission) {
-      document.getElementById('active-mission-banner').style.display = 'flex';
-      document.getElementById('mission-title').textContent = activeMission.title;
-    }
-
-    // Wizard logic
-    const steps = document.querySelectorAll('.wizard-step');
-    let currentStep = 0;
-
-    document.querySelectorAll('.next-step').forEach(btn => {
-      btn.addEventListener('click', () => {
-        steps[currentStep].classList.remove('active');
-        currentStep++;
-        steps[currentStep].classList.add('active');
-      });
-    });
-
-    document.querySelectorAll('.prev-step').forEach(btn => {
-      btn.addEventListener('click', () => {
-        steps[currentStep].classList.remove('active');
-        currentStep--;
-        steps[currentStep].classList.add('active');
-      });
-    });
-
-    // Submit Logic
-    document.querySelector('.submit-btn').addEventListener('click', () => {
-      const walkStudents = parseFloat(document.getElementById('input-commute-walk')?.value) || 0;
-      const cycleStudents = parseFloat(document.getElementById('input-commute-cycle')?.value) || 0;
-      const busStudents = parseFloat(document.getElementById('input-commute-bus')?.value) || 0;
-      const bikeStudents = parseFloat(document.getElementById('input-commute-bike')?.value) || 0;
-      const carStudents = parseFloat(document.getElementById('input-commute-car')?.value) || 0;
-
-      // Calculate monthly km (assuming 22 school days/month)
-      const days = 22;
-      const walk = walkStudents * avgDist * days;
-      const cycle = cycleStudents * avgDist * days;
-      const bus = busStudents * avgDist * days;
-      const bike = bikeStudents * avgDist * days;
-      const car = carStudents * avgDist * days;
-
-      const cNew = parseFloat(document.getElementById('input-paper-copies-new')?.value) || 0;
-      const isRecycled = document.getElementById('input-paper-recycled')?.value === 'yes';
-      
-      // assuming 1 copy/notebook is ~0.1kg of paper
-      let pVirg = cNew * 0.1;
-      let paperCO2 = 0;
-      
-      // If they recycle, we reward them by using the recycled emission factor for their copies.
-      if (isRecycled) {
-        paperCO2 = engine.calculateModule('paper', 'recycled_paper_kg', pVirg);
-      } else {
-        paperCO2 = engine.calculateModule('paper', 'virgin_paper_kg', pVirg);
+      // Inject School Metrics
+      const adminConfig = StorageManager.getAdminConfig();
+      if (adminConfig) {
+        document.getElementById('school-metrics-banner').style.display = 'flex';
+        const mbox = document.getElementById('school-metrics-data');
+        mbox.innerHTML = `
+          <span>⚡ ${adminConfig.electricity || 0} kWh</span>
+          <span>💧 ${adminConfig.water || 0} L</span>
+          <span>⛽ ${adminConfig.diesel || 0} L</span>
+          <span>🗑️ ${adminConfig.wasteType || 'burning'}</span>
+        `;
       }
 
-      // Waste Calculation (5-point scale distribution, 4 categories)
-      const students = parseFloat(document.getElementById('input-demo-students')?.value) || 30;
-      const totalWasteMonthly = students * 1.2; // 1.2kg per student per month
-      
-      const sBurn = parseInt(document.querySelector('input[name="waste-scale-burn"]:checked')?.value) || 0;
-      const sPit = parseInt(document.querySelector('input[name="waste-scale-pit"]:checked')?.value) || 0;
-      const sComp = parseInt(document.querySelector('input[name="waste-scale-comp"]:checked')?.value) || 0;
-      const sRecyc = parseInt(document.querySelector('input[name="waste-scale-recyc"]:checked')?.value) || 0;
-      
-      const totalScale = sBurn + sPit + sComp + sRecyc;
-      
-      let wasteCO2 = 0;
-      let wasteVal = 0;
+      // Inject Active Mission
+      const activeMission = StorageManager.getActiveMission(currentGrade);
+      if (activeMission) {
+        document.getElementById('active-mission-banner').style.display = 'flex';
+        document.getElementById('mission-title').textContent = activeMission.title;
+      }
 
-      if (totalScale > 0) {
-        const wBurn = (sBurn / totalScale) * totalWasteMonthly;
-        const wPit = (sPit / totalScale) * totalWasteMonthly;
+      // Wizard logic
+      const steps = document.querySelectorAll('.wizard-step');
+      let currentStep = 0;
+
+      document.querySelectorAll('.next-step').forEach(btn => {
+        btn.addEventListener('click', () => {
+          steps[currentStep].classList.remove('active');
+          currentStep++;
+          steps[currentStep].classList.add('active');
+        });
+      });
+
+      document.querySelectorAll('.prev-step').forEach(btn => {
+        btn.addEventListener('click', () => {
+          steps[currentStep].classList.remove('active');
+          currentStep--;
+          steps[currentStep].classList.add('active');
+        });
+      });
+
+      // Submit Logic
+      document.getElementById('metrics-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const walkStudents = parseFloat(document.getElementById('input-commute-walk')?.value) || 0;
+        const cycleStudents = parseFloat(document.getElementById('input-commute-cycle')?.value) || 0;
+        const busStudents = parseFloat(document.getElementById('input-commute-bus')?.value) || 0;
+        const bikeStudents = parseFloat(document.getElementById('input-commute-bike')?.value) || 0;
+        const carStudents = parseFloat(document.getElementById('input-commute-car')?.value) || 0;
+
+        // Calculate monthly km (assuming 22 school days/month)
+        const days = 22;
+        const walk = walkStudents * avgDist * days;
+        const cycle = cycleStudents * avgDist * days;
+        const bus = busStudents * avgDist * days;
+        const bike = bikeStudents * avgDist * days;
+        const car = carStudents * avgDist * days;
+
+        const cNew = parseFloat(document.getElementById('input-paper-copies-new')?.value) || 0;
+        const isRecycled = document.getElementById('input-paper-recycled')?.value === 'yes';
         
-        wasteVal = wBurn + wPit; // Tracking non-neutral waste for display
-        wasteCO2 = engine.calculateModule('waste', 'open_plastic_burning_kg', wBurn) + 
-                   engine.calculateModule('waste', 'anaerobic_pit_burial_kg', wPit);
-      }
+        // assuming 1 copy/notebook is ~0.1kg of paper
+        let pVirg = cNew * 0.1;
+        let paperCO2 = 0;
+        
+        // If they recycle, we reward them by using the recycled emission factor for their copies.
+        if (isRecycled) {
+          paperCO2 = engine.calculateModule('paper', 'recycled_paper_kg', pVirg);
+        } else {
+          paperCO2 = engine.calculateModule('paper', 'virgin_paper_kg', pVirg);
+        }
 
-      const commuteVal = walk + cycle + bus + bike + car;
-      const commuteCO2 = engine.calculateModule('commute', 'public_bus_pkm', bus) 
-                       + engine.calculateModule('commute', 'motorbike_km', bike)
-                       + engine.calculateModule('commute', 'private_car_km', car);
+        // Waste Calculation (5-point scale distribution, 4 categories)
+        const students = parseFloat(document.getElementById('input-demo-students')?.value) || 30;
+        const totalWasteMonthly = students * 1.2; // 1.2kg per student per month
+        
+        const sBurn = parseInt(document.querySelector('input[name="waste-scale-burn"]:checked')?.value) || 0;
+        const sPit = parseInt(document.querySelector('input[name="waste-scale-pit"]:checked')?.value) || 0;
+        const sComp = parseInt(document.querySelector('input[name="waste-scale-comp"]:checked')?.value) || 0;
+        const sRecyc = parseInt(document.querySelector('input[name="waste-scale-recyc"]:checked')?.value) || 0;
+        
+        const totalScale = sBurn + sPit + sComp + sRecyc;
+        
+        let wasteCO2 = 0;
+        let wasteVal = 0;
 
-      const payload = {
-        energy: { value: 0, co2: 0 },
-        commute: { value: commuteVal, co2: commuteCO2 },
-        waste: { value: wasteVal, co2: wasteCO2 },
-        water: { value: 0, co2: 0 },
-        paper: { value: pVirg, co2: paperCO2 }
-      };
+        if (totalScale > 0) {
+          const wBurn = (sBurn / totalScale) * totalWasteMonthly;
+          const wPit = (sPit / totalScale) * totalWasteMonthly;
+          
+          wasteVal = wBurn + wPit; // Tracking non-neutral waste for display
+          wasteCO2 = engine.calculateModule('waste', 'open_plastic_burning_kg', wBurn) + 
+                     engine.calculateModule('waste', 'anaerobic_pit_burial_kg', wPit);
+        }
 
-      StorageManager.saveQuarterlyLog(currentGrade, payload);
-      window.location.href = 'analytics.html';
-    });
+        const commuteVal = walk + cycle + bus + bike + car;
+        const commuteCO2 = engine.calculateModule('commute', 'public_bus_pkm', bus) 
+                         + engine.calculateModule('commute', 'motorbike_km', bike)
+                         + engine.calculateModule('commute', 'private_car_km', car);
+
+        const payload = {
+          energy: { value: 0, co2: 0 },
+          commute: { value: commuteVal, co2: commuteCO2 },
+          waste: { value: wasteVal, co2: wasteCO2 },
+          water: { value: 0, co2: 0 },
+          paper: { value: pVirg, co2: paperCO2 }
+        };
+
+        StorageManager.saveQuarterlyLog(currentGrade, payload);
+        window.location.href = 'analytics.html';
+      });
+    })();
   </script>
 </body>
 </html>

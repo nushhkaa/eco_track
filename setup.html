@@ -33,6 +33,8 @@
     }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   </style>
+  <script src="./js/geographic_matrix.js"></script>
+  <script src="./js/emission_factors.js"></script>
 </head>
 <body>
   <div class="container" style="display:flex;justify-content:center;">
@@ -43,7 +45,7 @@
         <p class="text-muted mt-8" data-i18n="setup_subtitle">Welcome! Please set up your school profile. Admin access uses the default password "admin123".</p>
       </div>
 
-      <form id="setup-form">
+      <form id="setup-form" onsubmit="event.preventDefault();">
         <!-- School Info -->
         <h3 class="mb-16 text-green" data-i18n="setup_section_info">1. School Information</h3>
         <div class="grid-2 mb-24">
@@ -85,17 +87,16 @@
     </div>
   </div>
 
-  <script type="module">
-    import { StorageManager } from './js/storage_manager.js';
-    import { I18n } from './js/i18n.js';
+  <script src="./js/storage_manager.js"></script>
+  <script src="./js/i18n.js"></script>
+  <script>
 
     I18n.init();
 
     // Populate districts dynamically
     async function loadDistricts() {
       try {
-        const res = await fetch('./data/geographic_matrix.json');
-        const data = await res.json();
+        const data = window.GEOGRAPHIC_MATRIX;
         const sel = document.getElementById('setup-district');
         sel.innerHTML = '<option value="" data-i18n="setup_select_dist">Select District...</option>';
         Object.keys(data.districts).sort().forEach(key => {

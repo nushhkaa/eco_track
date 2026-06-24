@@ -1,8 +1,6 @@
 /**
  * i18n.js — English/Nepali Localization Engine
  */
-import { StorageManager } from './storage_manager.js';
-
 const translations = {
   en: {
     // Nav
@@ -241,8 +239,7 @@ const translations = {
     "month_sep": "सेप्टेम्बर", "month_oct": "अक्टोबर", "month_nov": "नोभेम्बर", "month_dec": "डिसेम्बर"
   }
 };
-
-export class I18n {
+class I18n {
   static init() {
     this.currentLang = StorageManager.getLanguage();
     this.applyTranslations();
