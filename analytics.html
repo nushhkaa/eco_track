@@ -264,12 +264,12 @@
   <script src="./js/i18n.js"></script>
   <script src="./js/calculator_engine.js"></script>
   <script>
-    (async function() {
+    (function() {
       renderFooter({ showRefresh: true });
       I18n.init();
 
       const engine = new CalculatorEngine();
-      await engine.init();
+      engine.init();
 
       // Populate grade scale legend from canonical thresholds
       document.getElementById('grade-scale-legend').innerHTML =

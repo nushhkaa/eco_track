@@ -163,52 +163,7 @@
           <div class="wizard-step" id="step-4">
             <div class="cat-section__header"><div class="cat-icon cat-icon--waste">🗑️</div><div><div class="cat-section__title" data-i18n="std_step_4_title">Step 4: Waste Path</div><div class="cat-section__subtitle" data-i18n="std_step_4_sub">Disposal frequency</div></div></div>
             
-            <div style="display:flex;flex-direction:column;gap:16px;margin-bottom:24px;">
-              
-              <div style="background:var(--bg-card);border:1px solid #EF9A9A;border-radius:12px;padding:16px;">
-                <label class="form-label text-sm" style="margin-bottom:12px;display:block;" data-i18n="std_waste_burn">🔥 Open Burning</label>
-                <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
-                  <label><input type="radio" name="waste-scale-burn" value="0" checked> <span>Never</span></label>
-                  <label><input type="radio" name="waste-scale-burn" value="1"> <span>Rarely</span></label>
-                  <label><input type="radio" name="waste-scale-burn" value="2"> <span>Sometimes</span></label>
-                  <label><input type="radio" name="waste-scale-burn" value="3"> <span>Often</span></label>
-                  <label><input type="radio" name="waste-scale-burn" value="4"> <span>Always</span></label>
-                </div>
-              </div>
-
-              <div style="background:var(--bg-card);border:1px solid #B0BEC5;border-radius:12px;padding:16px;">
-                <label class="form-label text-sm" style="margin-bottom:12px;display:block;" data-i18n="std_waste_pit">🕳️ Pit Burial</label>
-                <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
-                  <label><input type="radio" name="waste-scale-pit" value="0" checked> <span>Never</span></label>
-                  <label><input type="radio" name="waste-scale-pit" value="1"> <span>Rarely</span></label>
-                  <label><input type="radio" name="waste-scale-pit" value="2"> <span>Sometimes</span></label>
-                  <label><input type="radio" name="waste-scale-pit" value="3"> <span>Often</span></label>
-                  <label><input type="radio" name="waste-scale-pit" value="4"> <span>Always</span></label>
-                </div>
-              </div>
-
-              <div style="background:var(--bg-card);border:1px solid #81C784;border-radius:12px;padding:16px;">
-                <label class="form-label text-sm" style="margin-bottom:12px;display:block;" data-i18n="std_waste_comp">🌱 Composting</label>
-                <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
-                  <label><input type="radio" name="waste-scale-comp" value="0" checked> <span>Never</span></label>
-                  <label><input type="radio" name="waste-scale-comp" value="1"> <span>Rarely</span></label>
-                  <label><input type="radio" name="waste-scale-comp" value="2"> <span>Sometimes</span></label>
-                  <label><input type="radio" name="waste-scale-comp" value="3"> <span>Often</span></label>
-                  <label><input type="radio" name="waste-scale-comp" value="4"> <span>Always</span></label>
-                </div>
-              </div>
-
-              <div style="background:var(--bg-card);border:1px solid #64B5F6;border-radius:12px;padding:16px;">
-                <label class="form-label text-sm" style="margin-bottom:12px;display:block;" data-i18n="std_waste_recycle">♻️ Recycle to Collectors</label>
-                <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
-                  <label><input type="radio" name="waste-scale-recyc" value="0" checked> <span>Never</span></label>
-                  <label><input type="radio" name="waste-scale-recyc" value="1"> <span>Rarely</span></label>
-                  <label><input type="radio" name="waste-scale-recyc" value="2"> <span>Sometimes</span></label>
-                  <label><input type="radio" name="waste-scale-recyc" value="3"> <span>Often</span></label>
-                  <label><input type="radio" name="waste-scale-recyc" value="4"> <span>Always</span></label>
-                </div>
-              </div>
-            </div>
+            <div id="waste-scales" class="flex-col gap-16 mb-24"></div>
 
             <div class="wizard-nav">
               <button type="button" class="btn btn-ghost prev-step" data-i18n="student_wizard_prev">← Previous</button>
@@ -224,10 +179,11 @@
   <script src="./js/i18n.js"></script>
   <script src="./js/calculator_engine.js"></script>
   <script>
-    (async function() {
+    (function() {
+      buildWasteScales('waste-scales');
       I18n.init();
       const engine = new CalculatorEngine();
-      await engine.init();
+      engine.init();
 
       // Determine avg daily commute distance from region
       let avgDist = window.GEOGRAPHIC_MATRIX.region_defaults['Hilly'].avg_commute_km;

@@ -645,6 +645,62 @@ h4 { font-size: 1rem; }
 .mb-24  { margin-bottom: 24px; }
 .mb-32  { margin-bottom: 32px; }
 
+.w-full       { width: 100%; }
+.flex-wrap    { flex-wrap: wrap; }
+.items-center { align-items: center; }
+
+/* Profile card sub-components */
+.meta-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+.display-value {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+.display-value--sm { font-size: 1.1rem; font-weight: 700; }
+.info-box {
+  background: var(--bg-page);
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid var(--border);
+}
+.co2-preview-val {
+  font-size: 1.3rem;
+  color: var(--green-700);
+  margin-top: 4px;
+}
+
+/* ─── Waste scale radio component ───────────────────────────── */
+.waste-scale-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+.waste-scale-card--burn  { border-color: #EF9A9A; }
+.waste-scale-card--pit   { border-color: #B0BEC5; }
+.waste-scale-card--comp  { border-color: #81C784; }
+.waste-scale-card--recyc { border-color: #64B5F6; }
+.waste-scale-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 8px;
+}
+.waste-scale-option {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
 /* ─── Alert / Info Boxes ─────────────────────────────────────── */
 .alert {
   display: flex;

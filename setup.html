@@ -68,7 +68,20 @@
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-lg" style="width:100%" data-i18n="setup_btn_save">
+        <!-- Admin Password -->
+        <h3 class="mb-16 text-green">2. Admin Password</h3>
+        <div class="grid-2 mb-24">
+          <div class="form-group">
+            <label class="form-label">Admin Password</label>
+            <input type="password" id="setup-password" class="form-input" required placeholder="Choose a password" minlength="4">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirm Password</label>
+            <input type="password" id="setup-password-confirm" class="form-input" required placeholder="Repeat password">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg w-full" data-i18n="setup_btn_save">
           💾 Initialize School Profile
         </button>
       </form>
@@ -102,18 +115,22 @@
     }
     loadDistricts();
 
-    document.getElementById('setup-form').addEventListener('submit', (e) => {
+    document.getElementById('setup-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+      const pw  = document.getElementById('setup-password').value;
+      const pw2 = document.getElementById('setup-password-confirm').value;
+      if (pw !== pw2) {
+        alert('Passwords do not match.');
+        return;
+      }
       const config = {
-        schoolName: document.getElementById('setup-school').value,
-        district: document.getElementById('setup-district').value,
+        schoolName:  document.getElementById('setup-school').value,
+        district:    document.getElementById('setup-district').value,
         reportMonth: document.getElementById('setup-month').value,
-        reportYear: document.getElementById('setup-year').value
+        reportYear:  document.getElementById('setup-year').value
       };
-
       StorageManager.saveAdminConfig(config);
-
+      await StorageManager.setAdminPassword(pw);
       alert(I18n.currentLang === 'ne' ? 'सफलतापूर्वक सेट अप गरियो! अब विद्यालय मेट्रिक्स प्रविष्ट गर्नुहोस्।' : 'Setup completed! Now please input the school metrics.');
       window.location.href = 'admin.html';
     });

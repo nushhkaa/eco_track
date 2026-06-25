@@ -5,13 +5,14 @@
 class StorageManager {
 
   static KEYS = {
-    HISTORY:      'ecotracks_history',
-    ADMIN_CONFIG: 'ecotracks_admin_config',
-    ADMIN_AUTH:   'ecotracks_admin_auth',
-    GRADE:        'ecotracks_current_grade',
-    HOTSPOT:      'ecotracks_highest_hotspot',
-    LANG:         'ecotracks_lang',
-    MISSIONS:     'ecotracks_missions'
+    HISTORY:         'ecotracks_history',
+    ADMIN_CONFIG:    'ecotracks_admin_config',
+    ADMIN_AUTH:      'ecotracks_admin_auth',
+    ADMIN_PASSWORD:  'ecotracks_admin_password',
+    GRADE:           'ecotracks_current_grade',
+    HOTSPOT:         'ecotracks_highest_hotspot',
+    LANG:            'ecotracks_lang',
+    MISSIONS:        'ecotracks_missions'
   };
 
   // ─── Admin Config & Auth ───────────────────────────────────────────────────
@@ -27,9 +28,25 @@ class StorageManager {
     return raw ? JSON.parse(raw) : null;
   }
 
-  static authenticateAdmin(username, password) {
-    // Phase 3: Discreet predefined admin access
-    return (username === 'admin' && password === 'admin123');
+  static async hashPassword(pw) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  static async setAdminPassword(pw) {
+    const hash = await this.hashPassword(pw);
+    localStorage.setItem(this.KEYS.ADMIN_PASSWORD, hash);
+  }
+
+  static async authenticateAdmin(username, password) {
+    if (username !== 'admin') return false;
+    const stored = localStorage.getItem(this.KEYS.ADMIN_PASSWORD);
+    if (!stored) {
+      // Legacy fallback for installs that haven't run setup with password
+      return password === 'admin123';
+    }
+    const hashed = await this.hashPassword(password);
+    return hashed === stored;
   }
 
   // ─── Language ────────────────────────────────────────────────────────────────

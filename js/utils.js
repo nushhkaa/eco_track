@@ -43,3 +43,34 @@ function buildMonthOptions(selectEl, selectedValue = '') {
     `<option value="${m.value}"${selectedValue === m.value ? ' selected' : ''} data-i18n="${m.i18n}">${m.value}</option>`
   ).join('');
 }
+
+// ─── Waste scale radio component ─────────────────────────────────────────────
+const WASTE_SCALE_TYPES = [
+  { name: 'waste-scale-burn',  cls: 'waste-scale-card--burn',  labelKey: 'std_waste_burn',    label: '🔥 Open Burning'          },
+  { name: 'waste-scale-pit',   cls: 'waste-scale-card--pit',   labelKey: 'std_waste_pit',     label: '🕳️ Pit Burial'            },
+  { name: 'waste-scale-comp',  cls: 'waste-scale-card--comp',  labelKey: 'std_waste_comp',    label: '🌱 Composting'             },
+  { name: 'waste-scale-recyc', cls: 'waste-scale-card--recyc', labelKey: 'std_waste_recycle', label: '♻️ Recycle to Collectors'  },
+];
+const WASTE_SCALE_OPTIONS = [
+  { value: '0', i18n: 'scale_never',     label: 'Never'     },
+  { value: '1', i18n: 'scale_rarely',    label: 'Rarely'    },
+  { value: '2', i18n: 'scale_sometimes', label: 'Sometimes' },
+  { value: '3', i18n: 'scale_often',     label: 'Often'     },
+  { value: '4', i18n: 'scale_always',    label: 'Always'    },
+];
+
+function buildWasteScales(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = WASTE_SCALE_TYPES.map(t => `
+    <div class="waste-scale-card ${t.cls}">
+      <label class="form-label text-sm mb-12" style="display:block" data-i18n="${t.labelKey}">${t.label}</label>
+      <div class="waste-scale-row">
+        ${WASTE_SCALE_OPTIONS.map(s => `
+          <label class="waste-scale-option">
+            <input type="radio" name="${t.name}" value="${s.value}" ${s.value === '0' ? 'checked' : ''}>
+            <span data-i18n="${s.i18n}">${s.label}</span>
+          </label>`).join('')}
+      </div>
+    </div>`).join('');
+}

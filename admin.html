@@ -168,23 +168,21 @@
         <div class="admin-grid">
 
           <!-- Left Column Cards -->
-          <div style="display:flex; flex-direction:column; gap:24px;">
+          <div class="flex-col gap-24">
             <!-- School Profile (Read-Only) -->
             <div class="card animate-fade-up delay-1">
               <div class="card-header">
                 <div class="card-header__icon card-header__icon--globe">🌐</div>
                 <div class="card-header__title">School Profile</div>
               </div>
-              <div style="background: var(--bg-page); border-radius: 8px; padding: 16px; border: 1px solid var(--border);">
-                <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">School Name</div>
-                <div id="display-school-name" style="font-size: 1.2rem; font-weight: 800; color: var(--text-primary); margin-bottom: 16px;">-</div>
-                
-                <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Region / District</div>
-                <div id="display-district-name" style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">
-                  -
-                </div>
+              <div class="info-box">
+                <div class="meta-label">School Name</div>
+                <div id="display-school-name" class="display-value mb-16">-</div>
+
+                <div class="meta-label">Region / District</div>
+                <div id="display-district-name" class="display-value display-value--sm">-</div>
                 <!-- Dynamic district info -->
-                <div class="district-info-box" id="district-info-box" role="status" aria-live="polite" style="margin-top: 12px;">
+                <div class="district-info-box mt-12" id="district-info-box" role="status" aria-live="polite">
                   <div id="district-badge-wrap"></div>
                   <div id="district-challenge-text"></div>
                 </div>
@@ -271,11 +269,11 @@
               <span class="alert__icon">🌿</span>
               <div>
                 <div class="font-bold text-sm">Estimated Monthly School CO₂e:</div>
-                <div id="co2-preview-val" class="font-extrabold" style="font-size:1.3rem;color:var(--green-700);margin-top:4px;"></div>
+                <div id="co2-preview-val" class="font-extrabold co2-preview-val"></div>
               </div>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-lg mt-24" id="btn-save-admin" style="width:100%" data-i18n="admin_btn_save">
+            <button type="submit" class="btn btn-primary btn-lg mt-24 w-full" id="btn-save-admin" data-i18n="admin_btn_save">
               💾 Save School Parameters
             </button>
 

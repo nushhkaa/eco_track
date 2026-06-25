@@ -28,6 +28,7 @@
   </style>
   <script src="./js/geographic_matrix.js"></script>
   <script src="./js/emission_factors.js"></script>
+  <script src="./js/utils.js"></script>
 </head>
 <body>
   <form class="auth-card animate-scale-in" id="admin-login-form" onsubmit="event.preventDefault();">
@@ -43,7 +44,7 @@
       <label class="form-label" data-i18n="login_password">Password</label>
       <input type="password" id="auth-pass" class="form-input" placeholder="admin123" required>
     </div>
-    <button type="submit" class="btn btn-primary btn-lg" id="btn-auth" style="width:100%" data-i18n="login_btn_teacher">Access Dashboard 📊</button>
+    <button type="submit" class="btn btn-primary btn-lg w-full" id="btn-auth" data-i18n="login_btn_teacher">Access Dashboard 📊</button>
     
     <div class="mt-24">
       <a href="index.html" class="btn btn-ghost btn-sm" data-i18n="nav_home">🏠 Return to Hub</a>
@@ -55,19 +56,16 @@
 
     I18n.init();
 
-    document.getElementById('admin-login-form').addEventListener('submit', (e) => {
+    document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const u = document.getElementById('auth-user').value.trim();
       const p = document.getElementById('auth-pass').value;
-      if (StorageManager.authenticateAdmin(u, p)) {
+      const ok = await StorageManager.authenticateAdmin(u, p);
+      if (ok) {
         const config = StorageManager.getAdminConfig();
-        if (!config) {
-          window.location.href = 'setup.html';
-        } else {
-          window.location.href = 'admin.html';
-        }
+        window.location.href = config ? 'admin.html' : 'setup.html';
       } else {
-        alert('Invalid credentials.');
+        showToast('Invalid credentials.', 'error');
       }
     });
   </script>

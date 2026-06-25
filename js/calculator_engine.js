@@ -20,7 +20,7 @@ class CalculatorEngine {
     this.display = null;
   }
 
-  async init() {
+  init() {
     try {
       const data = window.EMISSION_FACTORS;
       this.factors = data.factors;
