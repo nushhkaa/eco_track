@@ -8,6 +8,9 @@
   <script>
     if (!StorageManager.getAdminConfig()) { window.location.replace('setup.html'); }
   </script>
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#2D6A2F">
+  <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');</script>
   <link rel="stylesheet" href="./css/main.css">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
   <style>
@@ -93,6 +96,7 @@
     </div>
   </main>
 
+  <script src="./js/goal_engine.js"></script>
   <script src="./js/i18n.js"></script>
   <script src="./js/solutions.js"></script>
   <script>
@@ -102,7 +106,9 @@
       const adminConfig = StorageManager.getAdminConfig();
       if (!adminConfig) return;
 
-      const hotspot     = StorageManager.getHotspot();
+      // Prefer URL ?cat= param, fall back to stored hotspot
+      const urlCat  = new URLSearchParams(location.search).get('cat');
+      const hotspot = urlCat || StorageManager.getHotspot();
 
       const regionColors = {
         Mountain: { bannerClass: 'geo-banner--mountain', badgeStyle: 'background:#E8EAF6;color:#3F51B5', color: '#7986CB' },
@@ -132,24 +138,33 @@
           const grid         = document.getElementById('solutions-grid');
           grid.innerHTML     = '';
 
-          const categories = ['energy', 'commute', 'waste', 'water', 'paper'];
+          // Sort so the hotspot category appears first
+          const categories = ['energy', 'commute', 'waste', 'water', 'paper']
+            .sort((a,b) => (a === hotspot ? -1 : b === hotspot ? 1 : 0));
 
           categories.forEach((cat, idx) => {
             const sol = solutionPool[cat];
             if (!sol) return;
 
-            const meta = categoryLabels[cat] || { emoji: '📊', label: cat, color: '#888', bg: '#f5f5f5' };
-            const effortPct = mapPerc(sol.effort);
-            const impactPct = mapPerc(sol.impact);
+            const meta       = categoryLabels[cat] || { emoji: '📊', label: cat, color: '#888', bg: '#f5f5f5' };
+            const effortPct  = mapPerc(sol.effort);
+            const impactPct  = mapPerc(sol.impact);
+            const isHotspot  = cat === hotspot;
 
             const card = document.createElement('div');
+            card.id = `card-${cat}`;
             card.className = `eco-card animate-fade-up delay-${Math.min(idx+1, 5)}`;
+            if (isHotspot) {
+              card.style.border = '2px solid #E53935';
+              card.style.boxShadow = '0 0 0 3px rgba(229,57,53,0.12)';
+            }
 
             card.innerHTML = `
+              ${isHotspot ? '<div style="background:#FFEBEE;color:#C62828;font-size:0.75rem;font-weight:800;padding:4px 12px;border-radius:20px;display:inline-block;margin-bottom:10px;">⚠️ YOUR HOTSPOT</div>' : ''}
               <div class="eco-icon-wrapper" style="background:${meta.bg}; color:${meta.color};">
                 ${meta.emoji}
               </div>
-              
+
               <div class="eco-category-banner" style="background:${meta.bg}">
                 ${meta.emoji}
               </div>
@@ -177,18 +192,36 @@
                 </div>
               </div>
 
-              <button class="eco-commit-btn commit-btn" data-title="${sol.title}">Commit for a Month</button>
+              <button class="eco-commit-btn commit-btn" data-cat="${cat}" data-title="${sol.title}">🎯 Commit for a Month</button>
             `;
 
             grid.appendChild(card);
           });
 
-          // Add commit listeners
+          // Scroll to hotspot card
+          if (hotspot) {
+            setTimeout(() => {
+              const el = document.getElementById('card-' + hotspot);
+              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 400);
+          }
+
+          // Commit listeners
           document.querySelectorAll('.commit-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
               const title = e.target.getAttribute('data-title');
-              StorageManager.setActiveMission(StorageManager.getCurrentGrade(), title);
-              alert("Mission Saved!");
+              const cat   = e.target.getAttribute('data-cat');
+              const grade = StorageManager.getCurrentGrade();
+              StorageManager.setActiveMission(grade, title);
+              // Wire into GoalEngine if available
+              if (typeof GoalEngine !== 'undefined') {
+                const goals = StorageManager.getGoals(grade);
+                const existing = goals.find(g => g.category === cat);
+                if (!existing) {
+                  GoalEngine.suggestGoalsFromSubmission(grade, { [cat]: { co2: 10 } });
+                }
+              }
+              showToast('🎯 Mission committed! Check Goals & Badges for progress.', 'success');
               e.target.textContent = '✅ Committed!';
               e.target.disabled = true;
             });

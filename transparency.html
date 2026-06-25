@@ -9,6 +9,9 @@
   <script>
     if (!StorageManager.getAdminConfig()) { window.location.replace('setup.html'); }
   </script>
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#2D6A2F">
+  <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');</script>
   <link rel="stylesheet" href="./css/main.css">
   <style>
     .transparency-hero {

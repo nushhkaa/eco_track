@@ -7,7 +7,9 @@
 const NAV_PAGES = [
   { href: 'index.html',        id: 'nav-missions', i18n: 'nav_missions', label: 'Missions' },
   { href: 'admin.html',        id: 'nav-myschool',  i18n: 'nav_myschool',  label: 'My School' },
-  { href: 'transparency.html', id: 'nav-badges',    i18n: 'nav_badges',    label: 'Badges' },
+  { href: 'goals.html',        id: 'nav-goals',     i18n: 'nav_goals',     label: '🎯 Goals' },
+  { href: 'heatmap.html',      id: 'nav-heatmap',   i18n: 'nav_heatmap',   label: '🗺️ Schools Map' },
+  { href: 'transparency.html', id: 'nav-badges',    i18n: 'nav_badges',    label: 'Transparency' },
 ];
 
 /**
@@ -24,6 +26,13 @@ function renderNav({ activePage = '', actionsHTML = '' } = {}) {
     ? `<div class="nav-actions" style="display:flex;gap:12px;align-items:center;">${actionsHTML}</div>`
     : '';
 
+  const isOnline = navigator.onLine;
+  const onlineIndicator = `
+    <div id="online-indicator" style="display:flex;align-items:center;gap:6px;font-size:0.78rem;font-weight:700;padding:4px 10px;border-radius:20px;background:${isOnline ? '#E8F5E9' : '#FFF3E0'};color:${isOnline ? '#2E7D32' : '#E65100'};">
+      <span id="online-dot" style="width:8px;height:8px;border-radius:50%;background:${isOnline ? '#4CAF50' : '#FF9800'};"></span>
+      <span id="online-label">${isOnline ? 'Online' : 'Offline'}</span>
+    </div>`;
+
   document.body.insertAdjacentHTML('afterbegin', `
     <nav class="nav" role="navigation" aria-label="Main navigation">
       <div class="container nav__inner">
@@ -32,9 +41,39 @@ function renderNav({ activePage = '', actionsHTML = '' } = {}) {
           Eco-Tracks
         </a>
         <ul class="nav__links" role="list">${links}</ul>
-        ${actionsSlot}
+        <div style="display:flex;gap:10px;align-items:center;">
+          ${onlineIndicator}
+          ${actionsSlot}
+        </div>
       </div>
     </nav>`);
+
+  // Live online/offline toggle
+  window.addEventListener('online',  () => _setOnlineStatus(true));
+  window.addEventListener('offline', () => _setOnlineStatus(false));
+}
+
+function _setOnlineStatus(online) {
+  const dot   = document.getElementById('online-dot');
+  const label = document.getElementById('online-label');
+  const wrap  = document.getElementById('online-indicator');
+  if (!dot) return;
+  dot.style.background   = online ? '#4CAF50' : '#FF9800';
+  label.textContent      = online ? 'Online' : 'Offline';
+  wrap.style.background  = online ? '#E8F5E9' : '#FFF3E0';
+  wrap.style.color       = online ? '#2E7D32' : '#E65100';
+  if (online && typeof StorageManager !== 'undefined') {
+    const pending = StorageManager.getPendingSyncCount();
+    if (pending > 0) {
+      if (typeof showToast !== 'undefined')
+        showToast(`🔄 Back online! Syncing ${pending} record(s)...`, 'success');
+      // Auto-flush in background
+      StorageManager.flushSyncQueue().then(result => {
+        if (result.synced > 0 && typeof showToast !== 'undefined')
+          showToast(`✅ ${result.synced} record(s) synced to server!`, 'success');
+      }).catch(() => {});
+    }
+  }
 }
 
 /**

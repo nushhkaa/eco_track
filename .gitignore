@@ -1,3 +1,9 @@
 carbon_track/
 Screenshot 2026-06-09 194525.jpg
 node_modules/
+todo.md
+IMPLEMENTATION_PLAN.md
+backend/README_DEPLOY.md
+backend/db_setup.sql
+backend/db_config.php
+nextsteps.md

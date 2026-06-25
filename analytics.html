@@ -9,6 +9,9 @@
   <script>
     if (!StorageManager.getAdminConfig()) { window.location.replace('setup.html'); }
   </script>
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#2D6A2F">
+  <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');</script>
   <link rel="stylesheet" href="./css/main.css">
   <style>
     .report-hero h1 { color: var(--green-800); margin-bottom: 8px; }
@@ -263,6 +266,7 @@
 
   <script src="./js/i18n.js"></script>
   <script src="./js/calculator_engine.js"></script>
+  <script src="./js/goal_engine.js"></script>
   <script>
     (function() {
       renderFooter({ showRefresh: true });
@@ -323,6 +327,56 @@
         const improvement = prevTotalCO2 > 0
           ? (((prevTotalCO2 - totalCO2) / prevTotalCO2) * 100).toFixed(1)
           : null;
+
+        // ── Pain Points section ──────────────────────────────────────────────
+        const TIPS = {
+          energy:  'Switch canteen to briquettes/biogas; assign a monitor to turn off lights & heating.',
+          commute: 'Encourage walking/cycling groups; reduce private car and motorbike pickups.',
+          waste:   'Add segregation bins; start composting wet waste in the school garden.',
+          water:   'Fix leaking taps; set up grey water reuse for school plants.',
+          paper:   'Reuse old notebooks as scratch paper; redistribute books to junior classes.'
+        };
+        const sortedCats = Object.entries(data)
+          .filter(([,d]) => d.co2 > 0)
+          .sort((a,b) => b[1].co2 - a[1].co2)
+          .slice(0,3);
+        const rankEmoji = ['🥇','🥈','🥉'];
+
+        const latestRaw = current.data || {};
+        const habitItems = [];
+        if (latestRaw.energy?.hasHeatingCooling && (latestRaw.energy?.heatingHoursPerDay||0) >= 4)
+          habitItems.push('❄️ Heating/cooling runs ' + (latestRaw.energy.heatingHoursPerDay||0) + 'h/day — assign a switch-off monitor to earn the Energy Saver badge.');
+        if (latestRaw.water?.greyWaterUse === false)
+          habitItems.push('♻️ No grey water reuse — collect handwashing water for the school garden to earn the Water Warrior badge.');
+        if (latestRaw.waste?.hasSegregationBins === false)
+          habitItems.push('🗂️ No segregation bins — add dry/wet/hazardous bins to earn the Waste Champion badge.');
+        if ((latestRaw.water?.leakingTaps||0) > 0)
+          habitItems.push('🔧 ' + latestRaw.water.leakingTaps + ' leaking tap(s) reported — get them fixed to earn the Leak Fixer badge.');
+
+        const painPointsHTML = sortedCats.length === 0 ? '' : `
+          <div class="animate-fade-up delay-3 mt-24" style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-xl);padding:28px 32px;box-shadow:var(--shadow-card);">
+            <h3 style="margin-bottom:6px;">🔍 Top Pain Points &amp; Action Plan</h3>
+            <p class="text-sm text-muted mb-20">Your biggest emission sources — and what to do about each.</p>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              ${sortedCats.map(([cat,d],i) => {
+                const meta = catMeta[cat] || {emoji:'📊',label:cat,color:'#888'};
+                const pct  = totalCO2 > 0 ? ((d.co2/totalCO2)*100).toFixed(1) : '0';
+                return `<div style="display:flex;align-items:flex-start;gap:14px;padding:14px;background:var(--bg-page);border-radius:10px;border-left:3px solid ${meta.color};">
+                  <span style="font-size:1.4rem;flex-shrink:0;">${rankEmoji[i]}</span>
+                  <div style="flex:1;">
+                    <div style="font-weight:800;color:${meta.color};margin-bottom:2px;">${meta.emoji} ${meta.label} — ${d.co2.toFixed(1)} kg (${pct}%)</div>
+                    <div style="font-size:0.85rem;color:var(--text-muted);">${TIPS[cat]||'See geographic solutions for targeted actions.'}</div>
+                  </div>
+                  <a href="solutions.html?cat=${cat}" class="btn btn-outline btn-sm" style="white-space:nowrap;flex-shrink:0;font-size:0.75rem;">Fix →</a>
+                </div>`;
+              }).join('')}
+            </div>
+            ${habitItems.length === 0 ? '' : `
+              <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+                <div style="font-weight:700;font-size:0.9rem;margin-bottom:10px;color:var(--green-800);">🎯 Quick Wins — Earn Badges</div>
+                ${habitItems.map(s => `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:#F1F8E9;border-radius:8px;margin-bottom:8px;font-size:0.85rem;color:#2E7D32;">${s}</div>`).join('')}
+              </div>`}
+          </div>`;
 
         const html = `
           <div class="report-top-grid animate-fade-up">
@@ -493,9 +547,28 @@
             <div id="grade-scale-legend" style="display:flex; flex-wrap:wrap; gap:12px; font-size:0.8rem; color:var(--text-muted);"></div>
           </div>
 
+          <!-- Pain Points & Action Plan -->
+          ${painPointsHTML}
+
+          <!-- Badges earned this session -->
+          <div id="badges-earned-section" class="animate-fade-up delay-3 mt-24" style="display:none;background:linear-gradient(135deg,#FFFDE7,#FFF9C4);border:1px solid #F9A825;border-radius:12px;padding:20px 24px;">
+            <h4 style="color:#7A5C00;margin-bottom:12px;">🏅 Badges Earned This Session!</h4>
+            <div id="badges-earned-list" style="display:flex;flex-wrap:wrap;gap:12px;"></div>
+          </div>
+
+          <!-- Goal suggestions banner -->
+          <div id="goals-suggestion-banner" class="animate-fade-up delay-3 mt-16" style="display:none;background:var(--green-50);border:1px solid var(--green-300);border-radius:12px;padding:16px 20px;align-items:center;justify-content:space-between;gap:16px;">
+            <div>
+              <div style="font-weight:700;color:var(--green-800)">🎯 New goals have been suggested for your class!</div>
+              <div style="font-size:0.85rem;color:var(--text-muted);margin-top:4px;">Based on your submission, we found improvement opportunities.</div>
+            </div>
+            <a href="goals.html" class="btn btn-primary btn-sm" style="white-space:nowrap;">View Goals →</a>
+          </div>
+
           <!-- CTA -->
           <div class="flex justify-center gap-16 mt-32 animate-fade-up delay-4">
             <a href="solutions.html" class="btn btn-primary btn-lg" id="btn-proceed-solutions">🌱 View Geographic Solutions</a>
+            <a href="goals.html" class="btn btn-gold" id="btn-view-goals">🎯 Goals &amp; Badges</a>
             <a href="student.html" class="btn btn-outline" id="btn-log-again">📝 Log Another Session</a>
           </div>
         `;
@@ -518,6 +591,32 @@
           activeScale = 1.0;
           renderReport(currentDataObj, pastDataObj);
         });
+      }
+
+      // Show new badges earned this session
+      const newBadges = JSON.parse(sessionStorage.getItem('ecotracks_new_badges') || '[]');
+      if (newBadges.length > 0) {
+        sessionStorage.removeItem('ecotracks_new_badges');
+        const section = document.getElementById('badges-earned-section');
+        if (section) {
+          section.style.display = 'block';
+          document.getElementById('badges-earned-list').innerHTML = newBadges.map(b =>
+            `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;background:white;border-radius:10px;padding:12px 16px;min-width:100px;text-align:center;border:1px solid #F9A825;">
+               <span style="font-size:2rem">${b.emoji}</span>
+               <span style="font-size:0.82rem;font-weight:800;color:${b.color}">${b.title}</span>
+             </div>`
+          ).join('');
+        }
+        newBadges.forEach(b => showToast(`🏅 Badge earned: ${b.emoji} ${b.title}!`, 'success'));
+      }
+
+      // Show goal suggestions banner if new goals exist
+      if (typeof GoalEngine !== 'undefined' && currentDataObj) {
+        const suggested = GoalEngine.getSuggestedGoalsList(grade);
+        const banner = document.getElementById('goals-suggestion-banner');
+        if (banner && suggested.length > 0) {
+          banner.style.cssText += ';display:flex!important';
+        }
       }
 
       // Footer

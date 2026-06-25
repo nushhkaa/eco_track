@@ -12,7 +12,10 @@ class StorageManager {
     GRADE:           'ecotracks_current_grade',
     HOTSPOT:         'ecotracks_highest_hotspot',
     LANG:            'ecotracks_lang',
-    MISSIONS:        'ecotracks_missions'
+    MISSIONS:        'ecotracks_missions',
+    GOALS:           'ecotracks_goals',
+    BADGES:          'ecotracks_badges',
+    SYNC_QUEUE:      'ecotracks_sync_queue'
   };
 
   // ─── Admin Config & Auth ───────────────────────────────────────────────────
@@ -41,10 +44,7 @@ class StorageManager {
   static async authenticateAdmin(username, password) {
     if (username !== 'admin') return false;
     const stored = localStorage.getItem(this.KEYS.ADMIN_PASSWORD);
-    if (!stored) {
-      // Legacy fallback for installs that haven't run setup with password
-      return password === 'admin123';
-    }
+    if (!stored) return false;
     const hashed = await this.hashPassword(password);
     return hashed === stored;
   }
@@ -147,13 +147,20 @@ class StorageManager {
     return header + rows.join('\n');
   }
 
+  static getSyncUrl() {
+    return this.getAdminConfig()?.syncServerUrl || (typeof APP_CONSTANTS !== 'undefined' ? APP_CONSTANTS.DEFAULT_SYNC_URL : '');
+  }
+
   static async syncWithServer() {
     const csvStr = this.getCSVString();
     if (!csvStr) return { success: false, message: 'No data to sync.' };
 
-    const config = this.getAdminConfig();
+    const config    = this.getAdminConfig();
     const schoolName = config ? config.schoolName : 'UnknownSchool';
-    const monthYear = config && config.reportMonth ? `${config.reportMonth}_${config.reportYear}` : 'Current';
+    const monthYear  = config?.reportMonth ? `${config.reportMonth}_${config.reportYear}` : 'Current';
+    const syncUrl    = this.getSyncUrl();
+
+    if (!syncUrl) return { success: false, message: 'Sync server URL not configured.' };
 
     const blob = new Blob([csvStr], { type: 'text/csv' });
     const formData = new FormData();
@@ -162,22 +169,60 @@ class StorageManager {
     formData.append('monthYear', monthYear);
 
     try {
-      const res = await fetch(APP_CONSTANTS.SYNC_SERVER_URL, {
-        method: 'POST',
-        body: formData
-      });
+      const res  = await fetch(syncUrl, { method: 'POST', body: formData });
       const json = await res.json();
-      if (res.ok) {
-        return { success: true, message: json.message || 'Synced successfully.' };
-      } else {
-        return { success: false, message: json.message || 'Server rejected data.' };
-      }
+      return res.ok
+        ? { success: true,  message: json.message || 'Synced successfully.' }
+        : { success: false, message: json.message || 'Server rejected data.' };
     } catch (err) {
       console.error(err);
-      // Fallback: download locally if server unreachable
       this.downloadLocalCSV();
       return { success: false, message: 'Server unreachable. Downloaded locally instead.' };
     }
+  }
+
+  static async flushSyncQueue() {
+    const queue   = this.getSyncQueue().filter(q => !q.synced);
+    if (queue.length === 0) return { synced: 0, failed: 0 };
+
+    const config   = this.getAdminConfig() || {};
+    const syncUrl  = this.getSyncUrl();
+    if (!syncUrl) return { synced: 0, failed: 0 };
+
+    let synced = 0, failed = 0;
+
+    for (const item of queue) {
+      try {
+        const body = JSON.stringify({
+          action:     'sync',
+          schoolName: config.schoolName || 'Unknown',
+          district:   config.district   || '',
+          region:     config.region     || '',
+          reportMonth: config.reportMonth || '',
+          reportYear:  config.reportYear  || new Date().getFullYear(),
+          grade:      item.grade,
+          payload:    item.payload,
+          createdAt:  item.createdAt
+        });
+
+        const res = await fetch(syncUrl, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body
+        });
+
+        if (res.ok) {
+          this.markSynced(item.id);
+          synced++;
+        } else {
+          failed++;
+        }
+      } catch {
+        failed++;
+      }
+    }
+
+    return { synced, failed };
   }
 
   static downloadLocalCSV(filename = 'ecotracks_local_backup.csv') {
@@ -192,6 +237,97 @@ class StorageManager {
     link.click();
     document.body.removeChild(link);
     return true;
+  }
+
+  // ─── Goals & Badges ──────────────────────────────────────────────────────────
+  static getGoals(grade) {
+    const all = JSON.parse(localStorage.getItem(this.KEYS.GOALS)) || {};
+    return all[grade] || [];
+  }
+
+  static saveGoals(grade, goals) {
+    const all = JSON.parse(localStorage.getItem(this.KEYS.GOALS)) || {};
+    all[grade] = goals;
+    localStorage.setItem(this.KEYS.GOALS, JSON.stringify(all));
+  }
+
+  static getBadges(grade) {
+    const all = JSON.parse(localStorage.getItem(this.KEYS.BADGES)) || {};
+    return all[grade] || [];
+  }
+
+  static saveBadges(grade, badges) {
+    const all = JSON.parse(localStorage.getItem(this.KEYS.BADGES)) || {};
+    all[grade] = badges;
+    localStorage.setItem(this.KEYS.BADGES, JSON.stringify(all));
+  }
+
+  static awardBadge(grade, badge) {
+    const badges = this.getBadges(grade);
+    if (!badges.find(b => b.id === badge.id)) {
+      badges.push({ ...badge, earnedAt: new Date().toISOString() });
+      this.saveBadges(grade, badges);
+      return true;
+    }
+    return false;
+  }
+
+  // ─── Sync Queue ───────────────────────────────────────────────────────────────
+  static addToSyncQueue(type, grade, payload) {
+    const queue = JSON.parse(localStorage.getItem(this.KEYS.SYNC_QUEUE)) || [];
+    queue.push({ id: `sync_${Date.now()}`, type, grade, payload, createdAt: new Date().toISOString(), synced: false });
+    localStorage.setItem(this.KEYS.SYNC_QUEUE, JSON.stringify(queue));
+  }
+
+  static getSyncQueue() {
+    return JSON.parse(localStorage.getItem(this.KEYS.SYNC_QUEUE)) || [];
+  }
+
+  static markSynced(id) {
+    const queue = this.getSyncQueue();
+    const item = queue.find(q => q.id === id);
+    if (item) {
+      item.synced = true;
+      localStorage.setItem(this.KEYS.SYNC_QUEUE, JSON.stringify(queue));
+    }
+  }
+
+  static getPendingSyncCount() {
+    return this.getSyncQueue().filter(q => !q.synced).length;
+  }
+
+  // ─── Setup Export / Import ────────────────────────────────────────────────────
+  static exportSetupPackage() {
+    const pkg = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      adminConfig: this.getAdminConfig(),
+      adminPasswordHash: localStorage.getItem(this.KEYS.ADMIN_PASSWORD)
+    };
+    const blob = new Blob([JSON.stringify(pkg, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const school = (pkg.adminConfig?.schoolName || 'school').replace(/\s+/g, '_');
+    link.href = url;
+    link.download = `ecotracks_setup_${school}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  static importSetupPackage(json) {
+    try {
+      const pkg = typeof json === 'string' ? JSON.parse(json) : json;
+      if (!pkg.adminConfig) throw new Error('Invalid setup file');
+      this.saveAdminConfig(pkg.adminConfig);
+      if (pkg.adminPasswordHash) {
+        localStorage.setItem(this.KEYS.ADMIN_PASSWORD, pkg.adminPasswordHash);
+      }
+      return { success: true };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
   }
 
   // ─── Summary Stats ───────────────────────────────────────────────────────────

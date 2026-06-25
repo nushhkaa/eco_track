@@ -8,6 +8,9 @@
   <script>
     if (!StorageManager.getAdminConfig()) { window.location.replace('setup.html'); }
   </script>
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#2D6A2F">
+  <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');</script>
   <link rel="stylesheet" href="./css/main.css">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
   <style>
@@ -79,45 +82,62 @@
     </div>
   </main>
 
+  <script src="./js/goal_engine.js"></script>
+  <script src="./js/calculator_engine.js"></script>
   <script src="./js/i18n.js"></script>
   <script>
     renderFooter();
     I18n.init();
 
     const history = StorageManager.getHistory();
-    const grid = document.getElementById('grade-grid');
-    
-    let totalCO2 = 0;
-    const gradeStats = {};
+    const grid    = document.getElementById('grade-grid');
 
-    for (let i = 1; i <= 10; i++) {
-      gradeStats[`Grade ${i}`] = { sessions: 0, total: 0, latest: null };
-    }
+    let totalCO2 = 0;
+    // Build grade stats from actual history (all grade+section combos)
+    const gradeStats = {};
 
     history.forEach(log => {
       totalCO2 += log.totalCO2;
-      if (gradeStats[log.grade]) {
-        gradeStats[log.grade].sessions += 1;
-        gradeStats[log.grade].total += log.totalCO2;
-        gradeStats[log.grade].latest = log.timestamp;
-      }
+      if (!gradeStats[log.grade]) gradeStats[log.grade] = { sessions: 0, total: 0, latest: null };
+      gradeStats[log.grade].sessions += 1;
+      gradeStats[log.grade].total    += log.totalCO2;
+      gradeStats[log.grade].latest   = log.timestamp;
     });
 
     document.getElementById('total-emissions').textContent = `${totalCO2.toFixed(1)} kg CO₂e`;
-    document.getElementById('total-sessions').textContent = `${history.length} sessions logged across all grades`;
+    document.getElementById('total-sessions').textContent  = `${history.length} sessions logged across all classes`;
 
-    Object.keys(gradeStats).forEach((grade, idx) => {
-      const stats = gradeStats[grade];
-      const card = document.createElement('div');
-      card.className = `grade-card animate-fade-up delay-${Math.min((idx%5)+1, 5)}`;
-      card.innerHTML = `
-        <div class="grade-card__title">${grade}</div>
-        <div class="grade-card__stat"><span class="text-muted">Total Emissions:</span> <span class="val">${stats.total.toFixed(1)} kg</span></div>
-        <div class="grade-card__stat"><span class="text-muted">Sessions Logged:</span> <span class="val">${stats.sessions}</span></div>
-        <div class="grade-card__stat"><span class="text-muted">Last Update:</span> <span class="val">${stats.latest || 'Never'}</span></div>
-      `;
-      grid.appendChild(card);
-    });
+    const engine = new CalculatorEngine();
+    engine.init();
+
+    if (Object.keys(gradeStats).length === 0) {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">No student data yet. Start logging from the Missions page!</div>';
+    } else {
+      Object.entries(gradeStats)
+        .sort((a,b) => b[1].total - a[1].total)
+        .forEach(([grade, stats], idx) => {
+          const badges   = StorageManager.getBadges(grade);
+          const gradeInfo = engine.gradeFootprint(stats.total / Math.max(stats.sessions, 1));
+          const badgeRow = badges.length > 0
+            ? `<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;">${badges.map(b=>`<span title="${b.title}" style="font-size:1.2rem;">${b.emoji}</span>`).join('')}</div>`
+            : '';
+
+          const card = document.createElement('div');
+          card.className = `grade-card animate-fade-up delay-${Math.min((idx%5)+1, 5)}`;
+          card.style.borderTop = `3px solid ${gradeInfo.color}`;
+          card.innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+              <div class="grade-card__title" style="margin:0;">${grade}</div>
+              <span class="badge" style="background:${gradeInfo.color};color:#fff;padding:4px 10px;border-radius:20px;font-size:0.78rem;font-weight:800;">${gradeInfo.grade}</span>
+            </div>
+            <div class="grade-card__stat"><span class="text-muted">Total Emissions:</span> <span class="val">${stats.total.toFixed(1)} kg CO₂e</span></div>
+            <div class="grade-card__stat"><span class="text-muted">Sessions Logged:</span> <span class="val">${stats.sessions}</span></div>
+            <div class="grade-card__stat"><span class="text-muted">Last Update:</span> <span class="val">${stats.latest || 'Never'}</span></div>
+            ${badgeRow}
+          `;
+          grid.appendChild(card);
+        });
+    }
 
     document.getElementById('btn-sync-footer').addEventListener('click', async () => {
       const result = await StorageManager.syncWithServer();

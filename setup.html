@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>School Setup — Eco-Tracks Nepal</title>
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#2D6A2F">
+  <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');</script>
   <link rel="stylesheet" href="./css/main.css">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
   <style>
@@ -43,7 +46,19 @@
       <div class="setup-hero">
         <div class="setup-hero__icon">🏫</div>
         <h1 data-i18n="setup_title">School Initialization Protocol</h1>
-        <p class="text-muted mt-8" data-i18n="setup_subtitle">Welcome! Please set up your school profile. Admin access uses the default password "admin123".</p>
+        <p class="text-muted mt-8" data-i18n="setup_subtitle">Welcome! Set up your school profile, or import an existing setup file from another device.</p>
+      </div>
+
+      <!-- Import existing setup -->
+      <div style="background:#E3F2FD;border:1px solid #90CAF9;border-radius:10px;padding:16px 20px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+        <div>
+          <div style="font-weight:700;color:#0D47A1;margin-bottom:4px;">📥 Already have a setup file?</div>
+          <div style="font-size:0.85rem;color:#1565C0;">Import a setup package from the main device — skips the full form.</div>
+        </div>
+        <label class="btn btn-outline btn-sm" style="cursor:pointer;border-color:#1565C0;color:#1565C0;">
+          📂 Import Setup File
+          <input type="file" id="import-setup-file" accept=".json" style="display:none;">
+        </label>
       </div>
 
       <form id="setup-form" onsubmit="event.preventDefault();">
@@ -115,6 +130,24 @@
     }
     loadDistricts();
 
+    // Import setup file
+    document.getElementById('import-setup-file').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const result = StorageManager.importSetupPackage(text);
+        if (result.success) {
+          showToast('✅ Setup imported! Redirecting...', 'success');
+          setTimeout(() => window.location.href = 'admin.html', 1200);
+        } else {
+          showToast('❌ Import failed: ' + result.error, 'error');
+        }
+      } catch (err) {
+        showToast('❌ Could not read file.', 'error');
+      }
+    });
+
     document.getElementById('setup-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const pw  = document.getElementById('setup-password').value;
@@ -131,8 +164,8 @@
       };
       StorageManager.saveAdminConfig(config);
       await StorageManager.setAdminPassword(pw);
-      alert(I18n.currentLang === 'ne' ? 'सफलतापूर्वक सेट अप गरियो! अब विद्यालय मेट्रिक्स प्रविष्ट गर्नुहोस्।' : 'Setup completed! Now please input the school metrics.');
-      window.location.href = 'admin.html';
+      showToast('✅ Setup complete! Redirecting to admin panel...', 'success');
+      setTimeout(() => window.location.href = 'admin.html', 1000);
     });
   </script>
 </body>

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nearby Schools Map — Eco-Tracks Nepal</title>
+  <script src="./js/storage_manager.js"></script>
+  <script>
+    if (!StorageManager.getAdminConfig()) { window.location.replace('setup.html'); }
+  </script>
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#2D6A2F">
+  <link rel="stylesheet" href="./css/main.css">
+  <!-- Leaflet CSS — online only feature, CDN is fine -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    #map { width: 100%; height: 520px; border-radius: var(--radius-xl); box-shadow: var(--shadow-card); z-index: 0; }
+    .heatmap-hero { text-align: center; padding: 36px 24px 20px; }
+    .heatmap-hero h1 { color: var(--green-800); margin-bottom: 8px; }
+    .heatmap-hero p { color: var(--text-muted); }
+
+    .grade-legend { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; justify-content: center; }
+    .legend-pill {
+      display: flex; align-items: center; gap: 6px;
+      padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+    }
+    .legend-dot-map { width: 10px; height: 10px; border-radius: 50%; }
+
+    .school-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: 16px; margin-top: 24px; }
+    .school-tile {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 16px 20px; box-shadow: var(--shadow-sm);
+    }
+    .school-tile__name { font-weight: 800; color: var(--text-primary); margin-bottom: 4px; }
+    .school-tile__meta { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 8px; }
+    .school-tile__badges { display: flex; gap: 4px; flex-wrap: wrap; }
+
+    .offline-banner {
+      background: #FFF3E0; border: 1px solid #FF9800;
+      border-radius: var(--radius-lg); padding: 32px 24px; text-align: center; margin-top: 24px;
+    }
+    .offline-banner h3 { color: #E65100; margin-bottom: 8px; }
+
+    .stats-row { display: flex; gap: 20px; flex-wrap: wrap; margin: 16px 0; }
+    .stat-pill { background: var(--green-100); color: var(--green-800); padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; }
+  </style>
+  <script src="./js/geographic_matrix.js"></script>
+  <script src="./js/emission_factors.js"></script>
+  <script src="./js/utils.js"></script>
+  <script src="./js/nav.js"></script>
+</head>
+<body>
+  <script>
+    renderNav({
+      activePage: 'heatmap.html',
+      actionsHTML: '<a href="overview.html" class="btn btn-outline btn-sm">📈 Overview</a>'
+    });
+  </script>
+
+  <main class="page-main">
+    <div class="container">
+
+      <div class="heatmap-hero animate-fade-up">
+        <div style="font-size:3rem;margin-bottom:12px">🗺️</div>
+        <h1>Nearby Schools Map</h1>
+        <p id="hero-subtitle">See how other schools in your district are performing on their eco-missions.</p>
+      </div>
+
+      <!-- Offline state -->
+      <div id="offline-state" class="offline-banner animate-fade-up" style="display:none;">
+        <div style="font-size:3rem;margin-bottom:12px">📡</div>
+        <h3>Internet Required</h3>
+        <p style="color:#BF360C;">The schools heatmap needs an internet connection. All other features still work offline.</p>
+        <p class="text-sm text-muted mt-12">Your school's data is saved locally and will sync automatically when you reconnect.</p>
+      </div>
+
+      <!-- Online state -->
+      <div id="online-state" style="display:none;">
+
+        <!-- Stats row -->
+        <div class="stats-row animate-fade-up" id="stats-row"></div>
+
+        <!-- Grade legend -->
+        <div class="grade-legend animate-fade-up delay-1" id="grade-legend"></div>
+
+        <!-- Map -->
+        <div id="map" class="animate-fade-up delay-1"></div>
+
+        <!-- School list -->
+        <h3 style="margin:28px 0 12px;">📋 Schools in Your Region</h3>
+        <div class="school-list" id="school-list"></div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="./js/i18n.js"></script>
+  <script src="./js/calculator_engine.js"></script>
+  <script>
+    (function() {
+      renderFooter({});
+      I18n.init();
+
+      const GRADE_COLORS = {
+        'A+': '#2D6A2F', 'A': '#56C15B', 'B': '#8BC34A',
+        'C':  '#FFC107', 'D': '#FF9800', 'E': '#E53935'
+      };
+
+      const config  = StorageManager.getAdminConfig();
+      const myDistrict = config?.district || '';
+      const syncUrl = StorageManager.getSyncUrl();
+
+      if (!navigator.onLine || !syncUrl) {
+        document.getElementById('offline-state').style.display = 'block';
+        // Try to show cached heatmap data if available
+        const cached = localStorage.getItem('ecotracks_heatmap_cache');
+        if (cached) {
+          try {
+            const data = JSON.parse(cached);
+            document.getElementById('offline-state').insertAdjacentHTML('beforeend',
+              `<p class="text-sm mt-12" style="color:#795548;">Showing cached data from ${new Date(data.cachedAt).toLocaleDateString()}</p>`
+            );
+            renderSchools(data.schools, false);
+          } catch {}
+        }
+        return;
+      }
+
+      document.getElementById('online-state').style.display = 'block';
+      document.getElementById('hero-subtitle').textContent =
+        `Connected! Fetching nearby school eco-data${myDistrict ? ' for ' + myDistrict + ' district' : ''}...`;
+
+      // Get my school's coordinates from district lookup
+      const myCoords = DISTRICT_COORDS[myDistrict] || [28.0, 84.0];
+
+      // Fetch nearby schools from server
+      const url = `${syncUrl}?action=nearby&lat=${myCoords[0]}&lon=${myCoords[1]}&radius=150`;
+      fetch(url)
+        .then(r => r.json())
+        .then(data => {
+          if (!data.schools || data.schools.length === 0) {
+            document.getElementById('hero-subtitle').textContent =
+              'No other schools found yet. Be the first to sync in your region!';
+            initMap(myCoords, []);
+            return;
+          }
+          // Cache for offline use
+          localStorage.setItem('ecotracks_heatmap_cache', JSON.stringify({
+            schools: data.schools, cachedAt: new Date().toISOString()
+          }));
+          renderSchools(data.schools, true);
+        })
+        .catch(err => {
+          console.error(err);
+          document.getElementById('hero-subtitle').textContent =
+            'Could not load schools data. Check your sync server URL in Admin settings.';
+          initMap(myCoords, []);
+        });
+
+      function renderSchools(schools, showMap) {
+        // Stats
+        const total     = schools.length;
+        const avgGrade  = schools.filter(s => s.grade_letter).map(s => s.grade_letter);
+        const totalCO2  = schools.reduce((sum, s) => sum + (s.total_co2 || 0), 0);
+        document.getElementById('stats-row').innerHTML = `
+          <div class="stat-pill">🏫 ${total} schools synced</div>
+          <div class="stat-pill">🌍 ${totalCO2.toFixed(0)} kg CO₂e tracked</div>
+          <div class="stat-pill">📍 ${[...new Set(schools.map(s=>s.district))].length} districts</div>
+        `;
+
+        // Legend
+        document.getElementById('grade-legend').innerHTML = Object.entries(GRADE_COLORS).map(([g,c]) =>
+          `<div class="legend-pill" style="background:${c}22;color:${c};border:1px solid ${c}44;">
+            <div class="legend-dot-map" style="background:${c}"></div>
+            Grade ${g}
+          </div>`
+        ).join('');
+
+        if (showMap) {
+          const myCoords = DISTRICT_COORDS[myDistrict] || [28.0, 84.0];
+          initMap(myCoords, schools);
+        }
+
+        // School list
+        const listEl = document.getElementById('school-list');
+        listEl.innerHTML = schools.map(s => {
+          const color  = GRADE_COLORS[s.grade_letter] || '#888';
+          const badges = (s.badges || '').split(',').filter(Boolean);
+          return `
+            <div class="school-tile">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                <div class="school-tile__name">${s.school_name}</div>
+                ${s.grade_letter ? `<span style="background:${color};color:#fff;padding:2px 10px;border-radius:12px;font-size:0.75rem;font-weight:800;">${s.grade_letter}</span>` : ''}
+              </div>
+              <div class="school-tile__meta">📍 ${s.district || 'Unknown'} · ${(s.total_co2||0).toFixed(1)} kg CO₂e</div>
+              <div class="school-tile__badges">
+                ${badges.map(b => `<span title="${b}" style="font-size:1.2rem;">${badgeEmoji(b)}</span>`).join('') || '<span class="text-sm text-muted">No badges yet</span>'}
+              </div>
+            </div>`;
+        }).join('');
+      }
+
+      function initMap(center, schools) {
+        const map = L.map('map').setView(center, 8);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // My school marker
+        L.circleMarker(center, {
+          radius: 14, fillColor: '#1B5E20', color: '#fff',
+          weight: 3, opacity: 1, fillOpacity: 0.9
+        }).bindPopup(`
+          <strong>${config?.schoolName || 'My School'}</strong><br>
+          📍 ${myDistrict || 'Unknown'}<br>
+          <em>This is your school</em>
+        `).addTo(map);
+
+        // Other school markers
+        schools.forEach(s => {
+          const coords = DISTRICT_COORDS[s.district] || null;
+          if (!coords) return;
+          // Add small random offset so schools in same district don't perfectly overlap
+          const jitter = () => (Math.random() - 0.5) * 0.08;
+          const color  = GRADE_COLORS[s.grade_letter] || '#888';
+          const badges = (s.badges || '').split(',').filter(Boolean);
+
+          L.circleMarker([coords[0] + jitter(), coords[1] + jitter()], {
+            radius: 10, fillColor: color, color: '#fff',
+            weight: 2, opacity: 1, fillOpacity: 0.85
+          }).bindPopup(`
+            <strong>${s.school_name}</strong><br>
+            📍 ${s.district || 'Unknown'}<br>
+            Grade: <strong style="color:${color}">${s.grade_letter || '—'}</strong><br>
+            CO₂: ${(s.total_co2||0).toFixed(1)} kg<br>
+            ${badges.length > 0 ? 'Badges: ' + badges.map(badgeEmoji).join(' ') : ''}
+          `).addTo(map);
+        });
+      }
+
+      function badgeEmoji(badgeId) {
+        const map = {
+          energy_saver: '💡', water_warrior: '💧', waste_champion: '♻️',
+          green_commuter: '🚶', leak_fixer: '🔧'
+        };
+        return map[badgeId] || '🏅';
+      }
+
+      // Footer sync button
+      document.getElementById('btn-sync-footer')?.addEventListener('click', async () => {
+        const result = await StorageManager.flushSyncQueue();
+        showToast(result.synced > 0
+          ? `✅ ${result.synced} record(s) synced!`
+          : result.failed > 0 ? '⚠️ Sync failed. Check server URL in Admin.' : '✅ Nothing to sync.',
+          result.failed > 0 ? 'error' : 'success');
+      });
+    })();
+  </script>
+</body>
+</html>

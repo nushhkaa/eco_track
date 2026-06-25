@@ -9,6 +9,9 @@
   <script>
     if (!StorageManager.getAdminConfig()) { window.location.replace('setup.html'); }
   </script>
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#2D6A2F">
+  <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');</script>
   <link rel="stylesheet" href="./css/main.css">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
   <style>
@@ -264,6 +267,41 @@
               </select>
             </div>
 
+            <div class="form-group mt-16">
+              <label class="metric-label" for="input-waste-segregated">♻️ Waste Segregation in School</label>
+              <select class="form-select" id="input-waste-segregated">
+                <option value="no">No — single mixed bin</option>
+                <option value="yes">Yes — separate bins for dry/wet</option>
+              </select>
+            </div>
+
+            <div class="form-group mt-16">
+              <label class="metric-label" for="input-lunch-method">🍳 School Canteen Lunch Method</label>
+              <select class="form-select" id="input-lunch-method">
+                <option value="lpg">LPG Gas</option>
+                <option value="firewood">Firewood</option>
+                <option value="briquettes">Briquettes</option>
+                <option value="electric">Electric</option>
+              </select>
+            </div>
+
+            <div class="metrics-grid mt-16">
+              <div class="metric-field">
+                <label class="metric-label" for="input-leaking-taps">🚰 Leaking Taps in School</label>
+                <input class="form-input" type="number" id="input-leaking-taps" placeholder="0" min="0" step="1" value="0">
+              </div>
+              <div class="metric-field">
+                <label class="metric-label" for="input-grey-water">💧 Grey Water Reuse</label>
+                <select class="form-select" id="input-grey-water">
+                  <option value="no">No grey water reuse</option>
+                  <option value="yes">Yes — we reuse grey water</option>
+                </select>
+              </div>
+            </div>
+            <div id="grey-water-suggestion" style="display:none;background:#FFF9C4;border:1px solid #F9A825;border-radius:8px;padding:12px;margin-top:8px;font-size:0.85rem;color:#7A5C00;">
+              💡 <strong>Suggestion:</strong> Consider setting up grey water collection for school garden / fulbari irrigation — a low-cost way to reduce water footprint.
+            </div>
+
             <!-- Live CO2 preview -->
             <div class="alert alert--info mt-24" id="co2-preview-box" style="display:none">
               <span class="alert__icon">🌿</span>
@@ -276,6 +314,12 @@
             <button type="submit" class="btn btn-primary btn-lg mt-24 w-full" id="btn-save-admin" data-i18n="admin_btn_save">
               💾 Save School Parameters
             </button>
+
+            <div class="form-group mt-16" style="border-top:1px solid var(--border);padding-top:16px;">
+              <label class="metric-label" for="input-sync-url">🌐 Sync Server URL <span style="font-weight:400;color:var(--text-caption)">(optional — leave blank to skip online sync)</span></label>
+              <input class="form-input mt-6" type="url" id="input-sync-url" placeholder="https://yourschool.edu.np/ecotracks/sync_server.php">
+              <p class="text-sm text-muted mt-4">Set this to enable cloud sync and the nearby-schools heatmap.</p>
+            </div>
 
             <p class="sync-info" id="last-sync-text">Last synced: Never</p>
           </div>
@@ -290,7 +334,9 @@
           <div class="flex justify-center gap-12 mt-24">
             <a href="index.html" class="btn btn-outline btn-sm" id="btn-go-home">🏠 Go Home</a>
             <a href="student.html" class="btn btn-primary btn-sm" id="btn-go-student">🎒 Launch Student Portal</a>
+            <button type="button" class="btn btn-outline btn-sm" id="btn-export-setup" style="border-color:var(--blue);color:var(--blue)">📤 Export Setup File</button>
           </div>
+          <p class="text-sm text-muted mt-12" style="text-align:center;">Share the exported file with other class laptops so they can import this school setup.</p>
         </div>
 
       </form>
@@ -335,6 +381,12 @@
         document.getElementById('input-diesel').value = cfg.diesel || 0;
         document.getElementById('input-lpg').value = cfg.lpg || 0;
         document.getElementById('input-waste-primary').value = cfg.wasteType || 'burning';
+        document.getElementById('input-waste-segregated').value = cfg.wasteSegregated || 'no';
+        document.getElementById('input-lunch-method').value = cfg.lunchMethod || 'lpg';
+        document.getElementById('input-leaking-taps').value = cfg.leakingTaps || 0;
+        document.getElementById('input-grey-water').value = cfg.greyWaterUse || 'no';
+        toggleGreyWaterSuggestion(cfg.greyWaterUse || 'no');
+        if (cfg.syncServerUrl) document.getElementById('input-sync-url').value = cfg.syncServerUrl;
         
         if (cfg.savedAt) {
           const d = new Date(cfg.savedAt);
@@ -362,6 +414,11 @@
       document.getElementById('district-challenge-text').textContent = data.climate_challenge;
       box.classList.add('visible');
     }
+
+    function toggleGreyWaterSuggestion(val) {
+      document.getElementById('grey-water-suggestion').style.display = val === 'no' ? 'block' : 'none';
+    }
+    document.getElementById('input-grey-water').addEventListener('change', e => toggleGreyWaterSuggestion(e.target.value));
 
     // Live CO2 preview on input change
     ['input-elec', 'input-lpg', 'input-water', 'input-diesel'].forEach(id => {
@@ -411,6 +468,11 @@
         diesel:       parseFloat(document.getElementById('input-diesel').value) || 0,
         lpg:          parseFloat(document.getElementById('input-lpg').value) || 0,
         wasteType:    document.getElementById('input-waste-primary').value,
+        wasteSegregated: document.getElementById('input-waste-segregated').value,
+        lunchMethod:  document.getElementById('input-lunch-method').value,
+        leakingTaps:  parseInt(document.getElementById('input-leaking-taps').value) || 0,
+        greyWaterUse: document.getElementById('input-grey-water').value,
+        syncServerUrl: document.getElementById('input-sync-url').value.trim() || null,
         savedAt:      new Date().toISOString()
       };
 
@@ -423,6 +485,12 @@
         `Last updated: Today at ${now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}`;
 
       showToast('✅ School configuration saved!', 'success');
+    });
+
+    // Export setup package for other devices
+    document.getElementById('btn-export-setup')?.addEventListener('click', () => {
+      StorageManager.exportSetupPackage();
+      showToast('📤 Setup file downloaded! Share it with other class laptops.', 'success');
     });
 
     // Footer

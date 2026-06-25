@@ -10,6 +10,9 @@
     if (!config) { window.location.replace('setup.html'); }
     else if (config.electricity === undefined) { window.location.replace('index.html'); }
   </script>
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#2D6A2F">
+  <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');</script>
   <link rel="stylesheet" href="./css/main.css">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
   <style>
@@ -135,13 +138,13 @@
             </div>
           </div>
 
-          <!-- Step 3: Energy & Water -->
+          <!-- Step 3: Energy -->
           <div class="wizard-step" id="step-3">
             <div class="cat-section__header">
               <div class="cat-icon cat-icon--energy">⚡</div>
               <div>
-                <div class="cat-section__title">Step 3: Energy &amp; Water</div>
-                <div class="cat-section__subtitle">Monthly household use (per student average)</div>
+                <div class="cat-section__title">Step 3: Energy Use</div>
+                <div class="cat-section__subtitle">Monthly household energy use (per student average)</div>
               </div>
             </div>
 
@@ -149,7 +152,7 @@
               <div class="form-group">
                 <label class="form-label">🔥 Firewood used (kg per student/month)</label>
                 <input class="form-input" type="number" id="input-energy-firewood" value="0" min="0" step="0.5">
-                <p class="text-sm text-muted mt-8">Common in mountain & hilly households</p>
+                <p class="text-sm text-muted mt-8">Common in mountain &amp; hilly households</p>
               </div>
               <div class="form-group">
                 <label class="form-label">🔵 LPG cylinders used (count/month, class total)</label>
@@ -159,20 +162,23 @@
                 <label class="form-label">💡 Electricity (kWh per student/month)</label>
                 <input class="form-input" type="number" id="input-energy-kwh" value="0" min="0" step="1">
               </div>
-              <div class="form-group">
-                <label class="form-label">💧 Water used (litres per student/month)</label>
-                <input class="form-input" type="number" id="input-water-litres" value="0" min="0">
-              </div>
             </div>
 
-            <div class="form-group mb-16">
-              <label class="form-label">💧 Primary Water Source</label>
-              <select class="form-select" id="input-water-source">
-                <option value="groundwater_pump_m3">Groundwater / Borehole Pump</option>
-                <option value="municipal_piped_m3">Municipal Piped Water</option>
-                <option value="water_tanker_m3">Water Tanker</option>
-                <option value="rainwater_harvest_m3">Rainwater Harvesting (zero emission)</option>
-              </select>
+            <div class="form-group mb-16" style="background:var(--bg-page);border:1px solid var(--border);border-radius:10px;padding:16px;">
+              <label class="form-label" style="font-weight:700;">❄️ Does your classroom have a heating / cooling system?</label>
+              <div style="display:flex;gap:16px;margin-top:10px;">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;">
+                  <input type="radio" name="has-heating" id="heating-yes" value="yes"> Yes
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;">
+                  <input type="radio" name="has-heating" id="heating-no" value="no" checked> No
+                </label>
+              </div>
+              <div id="heating-hours-group" style="display:none;margin-top:12px;">
+                <label class="form-label">How many hours per day is it used on average?</label>
+                <input class="form-input" type="number" id="input-heating-hours" value="2" min="0" max="24" step="0.5">
+                <p class="text-sm mt-8" style="color:#E65100;">💡 Tip: Assign a monitor to turn off the system during free periods — earn a badge!</p>
+              </div>
             </div>
 
             <div class="wizard-nav">
@@ -181,10 +187,10 @@
             </div>
           </div>
 
-          <!-- Step 4: Paper (was Step 3) -->
+          <!-- Step 4: Paper -->
           <div class="wizard-step" id="step-4">
-            <div class="cat-section__header"><div class="cat-icon cat-icon--paper">📄</div><div><div class="cat-section__title" data-i18n="std_step_3_title">Step 4: Resource Log</div><div class="cat-section__subtitle" data-i18n="std_step_3_sub">Paper & Exam consumption</div></div></div>
-            
+            <div class="cat-section__header"><div class="cat-icon cat-icon--paper">📄</div><div><div class="cat-section__title" data-i18n="std_step_3_title">Step 4: Resource Log</div><div class="cat-section__subtitle" data-i18n="std_step_3_sub">Paper &amp; Exam consumption</div></div></div>
+
             <div style="display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px;">
               <div class="form-group">
                 <label class="form-label" data-i18n="std_copies_new" style="font-weight:700;font-size:1.05rem;">How many new copies (notebooks) were used this month?</label>
@@ -205,10 +211,78 @@
             </div>
           </div>
 
-          <!-- Step 5: Waste (was Step 4) -->
+          <!-- Step 5: Water (NEW) -->
           <div class="wizard-step" id="step-5">
-            <div class="cat-section__header"><div class="cat-icon cat-icon--waste">🗑️</div><div><div class="cat-section__title" data-i18n="std_step_4_title">Step 5: Waste Path</div><div class="cat-section__subtitle" data-i18n="std_step_4_sub">Disposal frequency</div></div></div>
-            
+            <div class="cat-section__header">
+              <div class="cat-icon" style="background:#E3F2FD">💧</div>
+              <div>
+                <div class="cat-section__title">Step 5: Water Tracking</div>
+                <div class="cat-section__subtitle">Water usage and conservation habits</div>
+              </div>
+            </div>
+
+            <div class="grid-2 mb-16">
+              <div class="form-group">
+                <label class="form-label">💧 Water used (litres per student/month)</label>
+                <input class="form-input" type="number" id="input-water-litres" value="0" min="0">
+              </div>
+              <div class="form-group">
+                <label class="form-label">🚰 Primary Water Source</label>
+                <select class="form-select" id="input-water-source">
+                  <option value="groundwater_pump_m3">Groundwater / Borehole Pump</option>
+                  <option value="municipal_piped_m3">Municipal Piped Water</option>
+                  <option value="water_tanker_m3">Water Tanker</option>
+                  <option value="rainwater_harvest_m3">Rainwater Harvesting (zero emission)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group mb-16" style="background:var(--bg-page);border:1px solid var(--border);border-radius:10px;padding:16px;">
+              <label class="form-label" style="font-weight:700;">🚰 How many taps in your classroom area are currently leaking?</label>
+              <input class="form-input mt-8" type="number" id="input-leaking-taps-student" value="0" min="0" step="1">
+              <p class="text-sm text-muted mt-8">Even small drips waste hundreds of litres per month.</p>
+            </div>
+
+            <div class="form-group mb-16" style="background:var(--bg-page);border:1px solid var(--border);border-radius:10px;padding:16px;">
+              <label class="form-label" style="font-weight:700;">♻️ Does your class practice grey water reuse? (e.g. washing water → plants)</label>
+              <div style="display:flex;gap:16px;margin-top:10px;">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;">
+                  <input type="radio" name="grey-water" id="grey-water-yes" value="yes"> Yes
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;">
+                  <input type="radio" name="grey-water" id="grey-water-no" value="no" checked> No
+                </label>
+              </div>
+              <div id="grey-water-goal-hint" style="margin-top:10px;padding:10px 12px;background:#E8F5E9;border-radius:8px;font-size:0.85rem;color:#2E7D32;display:none;">
+                🌱 <strong>Goal suggestion:</strong> Start collecting grey water from handwashing for the school garden or fulbari — earn the Water Warrior badge!
+              </div>
+            </div>
+
+            <div class="wizard-nav">
+              <button type="button" class="btn btn-ghost prev-step" data-i18n="student_wizard_prev">← Previous</button>
+              <button type="button" class="btn btn-primary next-step" data-i18n="student_wizard_next">Next Step ➔</button>
+            </div>
+          </div>
+
+          <!-- Step 6: Waste -->
+          <div class="wizard-step" id="step-6">
+            <div class="cat-section__header"><div class="cat-icon cat-icon--waste">🗑️</div><div><div class="cat-section__title" data-i18n="std_step_4_title">Step 6: Waste Path</div><div class="cat-section__subtitle" data-i18n="std_step_4_sub">Disposal frequency &amp; habits</div></div></div>
+
+            <div class="form-group mb-20" style="background:var(--bg-page);border:1px solid var(--border);border-radius:10px;padding:16px;">
+              <label class="form-label" style="font-weight:700;">🗂️ Do you have waste segregation bins in your classroom?</label>
+              <div style="display:flex;gap:16px;margin-top:10px;">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;">
+                  <input type="radio" name="waste-segregation" id="seg-yes" value="yes"> Yes — we have separate bins
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;">
+                  <input type="radio" name="waste-segregation" id="seg-no" value="no" checked> No — single mixed bin
+                </label>
+              </div>
+              <div id="seg-goal-hint" style="margin-top:10px;padding:10px 12px;background:#FFF9C4;border-radius:8px;font-size:0.85rem;color:#7A5C00;display:none;">
+                ♻️ <strong>Goal suggestion:</strong> Add segregation bins (dry/wet/hazardous) — earn the Waste Champion badge!
+              </div>
+            </div>
+
             <div id="waste-scales" class="flex-col gap-16 mb-24"></div>
 
             <div class="wizard-nav">
@@ -224,6 +298,7 @@
 
   <script src="./js/i18n.js"></script>
   <script src="./js/calculator_engine.js"></script>
+  <script src="./js/goal_engine.js"></script>
   <script>
     (function() {
       buildWasteScales('waste-scales');
@@ -266,6 +341,30 @@
         document.getElementById('active-mission-banner').style.display = 'flex';
         document.getElementById('mission-title').textContent = activeMission.title;
       }
+
+      // Heating/cooling toggle
+      document.querySelectorAll('input[name="has-heating"]').forEach(r => {
+        r.addEventListener('change', () => {
+          document.getElementById('heating-hours-group').style.display =
+            document.getElementById('heating-yes').checked ? 'block' : 'none';
+        });
+      });
+
+      // Grey water hint
+      document.querySelectorAll('input[name="grey-water"]').forEach(r => {
+        r.addEventListener('change', () => {
+          document.getElementById('grey-water-goal-hint').style.display =
+            document.getElementById('grey-water-no').checked ? 'block' : 'none';
+        });
+      });
+
+      // Segregation bins hint
+      document.querySelectorAll('input[name="waste-segregation"]').forEach(r => {
+        r.addEventListener('change', () => {
+          document.getElementById('seg-goal-hint').style.display =
+            document.getElementById('seg-no').checked ? 'block' : 'none';
+        });
+      });
 
       // Wizard logic
       const steps = document.querySelectorAll('.wizard-step');
@@ -358,15 +457,32 @@
                    + engine.calculateModule('waste', 'anaerobic_pit_burial_kg', wPit);
         }
 
+        // ── New habit fields ─────────────────────────────────────────────────────
+        const hasHeating     = document.getElementById('heating-yes')?.checked || false;
+        const heatingHours   = hasHeating ? (parseFloat(document.getElementById('input-heating-hours')?.value) || 0) : 0;
+        const greyWaterUse   = document.getElementById('grey-water-yes')?.checked || false;
+        const leakingTaps    = parseInt(document.getElementById('input-leaking-taps-student')?.value) || 0;
+        const hasSegBins     = document.getElementById('seg-yes')?.checked || false;
+
         const payload = {
-          energy:  { value: energyVal,  co2: energyCO2  },
+          energy:  { value: energyVal,  co2: energyCO2,  hasHeatingCooling: hasHeating, heatingHoursPerDay: heatingHours },
           commute: { value: commuteVal, co2: commuteCO2 },
-          waste:   { value: wasteVal,   co2: wasteCO2   },
-          water:   { value: waterVal,   co2: waterCO2   },
+          waste:   { value: wasteVal,   co2: wasteCO2,   hasSegregationBins: hasSegBins },
+          water:   { value: waterVal,   co2: waterCO2,   leakingTaps, greyWaterUse },
           paper:   { value: pVirg,      co2: paperCO2   }
         };
 
         StorageManager.saveQuarterlyLog(currentGrade, payload);
+        // Queue for sync when online
+        StorageManager.addToSyncQueue('student_submission', currentGrade, payload);
+        // Check goals
+        if (typeof GoalEngine !== 'undefined') {
+          const newBadges = GoalEngine.checkAndAwardBadges(currentGrade, payload);
+          if (newBadges.length > 0) {
+            sessionStorage.setItem('ecotracks_new_badges', JSON.stringify(newBadges));
+          }
+          GoalEngine.suggestGoalsFromSubmission(currentGrade, payload);
+        }
         window.location.href = 'analytics.html';
       });
     })();

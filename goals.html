@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goals &amp; Badges — Eco-Tracks Nepal</title>
+  <script src="./js/storage_manager.js"></script>
+  <script>
+    if (!StorageManager.getAdminConfig()) { window.location.replace('setup.html'); }
+  </script>
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#2D6A2F">
+  <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');</script>
+  <link rel="stylesheet" href="./css/main.css">
+  <style>
+    .goals-hero { text-align:center; padding:40px 24px 24px; }
+    .goals-hero h1 { color:var(--green-800); margin-bottom:8px; }
+    .goals-hero p { color:var(--text-muted); }
+
+    .section-title { font-size:1.2rem; font-weight:800; margin-bottom:16px; color:var(--text-primary); display:flex; align-items:center; gap:8px; }
+
+    .goal-card {
+      background:var(--bg-card);
+      border:1px solid var(--border);
+      border-radius:var(--radius-lg);
+      padding:20px 24px;
+      display:flex;
+      align-items:flex-start;
+      gap:16px;
+      margin-bottom:12px;
+      box-shadow:var(--shadow-sm);
+      transition:var(--transition);
+    }
+    .goal-card:hover { box-shadow:var(--shadow-card); }
+    .goal-card--active { border-left:4px solid var(--green-500); }
+    .goal-card--suggested { border-left:4px solid var(--gold-bg,#FFC107); }
+    .goal-card--completed { border-left:4px solid #9E9E9E; opacity:0.75; }
+
+    .goal-icon { font-size:2rem; flex-shrink:0; width:48px; text-align:center; }
+    .goal-body { flex:1; }
+    .goal-title { font-size:1rem; font-weight:800; color:var(--text-primary); margin-bottom:4px; }
+    .goal-desc { font-size:0.85rem; color:var(--text-muted); line-height:1.5; margin-bottom:10px; }
+    .goal-badge-link { font-size:0.8rem; color:var(--blue); font-weight:600; }
+    .goal-date { font-size:0.75rem; color:var(--text-caption); margin-top:4px; }
+
+    .badge-shelf {
+      display:flex;
+      flex-wrap:wrap;
+      gap:16px;
+      margin-bottom:32px;
+    }
+    .badge-card {
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:8px;
+      background:var(--bg-card);
+      border:1px solid var(--border);
+      border-radius:var(--radius-lg);
+      padding:20px 16px;
+      width:140px;
+      text-align:center;
+      box-shadow:var(--shadow-sm);
+      transition:transform 0.2s;
+    }
+    .badge-card:hover { transform:scale(1.05); }
+    .badge-card--locked { opacity:0.35; filter:grayscale(1); }
+    .badge-emoji { font-size:2.8rem; }
+    .badge-title { font-size:0.82rem; font-weight:800; color:var(--text-primary); }
+    .badge-desc { font-size:0.72rem; color:var(--text-muted); line-height:1.4; }
+    .badge-earned-date { font-size:0.7rem; color:var(--green-600); font-weight:700; }
+
+    .empty-msg { text-align:center; padding:32px; color:var(--text-muted); font-size:0.9rem; }
+
+    .progress-ring { display:inline-flex; align-items:center; gap:8px; background:var(--green-100); color:var(--green-800); border-radius:var(--radius-pill); padding:4px 14px; font-size:0.8rem; font-weight:700; margin-bottom:24px; }
+  </style>
+  <script src="./js/geographic_matrix.js"></script>
+  <script src="./js/emission_factors.js"></script>
+  <script src="./js/utils.js"></script>
+  <script src="./js/nav.js"></script>
+</head>
+<body>
+  <script>
+    renderNav({
+      activePage: 'goals.html',
+      actionsHTML: '<a href="analytics.html" class="btn btn-outline btn-sm">📊 Report Card</a>'
+    });
+  </script>
+
+  <main class="page-main">
+    <div class="container">
+
+      <div class="goals-hero animate-fade-up">
+        <div style="font-size:3rem;margin-bottom:12px">🎯</div>
+        <h1>Goals &amp; Badges</h1>
+        <p id="hero-subtitle">Commit to eco-goals, track progress, and earn badges for your classroom!</p>
+      </div>
+
+      <!-- Grade selector -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+        <label class="form-label" style="margin:0;white-space:nowrap;">Viewing class:</label>
+        <select class="form-select" id="grade-selector" style="max-width:260px;"></select>
+      </div>
+
+      <!-- Progress ring -->
+      <div id="progress-ring" class="progress-ring animate-fade-up">
+        <span>🏆</span> <span id="progress-text">Loading...</span>
+      </div>
+
+      <!-- Badges shelf -->
+      <div class="animate-fade-up delay-1">
+        <div class="section-title">🏅 Badge Collection</div>
+        <div class="badge-shelf" id="badge-shelf"></div>
+      </div>
+
+      <!-- Active goals -->
+      <div class="animate-fade-up delay-2">
+        <div class="section-title">🔥 Active Goals</div>
+        <div id="active-goals-list"></div>
+      </div>
+
+      <!-- Suggested goals -->
+      <div class="animate-fade-up delay-2">
+        <div class="section-title">💡 Suggested Goals</div>
+        <p class="text-sm text-muted mb-12">These were triggered by your last submission. Click "Commit" to start tracking!</p>
+        <div id="suggested-goals-list"></div>
+      </div>
+
+      <!-- Completed goals -->
+      <div class="animate-fade-up delay-3" id="completed-section" style="display:none;">
+        <div class="section-title">✅ Completed Goals</div>
+        <div id="completed-goals-list"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="./js/goal_engine.js"></script>
+  <script src="./js/i18n.js"></script>
+  <script>
+    (function() {
+      renderFooter({});
+      I18n.init();
+
+      const history = StorageManager.getHistory();
+      const grades = [...new Set(history.map(h => h.grade))];
+
+      // Populate grade selector
+      const sel = document.getElementById('grade-selector');
+      const currentGrade = StorageManager.getCurrentGrade();
+      if (grades.length === 0) {
+        sel.innerHTML = `<option value="${currentGrade}">${currentGrade}</option>`;
+      } else {
+        grades.forEach(g => {
+          const opt = document.createElement('option');
+          opt.value = g;
+          opt.textContent = g;
+          if (g === currentGrade) opt.selected = true;
+          sel.appendChild(opt);
+        });
+      }
+
+      sel.addEventListener('change', () => renderGoals(sel.value));
+      renderGoals(sel.value || currentGrade);
+
+      function renderGoals(grade) {
+        const allBadges = GoalEngine.getAllBadges();
+        const earned = StorageManager.getBadges(grade);
+        const earnedIds = earned.map(b => b.id);
+
+        // Badge shelf
+        const shelf = document.getElementById('badge-shelf');
+        shelf.innerHTML = Object.values(allBadges).map(b => {
+          const earnedBadge = earned.find(e => e.id === b.id);
+          const locked = !earnedBadge;
+          const dateStr = earnedBadge ? new Date(earnedBadge.earnedAt).toLocaleDateString() : '';
+          return `
+            <div class="badge-card ${locked ? 'badge-card--locked' : ''}" title="${b.description}">
+              <div class="badge-emoji">${b.emoji}</div>
+              <div class="badge-title" style="color:${locked ? '' : b.color}">${b.title}</div>
+              <div class="badge-desc">${b.description}</div>
+              ${earnedBadge ? `<div class="badge-earned-date">✓ Earned ${dateStr}</div>` : '<div class="badge-desc" style="color:#bbb">Not yet earned</div>'}
+            </div>`;
+        }).join('');
+
+        // Progress
+        const totalBadges = Object.keys(allBadges).length;
+        const earnedCount = earned.length;
+        document.getElementById('progress-text').textContent =
+          `${earnedCount} / ${totalBadges} badges earned for ${grade}`;
+
+        // Goals
+        const active    = GoalEngine.getActiveGoals(grade);
+        const suggested = GoalEngine.getSuggestedGoalsList(grade);
+        const completed = GoalEngine.getCompletedGoals(grade);
+
+        renderGoalList('active-goals-list', active, grade, 'active');
+        renderGoalList('suggested-goals-list', suggested, grade, 'suggested');
+
+        const completedSection = document.getElementById('completed-section');
+        completedSection.style.display = completed.length > 0 ? 'block' : 'none';
+        renderGoalList('completed-goals-list', completed, grade, 'completed');
+      }
+
+      function renderGoalList(containerId, goals, grade, type) {
+        const container = document.getElementById(containerId);
+        if (goals.length === 0) {
+          container.innerHTML = `<div class="empty-msg">${
+            type === 'active' ? 'No active goals yet. Commit to a suggested goal below!' :
+            type === 'suggested' ? 'No new suggestions. Keep logging data!' :
+            'No completed goals yet. Keep going!'
+          }</div>`;
+          return;
+        }
+        container.innerHTML = goals.map(g => `
+          <div class="goal-card goal-card--${type}">
+            <div class="goal-icon">${g.icon || '🎯'}</div>
+            <div class="goal-body">
+              <div class="goal-title">${g.title}</div>
+              <div class="goal-desc">${g.description}</div>
+              <div class="goal-badge-link">🏅 Earns: ${GoalEngine.getAllBadges()[g.badgeId]?.title || g.badgeId}</div>
+              ${g.startedAt ? `<div class="goal-date">Started: ${new Date(g.startedAt).toLocaleDateString()}</div>` : ''}
+              ${g.completedAt ? `<div class="goal-date" style="color:var(--green-600)">✅ Completed: ${new Date(g.completedAt).toLocaleDateString()}</div>` : ''}
+            </div>
+            ${type === 'suggested' ? `
+              <button class="btn btn-primary btn-sm" onclick="commitGoal('${grade}','${g.id}')">
+                Commit ✓
+              </button>
+            ` : ''}
+          </div>
+        `).join('');
+      }
+
+      window.commitGoal = function(grade, goalId) {
+        GoalEngine.commitToGoal(grade, goalId);
+        showToast('🎯 Goal activated! Keep it up!', 'success');
+        renderGoals(grade);
+      };
+
+      // Show new badges from session
+      const newBadges = JSON.parse(sessionStorage.getItem('ecotracks_new_badges') || '[]');
+      if (newBadges.length > 0) {
+        sessionStorage.removeItem('ecotracks_new_badges');
+        newBadges.forEach(b => {
+          showToast(`🏅 Badge earned: ${b.emoji} ${b.title}!`, 'success');
+        });
+      }
+
+      document.getElementById('btn-sync-footer')?.addEventListener('click', () => {
+        const ok = StorageManager.downloadLocalCSV();
+        showToast(ok ? '✅ Data exported!' : '⚠️ No data yet.', ok ? 'success' : 'error');
+      });
+    })();
+  </script>
+</body>
+</html>
