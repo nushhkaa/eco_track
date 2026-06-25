@@ -4,6 +4,16 @@
  * Compliant with IPCC 2006/2019 Refinement & AR6-GWP100.
  */
 class CalculatorEngine {
+  // Grade thresholds in ascending order — used by gradeFootprint() and the UI grade scale.
+  static GRADE_THRESHOLDS = [
+    { max: 30,       grade: 'A+', label: 'Eco Champion',          color: '#2D6A2F', rangeLabel: '0 – 30 kg'    },
+    { max: 60,       grade: 'A',  label: 'Green Warrior',         color: '#56C15B', rangeLabel: '31 – 60 kg'   },
+    { max: 100,      grade: 'B',  label: 'Planet Protector',      color: '#8BC34A', rangeLabel: '61 – 100 kg'  },
+    { max: 150,      grade: 'C',  label: 'Eco Learner',           color: '#FFC107', rangeLabel: '101 – 150 kg' },
+    { max: 200,      grade: 'D',  label: 'Needs Action',          color: '#FF9800', rangeLabel: '151 – 200 kg' },
+    { max: Infinity, grade: 'E',  label: 'Needs Immediate Focus', color: '#E53935', rangeLabel: '> 200 kg'     },
+  ];
+
   constructor() {
     this.factors = null;
     this.meta = null;
@@ -90,11 +100,7 @@ class CalculatorEngine {
    * Benchmarks per quarter per classroom (~30 students).
    */
   gradeFootprint(totalKgCO2e) {
-    if (totalKgCO2e <= 30)  return { grade: 'A+', label: 'Eco Champion',   color: '#2D6A2F' };
-    if (totalKgCO2e <= 60)  return { grade: 'A',  label: 'Green Warrior',  color: '#56C15B' };
-    if (totalKgCO2e <= 100) return { grade: 'B',  label: 'Planet Protector', color: '#8BC34A' };
-    if (totalKgCO2e <= 150) return { grade: 'C',  label: 'Eco Learner',    color: '#FFC107' };
-    if (totalKgCO2e <= 200) return { grade: 'D',  label: 'Needs Action',   color: '#FF9800' };
-    return                         { grade: 'E',  label: 'Needs Immediate Focus', color: '#E53935' };
+    return CalculatorEngine.GRADE_THRESHOLDS.find(t => totalKgCO2e <= t.max)
+        || CalculatorEngine.GRADE_THRESHOLDS[CalculatorEngine.GRADE_THRESHOLDS.length - 1];
   }
 }

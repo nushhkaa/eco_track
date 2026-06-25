@@ -221,6 +221,7 @@
   </style>
   <script src="./js/geographic_matrix.js"></script>
   <script src="./js/emission_factors.js"></script>
+  <script src="./js/solutions.js"></script>
   <script src="./js/utils.js"></script>
   <script src="./js/nav.js"></script>
 </head>
@@ -270,6 +271,12 @@
       const engine = new CalculatorEngine();
       await engine.init();
 
+      // Populate grade scale legend from canonical thresholds
+      document.getElementById('grade-scale-legend').innerHTML =
+        CalculatorEngine.GRADE_THRESHOLDS.map(t =>
+          `<div style="display:flex;align-items:center;gap:6px;"><span class="badge" style="background:${t.color};color:white">${t.grade}</span> ${t.rangeLabel}</div>`
+        ).join('');
+
       const grade = StorageManager.getCurrentGrade();
       document.getElementById('grade-badge-nav').textContent = grade;
 
@@ -298,13 +305,8 @@
         const trees     = engine.toTreesEquivalent(totalCO2);
         const gradeInfo = engine.gradeFootprint(totalCO2);
 
-        const catMeta = {
-          energy:  { emoji: '⚡', label: 'Energy',  color: '#5B8DD9' },
-          commute: { emoji: '🚌', label: 'Commute', color: '#56C15B' },
-          waste:   { emoji: '🗑️', label: 'Waste',   color: '#E57373' },
-          water:   { emoji: '💧', label: 'Water',   color: '#64B5F6' },
-          paper:   { emoji: '📄', label: 'Paper',   color: '#C8A400' },
-        };
+        // categoryLabels is the canonical source from solutions.js
+        const catMeta = categoryLabels;
 
         const maxBarCO2 = Math.max(...Object.values(data).map(d => d.co2), 1);
         const maxPrevCO2 = prevData ? Math.max(...Object.values(prevData).map(d=>d.co2),1) : 1;
@@ -483,14 +485,7 @@
           <!-- Grading Scale Legend -->
           <div class="animate-fade-up delay-3 mt-24 p-16" style="background:var(--bg-card); border-radius:12px; border:1px solid #eee;">
             <h4 style="margin-bottom:12px; font-size:0.95rem; color:var(--text-primary);">📊 Grade Scale Reference (kg CO₂e)</h4>
-            <div style="display:flex; flex-wrap:wrap; gap:12px; font-size:0.8rem; color:var(--text-muted);">
-              <div style="display:flex; align-items:center; gap:6px;"><span class="badge" style="background:#2E7D32;color:white">A+</span> 0 kg</div>
-              <div style="display:flex; align-items:center; gap:6px;"><span class="badge" style="background:#4CAF50;color:white">A</span> 1 - 50 kg</div>
-              <div style="display:flex; align-items:center; gap:6px;"><span class="badge" style="background:#8BC34A;color:white">B</span> 51 - 100 kg</div>
-              <div style="display:flex; align-items:center; gap:6px;"><span class="badge" style="background:#FFC107;color:white">C</span> 101 - 150 kg</div>
-              <div style="display:flex; align-items:center; gap:6px;"><span class="badge" style="background:#FF9800;color:white">D</span> 151 - 200 kg</div>
-              <div style="display:flex; align-items:center; gap:6px;"><span class="badge" style="background:#E53935;color:white">E</span> > 200 kg</div>
-            </div>
+            <div id="grade-scale-legend" style="display:flex; flex-wrap:wrap; gap:12px; font-size:0.8rem; color:var(--text-muted);"></div>
           </div>
 
           <!-- CTA -->

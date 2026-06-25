@@ -229,16 +229,14 @@
       const engine = new CalculatorEngine();
       await engine.init();
 
-      // Fetch region data to determine avg daily distance
-      let avgDist = 8; // Default Hilly
+      // Determine avg daily commute distance from region
+      let avgDist = window.GEOGRAPHIC_MATRIX.region_defaults['Hilly'].avg_commute_km;
       try {
         const matrix = window.GEOGRAPHIC_MATRIX;
         const distKey = StorageManager.getAdminConfig()?.district;
         if (distKey && matrix.districts[distKey]) {
           const region = matrix.districts[distKey].region;
-          if (region === 'Terai') avgDist = 4;
-          else if (region === 'Hilly') avgDist = 8;
-          else if (region === 'Mountain') avgDist = 12;
+          avgDist = matrix.region_defaults[region]?.avg_commute_km ?? avgDist;
         }
       } catch(e) { console.error("Could not load geographic matrix", e); }
 

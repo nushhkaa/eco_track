@@ -219,6 +219,7 @@
   </style>
   <script src="./js/geographic_matrix.js"></script>
   <script src="./js/emission_factors.js"></script>
+  <script src="./js/solutions.js"></script>
   <script src="./js/utils.js"></script>
   <script src="./js/nav.js"></script>
 </head>
@@ -349,61 +350,46 @@
     renderFooter({ showRefresh: true });
     I18n.init();
 
-    // Hardcoded factors table data (mirrors CSV / JSON)
-    const factorsData = [
-      // Energy
-      { category: 'Energy', emoji: '⚡', color: '#5B8DD9', bg: '#EEF4FF', activity: 'Firewood (Biomass)', unit: 'kg CO₂e / kg', factor: 0.006 },
-      { category: 'Energy', emoji: '⚡', color: '#5B8DD9', bg: '#EEF4FF', activity: 'LPG Cylinder (14.2 kg)', unit: 'kg CO₂e / cylinder', factor: 42.3 },
-      { category: 'Energy', emoji: '⚡', color: '#5B8DD9', bg: '#EEF4FF', activity: 'LPG Cooking Gas (weight)', unit: 'kg CO₂e / kg', factor: 2.98 },
-      { category: 'Energy', emoji: '⚡', color: '#5B8DD9', bg: '#EEF4FF', activity: 'NEA Hydro Grid Electricity', unit: 'kg CO₂e / kWh', factor: 0.0124 },
-      // Commute
-      { category: 'Commute', emoji: '🚌', color: '#56C15B', bg: '#EDFAEE', activity: 'Staff / Student Motorbike', unit: 'kg CO₂e / km', factor: 0.113 },
-      { category: 'Commute', emoji: '🚌', color: '#56C15B', bg: '#EDFAEE', activity: 'Local Public Bus / Microbus', unit: 'kg CO₂e / pass-km', factor: 0.089 },
-      // Waste
-      { category: 'Waste', emoji: '🗑️', color: '#E57373', bg: '#FFF0F0', activity: 'Open-Air Plastic Burning', unit: 'kg CO₂e / kg', factor: 2.89 },
-      { category: 'Waste', emoji: '🗑️', color: '#E57373', bg: '#FFF0F0', activity: 'Unmanaged Anaerobic Pit Burial', unit: 'kg CO₂e / kg', factor: 0.71 },
-      // Water
-      { category: 'Water', emoji: '💧', color: '#64B5F6', bg: '#EBF5FF', activity: 'Groundwater (Borehole Pump)', unit: 'kg CO₂e / m³', factor: 0.04 },
-      { category: 'Water', emoji: '💧', color: '#64B5F6', bg: '#EBF5FF', activity: 'Municipal Piped Water Supply', unit: 'kg CO₂e / m³', factor: 0.34 },
-      { category: 'Water', emoji: '💧', color: '#64B5F6', bg: '#EBF5FF', activity: 'Water Tanker Supply', unit: 'kg CO₂e / m³', factor: 1.02 },
-      { category: 'Water', emoji: '💧', color: '#64B5F6', bg: '#EBF5FF', activity: 'Rainwater Harvesting', unit: 'kg CO₂e / m³', factor: 0 },
-      // Paper
-      { category: 'Paper', emoji: '📄', color: '#C8A400', bg: '#FFFBEB', activity: 'Textbooks & Ledger (Virgin)', unit: 'kg CO₂e / kg', factor: 1.84 },
-      { category: 'Paper', emoji: '📄', color: '#C8A400', bg: '#FFFBEB', activity: 'Textbooks & Ledger (Recycled)', unit: 'kg CO₂e / kg', factor: 0.92 },
-    ];
-
+    // Build factors table from the canonical EMISSION_FACTORS.display data
+    const efDisplay  = window.EMISSION_FACTORS.display;
+    const efFactors  = window.EMISSION_FACTORS.factors;
     const tbody = document.getElementById('factors-tbody');
-    let lastCat = '';
 
-    factorsData.forEach(row => {
-      // Category header row
-      if (row.category !== lastCat) {
-        const headerRow = document.createElement('tr');
-        headerRow.className = 'category-row-header';
-        headerRow.innerHTML = `<td colspan="4">
-          <span class="cat-pill" style="background:${row.bg};color:${row.color}">
-            ${row.emoji} ${row.category}
-          </span>
-        </td>`;
-        tbody.appendChild(headerRow);
-        lastCat = row.category;
-      }
+    Object.entries(efDisplay).forEach(([catKey, cat]) => {
+      const meta = categoryLabels[catKey] || { bg: '#f5f5f5' };
 
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td></td>
-        <td>${row.activity}</td>
-        <td class="text-muted text-sm">${row.unit}</td>
-        <td class="factor-value">${row.factor}</td>
-      `;
-      tbody.appendChild(tr);
+      const headerRow = document.createElement('tr');
+      headerRow.className = 'category-row-header';
+      headerRow.innerHTML = `<td colspan="4">
+        <span class="cat-pill" style="background:${cat.bg};color:${cat.color}">
+          ${cat.icon} ${cat.label}
+        </span>
+      </td>`;
+      tbody.appendChild(headerRow);
+
+      cat.items.forEach(item => {
+        const factorVal = efFactors[catKey]?.[item.key] ?? 'N/A';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td></td>
+          <td>${item.label}</td>
+          <td class="text-muted text-sm">${item.unit}</td>
+          <td class="factor-value">${factorVal}</td>
+        `;
+        tbody.appendChild(tr);
+      });
     });
 
-    // Download methodology
+    // Download methodology — same data source
     const downloadFactors = () => {
-      const header = 'Category,Activity,Unit,Factor_kgCO2e\n';
-      const rows = factorsData.map(r => `${r.category},${r.activity},${r.unit},${r.factor}`).join('\n');
-      const csv = 'data:text/csv;charset=utf-8,' + encodeURIComponent(header + rows);
+      const csvRows = ['Category,Activity,Unit,Factor_kgCO2e'];
+      Object.entries(efDisplay).forEach(([catKey, cat]) => {
+        cat.items.forEach(item => {
+          const factorVal = efFactors[catKey]?.[item.key] ?? '';
+          csvRows.push(`${cat.label},${item.label},${item.unit},${factorVal}`);
+        });
+      });
+      const csv = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvRows.join('\n'));
       const link = document.createElement('a');
       link.href = csv;
       link.download = 'ecotracks_emission_factors.csv';

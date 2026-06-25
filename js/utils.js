@@ -4,10 +4,12 @@
  */
 
 // ─── App-wide constants ───────────────────────────────────────────────────────
+// Numeric defaults read from emission_factors.js at load time so they have one source of truth.
+const _efc = window.EMISSION_FACTORS?.constants || {};
 const APP_CONSTANTS = {
-  SCHOOL_DAYS_MONTH:           22,
-  NOTEBOOK_WEIGHT_KG:          0.1,
-  WASTE_KG_PER_STUDENT_MONTH:  1.2,
+  SCHOOL_DAYS_MONTH:           _efc.school_days_month           ?? 22,
+  NOTEBOOK_WEIGHT_KG:          _efc.notebook_weight_kg          ?? 0.1,
+  WASTE_KG_PER_STUDENT_MONTH:  _efc.waste_kg_per_student_month  ?? 1.2,
   SYNC_SERVER_URL:             'http://localhost:8080/sync_server.php'
 };
 

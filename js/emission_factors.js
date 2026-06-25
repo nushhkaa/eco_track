@@ -5,6 +5,11 @@ window.EMISSION_FACTORS = {
     "gwp_metric": "AR6-GWP100",
     "source": "Nepal localized factors — Pokhara school study + IPCC + DEFRA"
   },
+  "constants": {
+    "school_days_month": 22,
+    "notebook_weight_kg": 0.1,
+    "waste_kg_per_student_month": 1.2
+  },
   "factors": {
     "energy": {
       "firewood_kg": 0.0060,
@@ -45,6 +50,7 @@ window.EMISSION_FACTORS = {
       "label": "Energy",
       "icon": "⚡",
       "color": "#5B8DD9",
+      "bg": "#EEF4FF",
       "items": [
         { "key": "firewood_kg", "label": "Firewood (Biomass)", "unit": "kg CO₂e / kg" },
         { "key": "lpg_cylinder", "label": "LPG Cylinder (14.2 kg)", "unit": "kg CO₂e / cylinder" },
@@ -55,6 +61,7 @@ window.EMISSION_FACTORS = {
       "label": "Commute",
       "icon": "🚌",
       "color": "#56C15B",
+      "bg": "#EDFAEE",
       "items": [
         { "key": "private_car_km", "label": "Private Car / Taxi", "unit": "kg CO₂e / km" },
         { "key": "motorbike_km", "label": "Staff / Student Motorbike", "unit": "kg CO₂e / km" },
@@ -69,6 +76,7 @@ window.EMISSION_FACTORS = {
       "label": "Waste",
       "icon": "🗑️",
       "color": "#E57373",
+      "bg": "#FFF0F0",
       "items": [
         { "key": "open_plastic_burning_kg", "label": "Open-Air Plastic Burning", "unit": "kg CO₂e / kg" },
         { "key": "anaerobic_pit_burial_kg", "label": "Unmanaged Anaerobic Pit Burial", "unit": "kg CO₂e / kg" },
@@ -80,6 +88,7 @@ window.EMISSION_FACTORS = {
       "label": "Water",
       "icon": "💧",
       "color": "#64B5F6",
+      "bg": "#EBF5FF",
       "items": [
         { "key": "groundwater_pump_m3", "label": "Groundwater (Borehole Pump)", "unit": "kg CO₂e / m³" },
         { "key": "municipal_piped_m3", "label": "Municipal Piped Water Supply", "unit": "kg CO₂e / m³" },
@@ -91,6 +100,7 @@ window.EMISSION_FACTORS = {
       "label": "Paper",
       "icon": "📄",
       "color": "#C8A400",
+      "bg": "#FFFBEB",
       "items": [
         { "key": "virgin_paper_kg", "label": "Textbooks & Ledger Paper (Virgin)", "unit": "kg CO₂e / kg" },
         { "key": "recycled_paper_kg", "label": "Textbooks & Ledger Paper (Recycled)", "unit": "kg CO₂e / kg" }

@@ -1,4 +1,9 @@
 window.GEOGRAPHIC_MATRIX = {
+  "region_defaults": {
+    "Mountain": { "avg_commute_km": 12 },
+    "Hilly":    { "avg_commute_km": 8  },
+    "Terai":    { "avg_commute_km": 4  }
+  },
   "districts": {
     "taplejung": {
       "name": "Taplejung",
