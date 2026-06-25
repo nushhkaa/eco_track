@@ -135,9 +135,55 @@
             </div>
           </div>
 
-          <!-- Step 3: Paper -->
+          <!-- Step 3: Energy & Water -->
           <div class="wizard-step" id="step-3">
-            <div class="cat-section__header"><div class="cat-icon cat-icon--paper">📄</div><div><div class="cat-section__title" data-i18n="std_step_3_title">Step 3: Resource Log</div><div class="cat-section__subtitle" data-i18n="std_step_3_sub">Paper & Exam consumption</div></div></div>
+            <div class="cat-section__header">
+              <div class="cat-icon cat-icon--energy">⚡</div>
+              <div>
+                <div class="cat-section__title">Step 3: Energy &amp; Water</div>
+                <div class="cat-section__subtitle">Monthly household use (per student average)</div>
+              </div>
+            </div>
+
+            <div class="grid-2 mb-16">
+              <div class="form-group">
+                <label class="form-label">🔥 Firewood used (kg per student/month)</label>
+                <input class="form-input" type="number" id="input-energy-firewood" value="0" min="0" step="0.5">
+                <p class="text-sm text-muted mt-8">Common in mountain & hilly households</p>
+              </div>
+              <div class="form-group">
+                <label class="form-label">🔵 LPG cylinders used (count/month, class total)</label>
+                <input class="form-input" type="number" id="input-energy-lpg" value="0" min="0" step="1">
+              </div>
+              <div class="form-group">
+                <label class="form-label">💡 Electricity (kWh per student/month)</label>
+                <input class="form-input" type="number" id="input-energy-kwh" value="0" min="0" step="1">
+              </div>
+              <div class="form-group">
+                <label class="form-label">💧 Water used (litres per student/month)</label>
+                <input class="form-input" type="number" id="input-water-litres" value="0" min="0">
+              </div>
+            </div>
+
+            <div class="form-group mb-16">
+              <label class="form-label">💧 Primary Water Source</label>
+              <select class="form-select" id="input-water-source">
+                <option value="groundwater_pump_m3">Groundwater / Borehole Pump</option>
+                <option value="municipal_piped_m3">Municipal Piped Water</option>
+                <option value="water_tanker_m3">Water Tanker</option>
+                <option value="rainwater_harvest_m3">Rainwater Harvesting (zero emission)</option>
+              </select>
+            </div>
+
+            <div class="wizard-nav">
+              <button type="button" class="btn btn-ghost prev-step" data-i18n="student_wizard_prev">← Previous</button>
+              <button type="button" class="btn btn-primary next-step" data-i18n="student_wizard_next">Next Step ➔</button>
+            </div>
+          </div>
+
+          <!-- Step 4: Paper (was Step 3) -->
+          <div class="wizard-step" id="step-4">
+            <div class="cat-section__header"><div class="cat-icon cat-icon--paper">📄</div><div><div class="cat-section__title" data-i18n="std_step_3_title">Step 4: Resource Log</div><div class="cat-section__subtitle" data-i18n="std_step_3_sub">Paper & Exam consumption</div></div></div>
             
             <div style="display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px;">
               <div class="form-group">
@@ -159,9 +205,9 @@
             </div>
           </div>
 
-          <!-- Step 4: Waste -->
-          <div class="wizard-step" id="step-4">
-            <div class="cat-section__header"><div class="cat-icon cat-icon--waste">🗑️</div><div><div class="cat-section__title" data-i18n="std_step_4_title">Step 4: Waste Path</div><div class="cat-section__subtitle" data-i18n="std_step_4_sub">Disposal frequency</div></div></div>
+          <!-- Step 5: Waste (was Step 4) -->
+          <div class="wizard-step" id="step-5">
+            <div class="cat-section__header"><div class="cat-icon cat-icon--waste">🗑️</div><div><div class="cat-section__title" data-i18n="std_step_4_title">Step 5: Waste Path</div><div class="cat-section__subtitle" data-i18n="std_step_4_sub">Disposal frequency</div></div></div>
             
             <div id="waste-scales" class="flex-col gap-16 mb-24"></div>
 
@@ -244,66 +290,80 @@
       // Submit Logic
       document.getElementById('metrics-form').addEventListener('submit', (e) => {
         e.preventDefault();
-        const walkStudents = parseFloat(document.getElementById('input-commute-walk')?.value) || 0;
-        const cycleStudents = parseFloat(document.getElementById('input-commute-cycle')?.value) || 0;
-        const busStudents = parseFloat(document.getElementById('input-commute-bus')?.value) || 0;
-        const bikeStudents = parseFloat(document.getElementById('input-commute-bike')?.value) || 0;
-        const carStudents = parseFloat(document.getElementById('input-commute-car')?.value) || 0;
 
-        const days = APP_CONSTANTS.SCHOOL_DAYS_MONTH;
-        const walk = walkStudents * avgDist * days;
-        const cycle = cycleStudents * avgDist * days;
-        const bus = busStudents * avgDist * days;
-        const bike = bikeStudents * avgDist * days;
-        const car = carStudents * avgDist * days;
-
-        const cNew = parseFloat(document.getElementById('input-paper-copies-new')?.value) || 0;
-        const isRecycled = document.getElementById('input-paper-recycled')?.value === 'yes';
-        
-        let pVirg = cNew * APP_CONSTANTS.NOTEBOOK_WEIGHT_KG;
-        let paperCO2 = 0;
-        
-        // If they recycle, we reward them by using the recycled emission factor for their copies.
-        if (isRecycled) {
-          paperCO2 = engine.calculateModule('paper', 'recycled_paper_kg', pVirg);
-        } else {
-          paperCO2 = engine.calculateModule('paper', 'virgin_paper_kg', pVirg);
-        }
-
-        // Waste Calculation (5-point scale distribution, 4 categories)
         const students = parseFloat(document.getElementById('input-demo-students')?.value) || 30;
-        const totalWasteMonthly = students * APP_CONSTANTS.WASTE_KG_PER_STUDENT_MONTH;
-        
-        const sBurn = parseInt(document.querySelector('input[name="waste-scale-burn"]:checked')?.value) || 0;
-        const sPit = parseInt(document.querySelector('input[name="waste-scale-pit"]:checked')?.value) || 0;
-        const sComp = parseInt(document.querySelector('input[name="waste-scale-comp"]:checked')?.value) || 0;
-        const sRecyc = parseInt(document.querySelector('input[name="waste-scale-recyc"]:checked')?.value) || 0;
-        
-        const totalScale = sBurn + sPit + sComp + sRecyc;
-        
-        let wasteCO2 = 0;
-        let wasteVal = 0;
 
-        if (totalScale > 0) {
-          const wBurn = (sBurn / totalScale) * totalWasteMonthly;
-          const wPit = (sPit / totalScale) * totalWasteMonthly;
-          
-          wasteVal = wBurn + wPit; // Tracking non-neutral waste for display
-          wasteCO2 = engine.calculateModule('waste', 'open_plastic_burning_kg', wBurn) + 
-                     engine.calculateModule('waste', 'anaerobic_pit_burial_kg', wPit);
-        }
+        // ── Commute ─────────────────────────────────────────────────────────────
+        const walkStudents  = parseFloat(document.getElementById('input-commute-walk')?.value)  || 0;
+        const cycleStudents = parseFloat(document.getElementById('input-commute-cycle')?.value) || 0;
+        const busStudents   = parseFloat(document.getElementById('input-commute-bus')?.value)   || 0;
+        const bikeStudents  = parseFloat(document.getElementById('input-commute-bike')?.value)  || 0;
+        const carStudents   = parseFloat(document.getElementById('input-commute-car')?.value)   || 0;
+
+        const days  = APP_CONSTANTS.SCHOOL_DAYS_MONTH;
+        const bus   = busStudents   * avgDist * days;
+        const bike  = bikeStudents  * avgDist * days;
+        const car   = carStudents   * avgDist * days;
+        const walk  = walkStudents  * avgDist * days;
+        const cycle = cycleStudents * avgDist * days;
 
         const commuteVal = walk + cycle + bus + bike + car;
-        const commuteCO2 = engine.calculateModule('commute', 'public_bus_pkm', bus) 
-                         + engine.calculateModule('commute', 'motorbike_km', bike)
-                         + engine.calculateModule('commute', 'private_car_km', car);
+        const commuteCO2 = engine.calculateModule('commute', 'public_bus_pkm',  bus)
+                         + engine.calculateModule('commute', 'motorbike_km',     bike)
+                         + engine.calculateModule('commute', 'private_car_km',   car);
+
+        // ── Energy ──────────────────────────────────────────────────────────────
+        const firewoodPerStudent = parseFloat(document.getElementById('input-energy-firewood')?.value) || 0;
+        const lpgCylinders       = parseFloat(document.getElementById('input-energy-lpg')?.value)      || 0;
+        const kwhPerStudent      = parseFloat(document.getElementById('input-energy-kwh')?.value)      || 0;
+
+        const totalFirewood = firewoodPerStudent * students;
+        const totalKwh      = kwhPerStudent      * students;
+
+        const energyVal = totalFirewood + lpgCylinders + totalKwh;
+        const energyCO2 = engine.calculateModule('energy', 'firewood_kg',    totalFirewood)
+                        + engine.calculateModule('energy', 'lpg_cylinder',   lpgCylinders)
+                        + engine.calculateModule('energy', 'electricity_kwh', totalKwh);
+
+        // ── Water ───────────────────────────────────────────────────────────────
+        const litresPerStudent = parseFloat(document.getElementById('input-water-litres')?.value) || 0;
+        const waterSource      = document.getElementById('input-water-source')?.value || 'groundwater_pump_m3';
+        const totalM3          = (litresPerStudent * students) / 1000;
+
+        const waterVal = litresPerStudent * students;
+        const waterCO2 = engine.calculateModule('water', waterSource, totalM3);
+
+        // ── Paper ───────────────────────────────────────────────────────────────
+        const cNew       = parseFloat(document.getElementById('input-paper-copies-new')?.value) || 0;
+        const isRecycled = document.getElementById('input-paper-recycled')?.value === 'yes';
+        const pVirg      = cNew * APP_CONSTANTS.NOTEBOOK_WEIGHT_KG;
+        const paperCO2   = isRecycled
+          ? engine.calculateModule('paper', 'recycled_paper_kg', pVirg)
+          : engine.calculateModule('paper', 'virgin_paper_kg',   pVirg);
+
+        // ── Waste ───────────────────────────────────────────────────────────────
+        const totalWasteMonthly = students * APP_CONSTANTS.WASTE_KG_PER_STUDENT_MONTH;
+        const sBurn  = parseInt(document.querySelector('input[name="waste-scale-burn"]:checked')?.value)  || 0;
+        const sPit   = parseInt(document.querySelector('input[name="waste-scale-pit"]:checked')?.value)   || 0;
+        const sComp  = parseInt(document.querySelector('input[name="waste-scale-comp"]:checked')?.value)  || 0;
+        const sRecyc = parseInt(document.querySelector('input[name="waste-scale-recyc"]:checked')?.value) || 0;
+        const totalScale = sBurn + sPit + sComp + sRecyc;
+
+        let wasteCO2 = 0, wasteVal = 0;
+        if (totalScale > 0) {
+          const wBurn = (sBurn / totalScale) * totalWasteMonthly;
+          const wPit  = (sPit  / totalScale) * totalWasteMonthly;
+          wasteVal = wBurn + wPit;
+          wasteCO2 = engine.calculateModule('waste', 'open_plastic_burning_kg', wBurn)
+                   + engine.calculateModule('waste', 'anaerobic_pit_burial_kg', wPit);
+        }
 
         const payload = {
-          energy: { value: 0, co2: 0 },
+          energy:  { value: energyVal,  co2: energyCO2  },
           commute: { value: commuteVal, co2: commuteCO2 },
-          waste: { value: wasteVal, co2: wasteCO2 },
-          water: { value: 0, co2: 0 },
-          paper: { value: pVirg, co2: paperCO2 }
+          waste:   { value: wasteVal,   co2: wasteCO2   },
+          water:   { value: waterVal,   co2: waterCO2   },
+          paper:   { value: pVirg,      co2: paperCO2   }
         };
 
         StorageManager.saveQuarterlyLog(currentGrade, payload);

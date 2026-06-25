@@ -185,7 +185,7 @@
           <div class="portal-card__icon portal-card__icon--teacher">📊</div>
           <h3 data-i18n="admin_title">Admin / Teacher Portal</h3>
           <p>Initial configuration and monthly school-wide data entry (electricity, water, etc).</p>
-          <a href="login_admin.html" class="btn btn-outline btn-lg" style="width:100%">Admin Login</a>
+          <a href="admin_login.html" class="btn btn-outline btn-lg" style="width:100%">Admin Login</a>
         </div>
       </section>
 
@@ -219,7 +219,7 @@
       if (!config || config.electricity === undefined) {
         alert("The Admin must complete the one-time configuration and input school details first!");
       } else {
-        window.location.href = 'login.html';
+        window.location.href = 'class_select.html';
       }
     });
 

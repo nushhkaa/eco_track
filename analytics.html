@@ -253,7 +253,7 @@
         <h2>No Data Yet</h2>
         <p class="text-muted mt-8">Please complete the student tracking form first to generate your report card.</p>
         <div class="flex justify-center gap-12 mt-24">
-          <a href="login.html" class="btn btn-gold" id="btn-go-login">🎒 Go to Student Portal</a>
+          <a href="class_select.html" class="btn btn-gold" id="btn-go-login">🎒 Go to Student Portal</a>
           <a href="index.html" class="btn btn-outline" id="btn-go-home-nodata">🏠 Home</a>
         </div>
       </div>
@@ -271,17 +271,15 @@
       const engine = new CalculatorEngine();
       engine.init();
 
-      // Populate grade scale legend from canonical thresholds
-      document.getElementById('grade-scale-legend').innerHTML =
-        CalculatorEngine.GRADE_THRESHOLDS.map(t =>
-          `<div style="display:flex;align-items:center;gap:6px;"><span class="badge" style="background:${t.color};color:white">${t.grade}</span> ${t.rangeLabel}</div>`
-        ).join('');
-
       const grade = StorageManager.getCurrentGrade();
       document.getElementById('grade-badge-nav').textContent = grade;
 
       const currentDataObj = StorageManager.getLatestForGrade(grade);
       const pastDataObj    = StorageManager.getPreviousForGrade(grade);
+
+      // Weekly scale: 5 school days / 22 school days per month ≈ 0.227
+      const WEEKLY_SCALE = 5 / APP_CONSTANTS.SCHOOL_DAYS_MONTH;
+      let activeScale = 1.0;
 
       if (!currentDataObj) {
         document.getElementById('no-data-state').style.display = 'block';
@@ -290,8 +288,13 @@
       }
 
       function renderReport(current, past) {
-        const data     = current.data;
-        const prevData = past ? past.data : null;
+        // Apply active scale (1.0 = monthly, WEEKLY_SCALE ≈ 0.227 = weekly)
+        const data     = Object.fromEntries(
+          Object.entries(current.data).map(([k, v]) => [k, { ...v, co2: v.co2 * activeScale, value: v.value * activeScale }])
+        );
+        const prevData = past
+          ? Object.fromEntries(Object.entries(past.data).map(([k, v]) => [k, { ...v, co2: v.co2 * activeScale }]))
+          : null;
 
         // Find hotspot
         let maxCat = '', maxVal = -1;
@@ -300,10 +303,12 @@
         });
         StorageManager.setHotspot(maxCat);
 
-        const totalCO2  = current.totalCO2 || Object.values(data).reduce((s, d) => s + d.co2, 0);
-        const prevTotalCO2 = past ? (past.totalCO2 || Object.values(prevData).reduce((s,d)=>s+d.co2,0)) : 0;
-        const trees     = engine.toTreesEquivalent(totalCO2);
-        const gradeInfo = engine.gradeFootprint(totalCO2);
+        const totalCO2     = Object.values(data).reduce((s, d) => s + d.co2, 0);
+        const prevTotalCO2 = prevData ? Object.values(prevData).reduce((s, d) => s + d.co2, 0) : 0;
+        // Grade and trees always use full monthly CO2 regardless of active tab scale
+        const rawTotalCO2 = current.totalCO2 || Object.values(current.data).reduce((s, d) => s + d.co2, 0);
+        const trees     = engine.toTreesEquivalent(rawTotalCO2);
+        const gradeInfo = engine.gradeFootprint(rawTotalCO2);
 
         // categoryLabels is the canonical source from solutions.js
         const catMeta = categoryLabels;
@@ -351,7 +356,7 @@
               <div class="summary-stat">
                 <div class="summary-stat__icon summary-stat__icon--energy" aria-hidden="true">⚡</div>
                 <div>
-                  <div class="summary-stat__label">Total CO₂e This Session</div>
+                  <div class="summary-stat__label">Total CO₂e — ${activeScale < 1 ? 'This Week' : 'This Month'}</div>
                   <div class="summary-stat__value">${totalCO2.toFixed(1)} kg</div>
                 </div>
               </div>
@@ -396,8 +401,8 @@
                   ${gradeInfo.grade}
                 </div>
                 <div class="tab-group" role="group" aria-label="View toggle">
-                  <button class="tab-btn active" id="tab-weekly">Weekly</button>
-                  <button class="tab-btn" id="tab-monthly">Monthly</button>
+                  <button class="tab-btn ${activeScale < 1 ? 'active' : ''}" id="tab-weekly">Weekly</button>
+                  <button class="tab-btn ${activeScale === 1.0 ? 'active' : ''}" id="tab-monthly">Monthly</button>
                 </div>
               </div>
             </div>
@@ -497,14 +502,21 @@
 
         document.getElementById('analytics-content').innerHTML = html;
 
-        // Tab toggle (cosmetic)
-        document.getElementById('tab-weekly')?.addEventListener('click', (e) => {
-          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-          e.target.classList.add('active');
+        document.getElementById('grade-scale-legend').innerHTML =
+          CalculatorEngine.GRADE_THRESHOLDS.map(t =>
+            `<div style="display:flex;align-items:center;gap:6px;"><span class="badge" style="background:${t.color};color:white">${t.grade}</span> ${t.rangeLabel}</div>`
+          ).join('');
+
+        // Tab toggle — functional: re-render report at new scale
+        document.getElementById('tab-weekly')?.addEventListener('click', () => {
+          if (activeScale === WEEKLY_SCALE) return;
+          activeScale = WEEKLY_SCALE;
+          renderReport(currentDataObj, pastDataObj);
         });
-        document.getElementById('tab-monthly')?.addEventListener('click', (e) => {
-          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-          e.target.classList.add('active');
+        document.getElementById('tab-monthly')?.addEventListener('click', () => {
+          if (activeScale === 1.0) return;
+          activeScale = 1.0;
+          renderReport(currentDataObj, pastDataObj);
         });
       }
 
