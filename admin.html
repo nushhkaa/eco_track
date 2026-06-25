@@ -349,11 +349,10 @@
 
     let allDistricts = {};
 
-    async function loadDistricts() {
+    function loadDistricts() {
       try {
         const data = window.GEOGRAPHIC_MATRIX;
         allDistricts = data.districts;
-        // Load saved config
         loadSavedConfig();
       } catch(e) { console.error("Error loading districts", e); }
     }

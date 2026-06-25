@@ -10,7 +10,8 @@ class StorageManager {
     ADMIN_AUTH:   'ecotracks_admin_auth',
     GRADE:        'ecotracks_current_grade',
     HOTSPOT:      'ecotracks_highest_hotspot',
-    LANG:         'ecotracks_lang'
+    LANG:         'ecotracks_lang',
+    MISSIONS:     'ecotracks_missions'
   };
 
   // ─── Admin Config & Auth ───────────────────────────────────────────────────
@@ -60,16 +61,16 @@ class StorageManager {
 
   // ─── Active Missions ─────────────────────────────────────────────────────────
   static setActiveMission(grade, solutionTitle) {
-    const missions = JSON.parse(localStorage.getItem('ecotracks_missions')) || {};
+    const missions = JSON.parse(localStorage.getItem(this.KEYS.MISSIONS)) || {};
     missions[grade] = {
       title: solutionTitle,
       startedAt: new Date().toISOString()
     };
-    localStorage.setItem('ecotracks_missions', JSON.stringify(missions));
+    localStorage.setItem(this.KEYS.MISSIONS, JSON.stringify(missions));
   }
 
   static getActiveMission(grade) {
-    const missions = JSON.parse(localStorage.getItem('ecotracks_missions')) || {};
+    const missions = JSON.parse(localStorage.getItem(this.KEYS.MISSIONS)) || {};
     return missions[grade] || null;
   }
 
@@ -167,7 +168,7 @@ class StorageManager {
     const csvStr = this.getCSVString();
     if (!csvStr) return false;
     
-    const csvContent = 'data:text/csv;charset=utf-8,' + encodeURI(csvStr);
+    const csvContent = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvStr);
     const link = document.createElement('a');
     link.setAttribute('href', csvContent);
     link.setAttribute('download', filename);

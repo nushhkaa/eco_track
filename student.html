@@ -8,10 +8,7 @@
   <script>
     const config = StorageManager.getAdminConfig();
     if (!config) { window.location.replace('setup.html'); }
-    else if (config.electricity === undefined) {
-      alert("Admin must input school details first.");
-      window.location.replace('index.html');
-    }
+    else if (config.electricity === undefined) { window.location.replace('index.html'); }
   </script>
   <link rel="stylesheet" href="./css/main.css">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">

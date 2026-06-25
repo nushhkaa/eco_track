@@ -443,7 +443,7 @@
 
     // Footer
     document.getElementById('btn-sync-footer').addEventListener('click', () => {
-      const ok = StorageManager.downloadCSV();
+      const ok = StorageManager.downloadLocalCSV();
       showToast(ok ? '✅ Data exported!' : '⚠️ No data yet.', ok ? 'success' : 'error');
     });
     document.getElementById('btn-refresh-footer').addEventListener('click', () => location.reload());
