@@ -35,6 +35,7 @@
   </style>
   <script src="./js/geographic_matrix.js"></script>
   <script src="./js/emission_factors.js"></script>
+  <script src="./js/utils.js"></script>
 </head>
 <body>
   <div class="container" style="display:flex;justify-content:center;">
@@ -59,20 +60,7 @@
           </div>
           <div class="form-group">
             <label class="form-label" data-i18n="setup_month">Reporting Month</label>
-            <select id="setup-month" class="form-select" required>
-              <option value="January" data-i18n="month_jan">January</option>
-              <option value="February" data-i18n="month_feb">February</option>
-              <option value="March" data-i18n="month_mar">March</option>
-              <option value="April" data-i18n="month_apr">April</option>
-              <option value="May" data-i18n="month_may">May</option>
-              <option value="June" data-i18n="month_jun">June</option>
-              <option value="July" data-i18n="month_jul">July</option>
-              <option value="August" data-i18n="month_aug">August</option>
-              <option value="September" data-i18n="month_sep">September</option>
-              <option value="October" data-i18n="month_oct">October</option>
-              <option value="November" data-i18n="month_nov">November</option>
-              <option value="December" data-i18n="month_dec">December</option>
-            </select>
+            <select id="setup-month" class="form-select" required></select>
           </div>
           <div class="form-group">
             <label class="form-label" data-i18n="setup_year">Reporting Year</label>
@@ -91,6 +79,8 @@
   <script src="./js/i18n.js"></script>
   <script>
 
+    const currentMonth = new Date().toLocaleString('en-US', { month: 'long' });
+    buildMonthOptions(document.getElementById('setup-month'), currentMonth);
     I18n.init();
 
     document.getElementById('setup-year').value = new Date().getFullYear();

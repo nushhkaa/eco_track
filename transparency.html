@@ -219,25 +219,16 @@
   </style>
   <script src="./js/geographic_matrix.js"></script>
   <script src="./js/emission_factors.js"></script>
+  <script src="./js/utils.js"></script>
+  <script src="./js/nav.js"></script>
 </head>
 <body>
-
-  <!-- ── Navigation ── -->
-  <nav class="nav" role="navigation" aria-label="Main navigation">
-    <div class="container nav__inner">
-      <a href="index.html" class="nav__logo" id="nav-logo">
-        <div class="nav__logo-icon">🌿</div>
-        Eco-Tracks
-      </a>
-      <ul class="nav__links" role="list">
-        <li><a href="index.html" id="nav-missions" data-i18n="nav_missions">Missions</a></li>
-        <li><a href="admin.html" id="nav-myschool" data-i18n="nav_myschool">My School</a></li>
-        
-        <li><a href="transparency.html" class="active" id="nav-badges" data-i18n="nav_badges">Badges</a></li>
-      </ul>
-      <div class="nav__user" aria-label="User profile" id="nav-user-btn">👤</div>
-    </div>
-  </nav>
+  <script>
+    renderNav({
+      activePage: 'transparency.html',
+      actionsHTML: '<div class="nav__user" aria-label="User profile" id="nav-user-btn">👤</div>'
+    });
+  </script>
 
   <!-- ── Main ── -->
   <main class="page-main" id="main-content">
@@ -353,25 +344,9 @@
     </div>
   </main>
 
-  <!-- ── Footer ── -->
-  <footer class="footer" role="contentinfo">
-    <div class="container">
-      <div class="footer__inner">
-        <div>
-          <div class="footer__brand">Eco-Tracks <span>| Nepal</span></div>
-          <div class="footer__copy">© 2026 <a href="transparency.html">HimalEdge Eco-Track</a></div>
-        </div>
-        <div class="footer__actions">
-          <button class="btn btn-ghost btn-sm" id="btn-sync-footer">🔄 Sync with School Server</button>
-          <button class="btn btn-outline btn-sm" id="btn-reset-data" style="color:var(--red);border-color:var(--red)">🗑️ Reset Data</button>
-          <button class="btn btn-ghost btn-sm" id="btn-refresh-footer">↺ Refresh Data</button>
-        </div>
-      </div>
-    </div>
-  </footer>
-
   <script src="./js/i18n.js"></script>
   <script>
+    renderFooter({ showRefresh: true });
     I18n.init();
 
     // Hardcoded factors table data (mirrors CSV / JSON)
@@ -447,14 +422,6 @@
       showToast(ok ? '✅ Data exported!' : '⚠️ No data yet.', ok ? 'success' : 'error');
     });
     document.getElementById('btn-refresh-footer').addEventListener('click', () => location.reload());
-
-    function showToast(msg, type = 'success') {
-      const t = document.createElement('div');
-      t.className = `toast toast--${type}`;
-      t.textContent = msg;
-      document.body.appendChild(t);
-      setTimeout(() => t.remove(), 3500);
-    }
   </script>
 </body>
 </html>

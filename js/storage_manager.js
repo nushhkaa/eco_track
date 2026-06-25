@@ -145,8 +145,7 @@ class StorageManager {
     formData.append('monthYear', monthYear);
 
     try {
-      // Connect to local PHP dummy server
-      const res = await fetch('http://localhost:8080/sync_server.php', {
+      const res = await fetch(APP_CONSTANTS.SYNC_SERVER_URL, {
         method: 'POST',
         body: formData
       });

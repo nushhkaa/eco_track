@@ -49,4 +49,8 @@ create a goal, and track its progress, how far we are along, set goals like redu
 
 
 
+last update
+
+dynamic questions so doesn't becomes boring
+
 

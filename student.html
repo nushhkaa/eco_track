@@ -32,27 +32,15 @@
   </style>
   <script src="./js/geographic_matrix.js"></script>
   <script src="./js/emission_factors.js"></script>
+  <script src="./js/utils.js"></script>
+  <script src="./js/nav.js"></script>
 </head>
 <body>
-
-  <!-- Navigation -->
-  <nav class="nav" role="navigation">
-    <div class="container nav__inner">
-      <a href="index.html" class="nav__logo" id="nav-logo">
-        <div class="nav__logo-icon">🌿</div>
-        Eco-Tracks
-      </a>
-      <ul class="nav__links" role="list">
-        <li><a href="index.html" id="nav-missions" data-i18n="nav_missions">Missions</a></li>
-        <li><a href="admin.html" id="nav-myschool" data-i18n="nav_myschool">My School</a></li>
-        <li><a href="transparency.html" id="nav-badges" data-i18n="nav_badges">Badges</a></li>
-      </ul>
-      <div class="nav-actions" style="display:flex;gap:12px;align-items:center;">
-        <a href="overview.html" class="btn btn-outline btn-sm" data-i18n="footer_overview">📈 Overview</a>
-        <div class="badge badge-green" id="grade-badge-nav">—</div>
-      </div>
-    </div>
-  </nav>
+  <script>
+    renderNav({
+      actionsHTML: '<a href="overview.html" class="btn btn-outline btn-sm" data-i18n="footer_overview">📈 Overview</a><div class="badge badge-green" id="grade-badge-nav">—</div>'
+    });
+  </script>
 
   <!-- Main -->
   <main class="page-main" id="main-content">
@@ -233,8 +221,8 @@
     </div>
   </main>
 
-  <script src="./js/calculator_engine.js"></script>
   <script src="./js/i18n.js"></script>
+  <script src="./js/calculator_engine.js"></script>
   <script>
     (async function() {
       I18n.init();
@@ -308,8 +296,7 @@
         const bikeStudents = parseFloat(document.getElementById('input-commute-bike')?.value) || 0;
         const carStudents = parseFloat(document.getElementById('input-commute-car')?.value) || 0;
 
-        // Calculate monthly km (assuming 22 school days/month)
-        const days = 22;
+        const days = APP_CONSTANTS.SCHOOL_DAYS_MONTH;
         const walk = walkStudents * avgDist * days;
         const cycle = cycleStudents * avgDist * days;
         const bus = busStudents * avgDist * days;
@@ -319,8 +306,7 @@
         const cNew = parseFloat(document.getElementById('input-paper-copies-new')?.value) || 0;
         const isRecycled = document.getElementById('input-paper-recycled')?.value === 'yes';
         
-        // assuming 1 copy/notebook is ~0.1kg of paper
-        let pVirg = cNew * 0.1;
+        let pVirg = cNew * APP_CONSTANTS.NOTEBOOK_WEIGHT_KG;
         let paperCO2 = 0;
         
         // If they recycle, we reward them by using the recycled emission factor for their copies.
@@ -332,7 +318,7 @@
 
         // Waste Calculation (5-point scale distribution, 4 categories)
         const students = parseFloat(document.getElementById('input-demo-students')?.value) || 30;
-        const totalWasteMonthly = students * 1.2; // 1.2kg per student per month
+        const totalWasteMonthly = students * APP_CONSTANTS.WASTE_KG_PER_STUDENT_MONTH;
         
         const sBurn = parseInt(document.querySelector('input[name="waste-scale-burn"]:checked')?.value) || 0;
         const sPit = parseInt(document.querySelector('input[name="waste-scale-pit"]:checked')?.value) || 0;

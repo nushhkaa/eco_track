@@ -139,25 +139,16 @@
   </style>
   <script src="./js/geographic_matrix.js"></script>
   <script src="./js/emission_factors.js"></script>
+  <script src="./js/utils.js"></script>
+  <script src="./js/nav.js"></script>
 </head>
 <body>
-
-  <!-- ── Navigation ── -->
-  <nav class="nav" role="navigation" aria-label="Main navigation">
-    <div class="container nav__inner">
-      <a href="index.html" class="nav__logo" id="nav-logo">
-        <div class="nav__logo-icon">🌿</div>
-        Eco-Tracks
-      </a>
-      <ul class="nav__links" role="list">
-        <li><a href="index.html" id="nav-missions" data-i18n="nav_missions">Missions</a></li>
-        <li><a href="admin.html" class="active" id="nav-myschool" data-i18n="nav_myschool">My School</a></li>
-        
-        <li><a href="transparency.html" id="nav-badges" data-i18n="nav_badges">Badges</a></li>
-      </ul>
-      <a href="index.html" class="btn btn-ghost btn-sm" id="nav-home-btn" data-i18n="nav_home">🏠 Home</a>
-    </div>
-  </nav>
+  <script>
+    renderNav({
+      activePage: 'admin.html',
+      actionsHTML: '<a href="index.html" class="btn btn-ghost btn-sm" id="nav-home-btn" data-i18n="nav_home">🏠 Home</a>'
+    });
+  </script>
 
   <!-- ── Main ── -->
   <main class="page-main" id="main-content">
@@ -225,20 +216,7 @@
 
                 <div class="form-group">
                   <label class="form-label" for="report-month" data-i18n="setup_month">Reporting Month</label>
-                  <select id="report-month" class="form-select" required>
-                    <option value="January">January</option>
-                    <option value="February">February</option>
-                    <option value="March">March</option>
-                    <option value="April">April</option>
-                    <option value="May">May</option>
-                    <option value="June">June</option>
-                    <option value="July">July</option>
-                    <option value="August">August</option>
-                    <option value="September">September</option>
-                    <option value="October">October</option>
-                    <option value="November">November</option>
-                    <option value="December">December</option>
-                  </select>
+                  <select id="report-month" class="form-select" required></select>
                 </div>
               </div>
 
@@ -322,26 +300,11 @@
     </div>
   </main>
 
-  <!-- ── Footer ── -->
-  <footer class="footer" role="contentinfo">
-    <div class="container">
-      <div class="footer__inner">
-        <div>
-          <div class="footer__brand">Eco-Tracks <span>| Nepal</span></div>
-          <div class="footer__copy">© 2026 <a href="transparency.html">HimalEdge Eco-Track</a></div>
-        </div>
-        <div class="footer__actions">
-          <button class="btn btn-ghost btn-sm" id="btn-sync-footer" data-i18n="footer_sync">🔄 Sync with School Server</button>
-          <button class="btn btn-outline btn-sm" id="btn-reset-data" style="color:var(--red);border-color:var(--red)">🗑️ Reset Data</button>
-          <a href="overview.html" class="btn btn-primary btn-sm" data-i18n="footer_overview">📈 Sync with my school</a>
-        </div>
-      </div>
-    </div>
-  </footer>
-
   <script src="./js/calculator_engine.js"></script>
   <script src="./js/i18n.js"></script>
   <script>
+    renderFooter({ showOverviewLink: true });
+    buildMonthOptions(document.getElementById('report-month'));
     I18n.init();
 
     const engine = new CalculatorEngine();
@@ -469,14 +432,6 @@
       const result = await StorageManager.syncWithServer();
       showToast(result.message, result.success ? 'success' : 'error');
     });
-
-    function showToast(msg, type = 'success') {
-      const t = document.createElement('div');
-      t.className = `toast toast--${type}`;
-      t.textContent = msg;
-      document.body.appendChild(t);
-      setTimeout(() => t.remove(), 3500);
-    }
   </script>
 </body>
 </html>

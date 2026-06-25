@@ -146,27 +146,16 @@
   </style>
   <script src="./js/geographic_matrix.js"></script>
   <script src="./js/emission_factors.js"></script>
+  <script src="./js/utils.js"></script>
+  <script src="./js/nav.js"></script>
 </head>
 <body>
-
-  <!-- ── Navigation ── -->
-  <nav class="nav" role="navigation" aria-label="Main navigation">
-    <div class="container nav__inner">
-      <a href="index.html" class="nav__logo" id="nav-logo">
-        <div class="nav__logo-icon">🌿</div>
-        Eco-Tracks
-      </a>
-      <ul class="nav__links" role="list">
-        <li><a href="index.html" class="active" id="nav-missions" data-i18n="nav_missions">Missions</a></li>
-        <li><a href="admin.html" id="nav-myschool" data-i18n="nav_myschool">My School</a></li>
-        <li><a href="transparency.html" id="nav-badges" data-i18n="nav_badges">Badges</a></li>
-      </ul>
-      
-      <div class="nav-actions" style="display:flex;gap:12px;align-items:center;">
-        <a href="overview.html" class="btn btn-outline btn-sm" data-i18n="footer_overview">📈 Overview</a>
-      </div>
-    </div>
-  </nav>
+  <script>
+    renderNav({
+      activePage: 'index.html',
+      actionsHTML: '<a href="overview.html" class="btn btn-outline btn-sm" data-i18n="footer_overview">📈 Overview</a>'
+    });
+  </script>
 
   <!-- ── Main ── -->
   <main class="page-main" id="main-content">
@@ -219,27 +208,9 @@
     </div>
   </main>
 
-  <!-- ── Footer ── -->
-  <footer class="footer" role="contentinfo">
-    <div class="container">
-      <div class="footer__inner">
-        <div>
-          <div class="footer__brand">Eco-Tracks <span>| Nepal</span></div>
-          <div class="footer__copy">© 2026 <a href="transparency.html">HimalEdge Eco-Track</a></div>
-        </div>
-        <div class="footer__actions">
-          <button class="btn btn-ghost btn-sm" id="btn-sync-footer" data-i18n="footer_sync">
-            🔄 Sync with School Server
-          </button>
-          <button class="btn btn-outline btn-sm" id="btn-reset-data" style="color:var(--red);border-color:var(--red)">🗑️ Reset Data</button>
-        </div>
-      </div>
-    </div>
-  </footer>
-
   <script src="./js/i18n.js"></script>
   <script>
-
+    renderFooter();
     I18n.init();
 
     // Student Portal Lockout Logic
@@ -250,6 +221,11 @@
       } else {
         window.location.href = 'login.html';
       }
+    });
+
+    document.getElementById('btn-sync-footer').addEventListener('click', async () => {
+      const result = await StorageManager.syncWithServer();
+      showToast(result.message, result.success ? 'success' : 'error');
     });
 
     // Update stats bar if data exists

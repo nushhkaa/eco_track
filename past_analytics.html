@@ -66,26 +66,15 @@
   </style>
   <script src="./js/geographic_matrix.js"></script>
   <script src="./js/emission_factors.js"></script>
+  <script src="./js/utils.js"></script>
+  <script src="./js/nav.js"></script>
 </head>
 <body>
-
-  <!-- Navigation -->
-  <nav class="nav" role="navigation">
-    <div class="container nav__inner">
-      <a href="index.html" class="nav__logo">
-        <div class="nav__logo-icon">🌿</div>
-        Eco-Tracks
-      </a>
-      <ul class="nav__links" role="list">
-        <li><a href="index.html">Missions</a></li>
-        <li><a href="admin.html">My School</a></li>
-        <li><a href="transparency.html">Badges</a></li>
-      </ul>
-      <div class="nav-actions">
-        <a href="overview.html" class="btn btn-outline btn-sm">📉 Back to Overview</a>
-      </div>
-    </div>
-  </nav>
+  <script>
+    renderNav({
+      actionsHTML: '<a href="overview.html" class="btn btn-outline btn-sm">📉 Back to Overview</a>'
+    });
+  </script>
 
   <!-- Main -->
   <main class="page-main">
