@@ -83,16 +83,21 @@
           </div>
         </div>
 
-        <!-- Admin Password -->
-        <h3 class="mb-16 text-green">2. Admin Password</h3>
+        <!-- Admin Credentials -->
+        <h3 class="mb-16 text-green">2. Admin Account</h3>
         <div class="grid-2 mb-24">
+          <div class="form-group" style="grid-column:1/-1;">
+            <label class="form-label">Admin Username</label>
+            <input type="text" id="setup-username" class="form-input" required placeholder="e.g. principal" minlength="3" autocomplete="username">
+            <p class="text-sm text-muted mt-4">Used to log into the admin section on any device.</p>
+          </div>
           <div class="form-group">
             <label class="form-label">Admin Password</label>
-            <input type="password" id="setup-password" class="form-input" required placeholder="Choose a password" minlength="4">
+            <input type="password" id="setup-password" class="form-input" required placeholder="Choose a password" minlength="4" autocomplete="new-password">
           </div>
           <div class="form-group">
             <label class="form-label">Confirm Password</label>
-            <input type="password" id="setup-password-confirm" class="form-input" required placeholder="Repeat password">
+            <input type="password" id="setup-password-confirm" class="form-input" required placeholder="Repeat password" autocomplete="new-password">
           </div>
         </div>
 
@@ -150,12 +155,11 @@
 
     document.getElementById('setup-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const pw  = document.getElementById('setup-password').value;
-      const pw2 = document.getElementById('setup-password-confirm').value;
-      if (pw !== pw2) {
-        alert('Passwords do not match.');
-        return;
-      }
+      const uname = document.getElementById('setup-username').value.trim();
+      const pw    = document.getElementById('setup-password').value;
+      const pw2   = document.getElementById('setup-password-confirm').value;
+      if (!uname) { showToast('Enter an admin username.', 'error'); return; }
+      if (pw !== pw2) { showToast('Passwords do not match.', 'error'); return; }
       const config = {
         schoolName:  document.getElementById('setup-school').value,
         district:    document.getElementById('setup-district').value,
@@ -163,8 +167,10 @@
         reportYear:  document.getElementById('setup-year').value
       };
       StorageManager.saveAdminConfig(config);
+      StorageManager.setAdminUsername(uname);
       await StorageManager.setAdminPassword(pw);
-      showToast('✅ Setup complete! Redirecting to admin panel...', 'success');
+      StorageManager.setAdminSession();
+      showToast('✅ School setup complete!', 'success');
       setTimeout(() => window.location.href = 'admin.html', 1000);
     });
   </script>

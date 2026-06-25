@@ -9,6 +9,8 @@ class StorageManager {
     ADMIN_CONFIG:    'ecotracks_admin_config',
     ADMIN_AUTH:      'ecotracks_admin_auth',
     ADMIN_PASSWORD:  'ecotracks_admin_password',
+    ADMIN_USERNAME:  'ecotracks_admin_username',
+    MONTHLY_LOGS:    'ecotracks_monthly_logs',
     GRADE:           'ecotracks_current_grade',
     HOTSPOT:         'ecotracks_highest_hotspot',
     LANG:            'ecotracks_lang',
@@ -41,12 +43,69 @@ class StorageManager {
     localStorage.setItem(this.KEYS.ADMIN_PASSWORD, hash);
   }
 
+  static setAdminUsername(username) {
+    localStorage.setItem(this.KEYS.ADMIN_USERNAME, username.trim().toLowerCase());
+  }
+
+  static getAdminUsername() {
+    return localStorage.getItem(this.KEYS.ADMIN_USERNAME) || 'admin';
+  }
+
   static async authenticateAdmin(username, password) {
-    if (username !== 'admin') return false;
+    const storedUser = this.getAdminUsername();
+    if (username.trim().toLowerCase() !== storedUser) return false;
     const stored = localStorage.getItem(this.KEYS.ADMIN_PASSWORD);
     if (!stored) return false;
     const hashed = await this.hashPassword(password);
     return hashed === stored;
+  }
+
+  static isAdminSession() {
+    return sessionStorage.getItem('ecotracks_admin_session') === '1';
+  }
+
+  static setAdminSession() {
+    sessionStorage.setItem('ecotracks_admin_session', '1');
+  }
+
+  static clearAdminSession() {
+    sessionStorage.removeItem('ecotracks_admin_session');
+  }
+
+  // ─── Monthly Usage Logs ───────────────────────────────────────────────────
+  static addMonthlyLog(logData) {
+    const logs = this.getMonthlyLogs();
+    logs.push({ ...logData, id: `mlog_${Date.now()}`, savedAt: new Date().toISOString() });
+    localStorage.setItem(this.KEYS.MONTHLY_LOGS, JSON.stringify(logs));
+  }
+
+  static getMonthlyLogs() {
+    return JSON.parse(localStorage.getItem(this.KEYS.MONTHLY_LOGS)) || [];
+  }
+
+  static getLatestMonthlyLog() {
+    const logs = this.getMonthlyLogs();
+    return logs.length ? logs[logs.length - 1] : null;
+  }
+
+  // Returns adminConfig merged with latest monthly log values so calculators always get fresh data
+  static getEffectiveConfig() {
+    const base   = this.getAdminConfig() || {};
+    const latest = this.getLatestMonthlyLog();
+    if (!latest) return base;
+    return {
+      ...base,
+      electricity:  latest.electricity  ?? base.electricity,
+      water:        latest.water        ?? base.water,
+      diesel:       latest.diesel       ?? base.diesel,
+      lpg:          latest.lpg          ?? base.lpg,
+      wasteType:    latest.wasteType    ?? base.wasteType,
+      lunchMethod:  latest.lunchMethod  ?? base.lunchMethod,
+      leakingTaps:  latest.leakingTaps  ?? base.leakingTaps,
+      greyWaterUse: latest.greyWaterUse ?? base.greyWaterUse,
+      reportMonth:  latest.month        ?? base.reportMonth,
+      reportYear:   latest.year         ?? base.reportYear,
+    };
   }
 
   // ─── Language ────────────────────────────────────────────────────────────────

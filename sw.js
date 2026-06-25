@@ -10,7 +10,6 @@ const ASSETS_TO_CACHE = [
   './index.html',
   './setup.html',
   './admin.html',
-  './admin_login.html',
   './class_select.html',
   './student.html',
   './analytics.html',

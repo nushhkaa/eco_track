@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Teacher's Operations Ledger — Log your school's environmental data to configure Eco-Tracks Nepal.">
-  <title>Teacher's Operations Ledger — Eco-Tracks Nepal</title>
+  <title>My School — Eco-Tracks Nepal</title>
   <script src="./js/storage_manager.js"></script>
   <script>
     if (!StorageManager.getAdminConfig()) { window.location.replace('setup.html'); }
@@ -13,131 +12,78 @@
   <meta name="theme-color" content="#2D6A2F">
   <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');</script>
   <link rel="stylesheet" href="./css/main.css">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    .admin-hero {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 32px;
-      margin-bottom: 40px;
-    }
-    .admin-hero__content h1 {
-      color: var(--green-800);
-      margin-bottom: 10px;
-    }
-    .admin-hero__content p {
-      font-size: 1rem;
-      color: var(--text-muted);
-    }
-    .admin-hero__img {
-      font-size: 5rem;
-      flex-shrink: 0;
-    }
-
-    .admin-grid {
-      display: grid;
-      grid-template-columns: 1fr 1.4fr;
-      gap: 24px;
-      align-items: start;
-    }
-
-    .card-header {
+    .school-profile-card {
+      background: linear-gradient(135deg, var(--green-700), var(--green-800));
+      border-radius: var(--radius-xl);
+      padding: 28px 32px;
+      color: #fff;
+      margin-bottom: 24px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .school-profile-card h2 { font-size: 1.6rem; margin-bottom: 6px; }
+    .school-profile-card p  { opacity: 0.85; font-size: 0.9rem; }
+
+    .log-form-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 28px 32px;
+      box-shadow: var(--shadow-card);
       margin-bottom: 24px;
     }
-
-    .card-header__icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-    }
-
-    .card-header__icon--globe { background: var(--blue-light); }
-    .card-header__icon--chart { background: var(--green-100); }
-
-    .card-header__title {
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: var(--text-primary);
-    }
+    .log-form-panel h3 { margin-bottom: 20px; color: var(--text-primary); }
 
     .metrics-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
       gap: 16px;
     }
-
-    .metric-field {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
     .metric-label {
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 5px;
+      font-size: 0.82rem; font-weight: 700;
+      color: var(--text-muted); display: block; margin-bottom: 6px;
     }
 
-    .sync-info {
-      font-size: 0.8rem;
-      color: var(--text-caption);
-      text-align: center;
-      margin-top: 12px;
-    }
-
-    .district-info-box {
-      background: var(--bg-page);
-      border-radius: var(--radius-md);
-      padding: 14px 16px;
+    .log-history-table {
+      width: 100%;
+      border-collapse: collapse;
       font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-top: 10px;
-      display: none;
-      border: 1px solid var(--border);
     }
-
-    .district-info-box.visible { display: block; }
-
-    .district-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 3px 12px;
-      border-radius: var(--radius-pill);
-      font-size: 0.78rem;
+    .log-history-table th {
+      background: var(--bg-page);
+      padding: 10px 12px;
+      text-align: left;
       font-weight: 700;
-      margin-bottom: 6px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
     }
+    .log-history-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-body);
+    }
+    .log-history-table tr:last-child td { border-bottom: none; }
+    .log-history-table .latest-row { background: #F1F8E9; font-weight: 700; }
 
-    .success-panel {
-      display: none;
-      background: linear-gradient(135deg, var(--green-50), #fff);
-      border: 1.5px solid var(--green-300);
-      border-radius: var(--radius-lg);
-      padding: 24px;
+    .locked-overlay {
+      background: var(--bg-card);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-xl);
+      padding: 40px;
       text-align: center;
-      margin-top: 20px;
+      margin-bottom: 24px;
     }
-
-    .success-panel.visible { display: block; animation: fadeUp 0.4s ease; }
-    .success-panel h3 { color: var(--green-700); margin-bottom: 8px; }
-    .success-panel p  { color: var(--text-muted); font-size: 0.9rem; }
+    .locked-overlay h3 { color: var(--text-primary); margin-bottom: 8px; }
+    .locked-overlay p  { color: var(--text-muted); margin-bottom: 20px; }
 
     @media (max-width: 768px) {
-      .admin-grid { grid-template-columns: 1fr; }
-      .metrics-grid { grid-template-columns: 1fr; }
-      .admin-hero { flex-direction: column; }
+      .metrics-grid { grid-template-columns: 1fr 1fr; }
+      .school-profile-card { flex-direction: column; }
     }
   </style>
   <script src="./js/geographic_matrix.js"></script>
@@ -147,200 +93,12 @@
 </head>
 <body>
   <script>
-    renderNav({
-      activePage: 'admin.html',
-      actionsHTML: '<a href="index.html" class="btn btn-ghost btn-sm" id="nav-home-btn" data-i18n="nav_home">🏠 Home</a>'
-    });
+    renderNav({ activePage: 'admin.html' });
   </script>
 
-  <!-- ── Main ── -->
-  <main class="page-main" id="main-content">
+  <main class="page-main">
     <div class="container">
-
-      <!-- Hero -->
-      <div class="admin-hero animate-fade-up">
-        <div class="admin-hero__content">
-          <h1 id="admin-heading" data-i18n="admin_title">Teacher's Operations Ledger</h1>
-          <p data-i18n="admin_desc">Log your school's environmental data to unlock new adventure missions for your students!</p>
-        </div>
-        <div class="admin-hero__img" aria-hidden="true">📚</div>
-      </div>
-
-      <!-- Form -->
-      <form id="admin-form" novalidate onsubmit="event.preventDefault();">
-        <div class="admin-grid">
-
-          <!-- Left Column Cards -->
-          <div class="flex-col gap-24">
-            <!-- School Profile (Read-Only) -->
-            <div class="card animate-fade-up delay-1">
-              <div class="card-header">
-                <div class="card-header__icon card-header__icon--globe">🌐</div>
-                <div class="card-header__title">School Profile</div>
-              </div>
-              <div class="info-box">
-                <div class="meta-label">School Name</div>
-                <div id="display-school-name" class="display-value mb-16">-</div>
-
-                <div class="meta-label">Region / District</div>
-                <div id="display-district-name" class="display-value display-value--sm">-</div>
-                <!-- Dynamic district info -->
-                <div class="district-info-box mt-12" id="district-info-box" role="status" aria-live="polite">
-                  <div id="district-badge-wrap"></div>
-                  <div id="district-challenge-text"></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Environment Details Card -->
-            <div class="card animate-fade-up delay-1">
-              <h3 class="mb-16">🏫 Environment Details</h3>
-              <div class="flex-col gap-16">
-                <div class="form-group mb-16">
-                  <label class="form-label" for="student-count">Student Count</label>
-                  <input class="form-input" type="number" id="student-count" placeholder="450" min="1" max="5000">
-                </div>
-              
-                <div class="form-group mb-16">
-                  <label class="form-label" for="config-muni-waste">School Municipal Waste Collection</label>
-                  <select class="form-select" id="config-muni-waste">
-                    <option value="none">None (Local burning/pit only)</option>
-                    <option value="mixed">Single Mixed Collection</option>
-                    <option value="separated">Separated Collection (Recycling/Compost)</option>
-                  </select>
-                </div>
-                <div class="form-group mb-16">
-                  <label class="form-label" for="config-admin-paper">Admin Paper Recycled (kg/month)</label>
-                  <input type="number" id="config-admin-paper" class="form-input" min="0" value="0" placeholder="e.g. 5">
-                  <p class="text-sm text-muted mt-8">Amount of school/office paper given to collectors</p>
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label" for="report-month" data-i18n="setup_month">Reporting Month</label>
-                  <select id="report-month" class="form-select" required></select>
-                </div>
-              </div>
-
-              <!-- Quote -->
-              <div class="blockquote mt-24">
-                "Accurate data helps us tailor your students' eco-quest levels. Every number counts toward a greener tomorrow!"
-                <cite>— Professor Pine</cite>
-              </div>
-            </div>
-          </div>
-
-          <!-- Consumption Metrics Card -->
-          <div class="card animate-fade-up delay-2">
-            <div class="card-header">
-              <div class="card-header__icon card-header__icon--chart">📊</div>
-              <div class="card-header__title" data-i18n="admin_metrics_title">Consumption Metrics</div>
-            </div>
-
-            <p class="text-muted text-sm mb-16" data-i18n="admin_metrics_desc">Enter whole-school monthly data.</p>
-
-            <div class="metrics-grid">
-              <div class="metric-field">
-                <label class="metric-label" for="input-elec" data-i18n="admin_elec">⚡ Electricity (kWh)</label>
-                <input class="form-input" type="number" id="input-elec" placeholder="e.g. 120" min="0" step="0.1">
-              </div>
-              <div class="metric-field">
-                <label class="metric-label" for="input-water" data-i18n="admin_water">💧 Water (Litres)</label>
-                <input class="form-input" type="number" id="input-water" placeholder="e.g. 5000" min="0" step="1">
-              </div>
-              <div class="metric-field">
-                <label class="metric-label" for="input-diesel" data-i18n="admin_diesel">⛽ Diesel/Petrol (L)</label>
-                <input class="form-input" type="number" id="input-diesel" placeholder="e.g. 40" min="0" step="0.1">
-              </div>
-              <div class="metric-field">
-                <label class="metric-label" for="input-lpg" data-i18n="admin_lpg">🔥 LPG Cylinders</label>
-                <input class="form-input" type="number" id="input-lpg" placeholder="e.g. 2" min="0" step="1">
-              </div>
-            </div>
-            
-            <div class="form-group mt-16">
-              <label class="metric-label" for="input-waste-primary" data-i18n="admin_waste_type">🗑️ Primary Waste Disposal</label>
-              <select class="form-select" id="input-waste-primary">
-                <option value="burning">Open-Air Burning</option>
-                <option value="municipal">Municipal Collection</option>
-                <option value="compost">Composting & Recycling</option>
-                <option value="pit">Anaerobic Pit Burial</option>
-              </select>
-            </div>
-
-            <div class="form-group mt-16">
-              <label class="metric-label" for="input-waste-segregated">♻️ Waste Segregation in School</label>
-              <select class="form-select" id="input-waste-segregated">
-                <option value="no">No — single mixed bin</option>
-                <option value="yes">Yes — separate bins for dry/wet</option>
-              </select>
-            </div>
-
-            <div class="form-group mt-16">
-              <label class="metric-label" for="input-lunch-method">🍳 School Canteen Lunch Method</label>
-              <select class="form-select" id="input-lunch-method">
-                <option value="lpg">LPG Gas</option>
-                <option value="firewood">Firewood</option>
-                <option value="briquettes">Briquettes</option>
-                <option value="electric">Electric</option>
-              </select>
-            </div>
-
-            <div class="metrics-grid mt-16">
-              <div class="metric-field">
-                <label class="metric-label" for="input-leaking-taps">🚰 Leaking Taps in School</label>
-                <input class="form-input" type="number" id="input-leaking-taps" placeholder="0" min="0" step="1" value="0">
-              </div>
-              <div class="metric-field">
-                <label class="metric-label" for="input-grey-water">💧 Grey Water Reuse</label>
-                <select class="form-select" id="input-grey-water">
-                  <option value="no">No grey water reuse</option>
-                  <option value="yes">Yes — we reuse grey water</option>
-                </select>
-              </div>
-            </div>
-            <div id="grey-water-suggestion" style="display:none;background:#FFF9C4;border:1px solid #F9A825;border-radius:8px;padding:12px;margin-top:8px;font-size:0.85rem;color:#7A5C00;">
-              💡 <strong>Suggestion:</strong> Consider setting up grey water collection for school garden / fulbari irrigation — a low-cost way to reduce water footprint.
-            </div>
-
-            <!-- Live CO2 preview -->
-            <div class="alert alert--info mt-24" id="co2-preview-box" style="display:none">
-              <span class="alert__icon">🌿</span>
-              <div>
-                <div class="font-bold text-sm">Estimated Monthly School CO₂e:</div>
-                <div id="co2-preview-val" class="font-extrabold co2-preview-val"></div>
-              </div>
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-lg mt-24 w-full" id="btn-save-admin" data-i18n="admin_btn_save">
-              💾 Save School Parameters
-            </button>
-
-            <div class="form-group mt-16" style="border-top:1px solid var(--border);padding-top:16px;">
-              <label class="metric-label" for="input-sync-url">🌐 Sync Server URL <span style="font-weight:400;color:var(--text-caption)">(optional — leave blank to skip online sync)</span></label>
-              <input class="form-input mt-6" type="url" id="input-sync-url" placeholder="https://yourschool.edu.np/ecotracks/sync_server.php">
-              <p class="text-sm text-muted mt-4">Set this to enable cloud sync and the nearby-schools heatmap.</p>
-            </div>
-
-            <p class="sync-info" id="last-sync-text">Last synced: Never</p>
-          </div>
-
-        </div>
-
-        <!-- Success Panel -->
-        <div class="success-panel" id="success-panel">
-          <div style="font-size:3rem;margin-bottom:12px">✅</div>
-          <h3>School Profile Saved!</h3>
-          <p>Configuration updated successfully. Students can now start their eco-missions!</p>
-          <div class="flex justify-center gap-12 mt-24">
-            <a href="index.html" class="btn btn-outline btn-sm" id="btn-go-home">🏠 Go Home</a>
-            <a href="student.html" class="btn btn-primary btn-sm" id="btn-go-student">🎒 Launch Student Portal</a>
-            <button type="button" class="btn btn-outline btn-sm" id="btn-export-setup" style="border-color:var(--blue);color:var(--blue)">📤 Export Setup File</button>
-          </div>
-          <p class="text-sm text-muted mt-12" style="text-align:center;">Share the exported file with other class laptops so they can import this school setup.</p>
-        </div>
-
-      </form>
-
+      <div id="admin-body"></div>
     </div>
   </main>
 
@@ -348,156 +106,276 @@
   <script src="./js/i18n.js"></script>
   <script>
     renderFooter({ showOverviewLink: true });
-    buildMonthOptions(document.getElementById('report-month'));
     I18n.init();
 
     const engine = new CalculatorEngine();
     engine.init();
 
-    let allDistricts = {};
+    const config  = StorageManager.getAdminConfig() || {};
+    const geoData = window.GEOGRAPHIC_MATRIX?.districts || {};
+    const distData = geoData[config.district] || { name: config.district || '—', region: '—' };
+    const isAdmin  = StorageManager.isAdminSession();
 
-    function loadDistricts() {
-      try {
-        const data = window.GEOGRAPHIC_MATRIX;
-        allDistricts = data.districts;
-        loadSavedConfig();
-      } catch(e) { console.error("Error loading districts", e); }
-    }
+    render();
 
-    function loadSavedConfig() {
-      const cfg = StorageManager.getAdminConfig();
-      if(cfg) {
-        document.getElementById('display-school-name').textContent = cfg.schoolName || 'Unknown School';
-        const distData = allDistricts[cfg.district];
-        document.getElementById('display-district-name').textContent = distData ? `${distData.name} (${distData.region})` : (cfg.district || 'Unknown District');
-        
-        document.getElementById('student-count').value = cfg.studentCount || '';
-        document.getElementById('report-month').value = cfg.reportMonth || 'January';
-        
-        if (cfg.muniWaste) document.getElementById('config-muni-waste').value = cfg.muniWaste;
-        document.getElementById('config-admin-paper').value = cfg.adminPaperRecycled || 0;
-        document.getElementById('input-elec').value = cfg.electricity || 0;
-        document.getElementById('input-water').value = cfg.water || 0;
-        document.getElementById('input-diesel').value = cfg.diesel || 0;
-        document.getElementById('input-lpg').value = cfg.lpg || 0;
-        document.getElementById('input-waste-primary').value = cfg.wasteType || 'burning';
-        document.getElementById('input-waste-segregated').value = cfg.wasteSegregated || 'no';
-        document.getElementById('input-lunch-method').value = cfg.lunchMethod || 'lpg';
-        document.getElementById('input-leaking-taps').value = cfg.leakingTaps || 0;
-        document.getElementById('input-grey-water').value = cfg.greyWaterUse || 'no';
-        toggleGreyWaterSuggestion(cfg.greyWaterUse || 'no');
-        if (cfg.syncServerUrl) document.getElementById('input-sync-url').value = cfg.syncServerUrl;
-        
-        if (cfg.savedAt) {
-          const d = new Date(cfg.savedAt);
-          document.getElementById('last-sync-text').textContent = `Last updated: ${d.toLocaleDateString()} at ${d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}`;
+    function render() {
+      const isAdmin = StorageManager.isAdminSession();
+      const logs    = StorageManager.getMonthlyLogs();
+      const latest  = StorageManager.getLatestMonthlyLog();
+
+      const schoolCard = `
+        <div class="school-profile-card animate-fade-up">
+          <div>
+            <h2>🏫 ${config.schoolName || 'My School'}</h2>
+            <p>📍 ${distData.name} · ${distData.region} Region · ${config.studentCount || '—'} students</p>
+          </div>
+          <div style="text-align:right;">
+            <a href="setup.html" class="btn btn-outline btn-sm" style="border-color:rgba(255,255,255,0.5);color:#fff;background:rgba(255,255,255,0.1)">✏️ Re-run Setup</a>
+          </div>
+        </div>`;
+
+      // Auth gate for edit form
+      const editSection = isAdmin ? buildLogForm(latest) : `
+        <div class="locked-overlay animate-fade-up delay-1">
+          <div style="font-size:3rem;margin-bottom:12px;">🔒</div>
+          <h3>Admin Login Required</h3>
+          <p>Click the lock icon in the top navigation to log in and edit school data.</p>
+          <button class="btn btn-primary" onclick="document.getElementById('nav-account-btn').click()">🔓 Login as Admin</button>
+        </div>`;
+
+      const historySection = logs.length > 0 ? buildLogHistory(logs) : '';
+      const settingsSection = isAdmin ? buildSettings() : '';
+
+      document.getElementById('admin-body').innerHTML = schoolCard + editSection + historySection + settingsSection;
+
+      if (isAdmin) attachFormHandlers();
+
+      // Footer sync
+      document.getElementById('btn-sync-footer')?.addEventListener('click', async () => {
+        const result = await StorageManager.syncWithServer();
+        showToast(result.message, result.success ? 'success' : 'error');
+      });
+      document.getElementById('btn-reset-data')?.addEventListener('click', () => {
+        if (confirm('Reset ALL app data? This cannot be undone.')) {
+          localStorage.clear(); sessionStorage.clear(); location.href = 'setup.html';
         }
-        updateDistrictInfo(cfg.district);
-        updateCO2Preview();
+      });
+    }
+
+    function buildLogForm(latest) {
+      const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      const now    = new Date();
+      const mopts  = months.map((m, i) => `<option value="${m}"${latest?.month === m || (!latest && now.getMonth() === i) ? ' selected' : ''}>${m}</option>`).join('');
+      const yearNow = now.getFullYear();
+
+      return `
+        <div class="log-form-panel animate-fade-up delay-1">
+          <h3>📊 Log Monthly Usage</h3>
+          <p class="text-sm text-muted mb-20">Add a new monthly entry. The latest log is used in all calculations.</p>
+
+          <div class="metrics-grid mb-20">
+            <div>
+              <label class="metric-label">📅 Month</label>
+              <select class="form-select" id="log-month">${mopts}</select>
+            </div>
+            <div>
+              <label class="metric-label">Year</label>
+              <input class="form-input" type="number" id="log-year" value="${yearNow}" min="2020" max="2035">
+            </div>
+            <div>
+              <label class="metric-label">👥 Student Count</label>
+              <input class="form-input" type="number" id="log-students" placeholder="e.g. 450" min="1" value="${config.studentCount || ''}">
+            </div>
+          </div>
+
+          <div style="border-top:1px solid var(--border);padding-top:20px;margin-bottom:20px;">
+            <div style="font-weight:700;color:var(--text-primary);margin-bottom:14px;">Energy &amp; Utilities</div>
+            <div class="metrics-grid">
+              <div>
+                <label class="metric-label">⚡ Electricity (kWh)</label>
+                <input class="form-input" type="number" id="log-elec" placeholder="e.g. 120" min="0" step="0.1" value="${latest?.electricity || ''}">
+              </div>
+              <div>
+                <label class="metric-label">💧 Water (Litres)</label>
+                <input class="form-input" type="number" id="log-water" placeholder="e.g. 5000" min="0" value="${latest?.water || ''}">
+              </div>
+              <div>
+                <label class="metric-label">⛽ Diesel/Petrol (L)</label>
+                <input class="form-input" type="number" id="log-diesel" placeholder="e.g. 40" min="0" step="0.1" value="${latest?.diesel || ''}">
+              </div>
+              <div>
+                <label class="metric-label">🔥 LPG Cylinders</label>
+                <input class="form-input" type="number" id="log-lpg" placeholder="e.g. 2" min="0" step="1" value="${latest?.lpg || ''}">
+              </div>
+            </div>
+          </div>
+
+          <div style="border-top:1px solid var(--border);padding-top:20px;margin-bottom:20px;">
+            <div style="font-weight:700;color:var(--text-primary);margin-bottom:14px;">Waste &amp; Practices</div>
+            <div class="metrics-grid">
+              <div>
+                <label class="metric-label">🗑️ Primary Waste Disposal</label>
+                <select class="form-select" id="log-waste-type">
+                  <option value="burning" ${latest?.wasteType==='burning'?'selected':''}>Open-Air Burning</option>
+                  <option value="municipal" ${latest?.wasteType==='municipal'?'selected':''}>Municipal Collection</option>
+                  <option value="compost" ${latest?.wasteType==='compost'?'selected':''}>Composting &amp; Recycling</option>
+                  <option value="pit" ${latest?.wasteType==='pit'?'selected':''}>Anaerobic Pit Burial</option>
+                </select>
+              </div>
+              <div>
+                <label class="metric-label">🍳 Canteen Cooking Method</label>
+                <select class="form-select" id="log-lunch-method">
+                  <option value="lpg" ${latest?.lunchMethod==='lpg'?'selected':''}>LPG Gas</option>
+                  <option value="firewood" ${latest?.lunchMethod==='firewood'?'selected':''}>Firewood</option>
+                  <option value="briquettes" ${latest?.lunchMethod==='briquettes'?'selected':''}>Briquettes</option>
+                  <option value="electric" ${latest?.lunchMethod==='electric'?'selected':''}>Electric</option>
+                </select>
+              </div>
+              <div>
+                <label class="metric-label">♻️ Waste Segregation</label>
+                <select class="form-select" id="log-segregated">
+                  <option value="no" ${latest?.wasteSegregated==='no'?'selected':''}>No — single mixed bin</option>
+                  <option value="yes" ${latest?.wasteSegregated==='yes'?'selected':''}>Yes — dry/wet separated</option>
+                </select>
+              </div>
+              <div>
+                <label class="metric-label">🚰 Leaking Taps (count)</label>
+                <input class="form-input" type="number" id="log-leaking-taps" placeholder="0" min="0" value="${latest?.leakingTaps ?? 0}">
+              </div>
+              <div>
+                <label class="metric-label">💧 Grey Water Reuse</label>
+                <select class="form-select" id="log-grey-water">
+                  <option value="no" ${latest?.greyWaterUse==='no'?'selected':''}>No</option>
+                  <option value="yes" ${latest?.greyWaterUse==='yes'?'selected':''}>Yes — reuse for garden/flush</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live CO₂ estimate -->
+          <div id="co2-preview-box" style="display:none;background:var(--green-50);border:1px solid var(--green-300);border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
+            <span style="font-size:1.3rem;">🌿</span>
+            <div>
+              <div style="font-size:0.8rem;font-weight:700;color:var(--green-700);">Estimated School CO₂e this month</div>
+              <div id="co2-preview-val" style="font-size:1.4rem;font-weight:900;color:var(--green-800);"></div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-lg w-full" id="btn-log-save">💾 Save Monthly Log</button>
+        </div>`;
+    }
+
+    function buildLogHistory(logs) {
+      const recent = logs.slice().reverse().slice(0, 12);
+      return `
+        <div class="log-form-panel animate-fade-up delay-2">
+          <h3>📋 Monthly Log History</h3>
+          <div style="overflow-x:auto;">
+            <table class="log-history-table">
+              <thead>
+                <tr>
+                  <th>Month</th><th>Elec (kWh)</th><th>Water (L)</th><th>LPG (cyl)</th><th>Diesel (L)</th><th>Waste Type</th><th>Logged</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${recent.map((log, i) => `
+                  <tr class="${i === 0 ? 'latest-row' : ''}">
+                    <td>${i === 0 ? '⭐ ' : ''}${log.month || '?'} ${log.year || ''}</td>
+                    <td>${log.electricity ?? '—'}</td>
+                    <td>${log.water ?? '—'}</td>
+                    <td>${log.lpg ?? '—'}</td>
+                    <td>${log.diesel ?? '—'}</td>
+                    <td>${log.wasteType || '—'}</td>
+                    <td style="color:var(--text-caption)">${log.savedAt ? new Date(log.savedAt).toLocaleDateString() : '—'}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+          <p class="text-sm text-muted mt-12">⭐ = latest log used in all calculations</p>
+        </div>`;
+    }
+
+    function buildSettings() {
+      return `
+        <div class="log-form-panel animate-fade-up delay-2">
+          <h3>⚙️ Settings</h3>
+          <div class="metrics-grid">
+            <div>
+              <label class="metric-label">🌐 Sync Server URL</label>
+              <input class="form-input" type="url" id="input-sync-url" placeholder="https://yourschool.edu.np/ecotracks/sync_server.php" value="${config.syncServerUrl || ''}">
+              <p class="text-sm text-muted mt-4">Set to enable cloud sync and schools heatmap.</p>
+            </div>
+          </div>
+          <div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap;">
+            <button class="btn btn-primary" id="btn-save-settings">Save Settings</button>
+            <button class="btn btn-outline" id="btn-export-setup" style="border-color:var(--blue);color:var(--blue)">📤 Export Setup File</button>
+          </div>
+        </div>`;
+    }
+
+    function attachFormHandlers() {
+      // Live CO₂ preview
+      ['log-elec','log-lpg','log-water','log-diesel'].forEach(id => {
+        document.getElementById(id)?.addEventListener('input', updateCO2Preview);
+      });
+      updateCO2Preview();
+
+      function updateCO2Preview() {
+        const elec   = parseFloat(document.getElementById('log-elec')?.value) || 0;
+        const lpg    = parseFloat(document.getElementById('log-lpg')?.value)  || 0;
+        const waterL = parseFloat(document.getElementById('log-water')?.value) || 0;
+        const diesel = parseFloat(document.getElementById('log-diesel')?.value) || 0;
+        const co2Elec   = engine.calculateModule('energy',  'electricity_kwh',        elec);
+        const co2LPG    = engine.calculateModule('energy',  'lpg_cylinder',           lpg);
+        const co2Water  = engine.calculateModule('water',   'municipal_piped_m3',     waterL / 1000);
+        const co2Diesel = engine.calculateModule('commute', 'diesel_vehicle_litre',   diesel);
+        const total = co2Elec + co2LPG + co2Water + co2Diesel;
+        const box = document.getElementById('co2-preview-box');
+        if (total > 0 && box) {
+          box.style.display = 'flex';
+          document.getElementById('co2-preview-val').textContent = `${total.toFixed(2)} kg CO₂e / month`;
+        }
       }
+
+      // Save monthly log
+      document.getElementById('btn-log-save')?.addEventListener('click', () => {
+        const logData = {
+          month:        document.getElementById('log-month').value,
+          year:         parseInt(document.getElementById('log-year').value),
+          studentCount: parseInt(document.getElementById('log-students').value) || config.studentCount || 30,
+          electricity:  parseFloat(document.getElementById('log-elec').value)   || 0,
+          water:        parseFloat(document.getElementById('log-water').value)   || 0,
+          diesel:       parseFloat(document.getElementById('log-diesel').value)  || 0,
+          lpg:          parseFloat(document.getElementById('log-lpg').value)     || 0,
+          wasteType:    document.getElementById('log-waste-type').value,
+          wasteSegregated: document.getElementById('log-segregated').value,
+          lunchMethod:  document.getElementById('log-lunch-method').value,
+          leakingTaps:  parseInt(document.getElementById('log-leaking-taps').value) || 0,
+          greyWaterUse: document.getElementById('log-grey-water').value,
+        };
+
+        // Update admin config with latest student count
+        const updatedConfig = { ...config, studentCount: logData.studentCount };
+        StorageManager.saveAdminConfig(updatedConfig);
+
+        StorageManager.addMonthlyLog(logData);
+        showToast(`✅ ${logData.month} ${logData.year} logged!`, 'success');
+        render(); // Re-render to show updated history
+      });
+
+      // Save settings
+      document.getElementById('btn-save-settings')?.addEventListener('click', () => {
+        const syncUrl = document.getElementById('input-sync-url')?.value.trim() || null;
+        StorageManager.saveAdminConfig({ ...config, syncServerUrl: syncUrl });
+        showToast('✅ Settings saved!', 'success');
+      });
+
+      // Export setup
+      document.getElementById('btn-export-setup')?.addEventListener('click', () => {
+        StorageManager.exportSetupPackage();
+        showToast('📤 Setup file downloaded.', 'success');
+      });
     }
-
-    loadDistricts();
-
-    // District info is static now, handled in loadSavedConfig
-
-    function updateDistrictInfo(distKey) {
-      const box = document.getElementById('district-info-box');
-      const data = allDistricts[distKey];
-      if (!data) { box.classList.remove('visible'); return; }
-      
-      const colors = { Mountain: '#7986CB', Hilly: '#56C15B', Terai: '#FFB74D' };
-      const color = colors[data.region] || '#888';
-      
-      document.getElementById('district-badge-wrap').innerHTML =
-        `<span class="district-badge" style="background:${color}22;color:${color};">📍 ${data.region} Region</span>`;
-      document.getElementById('district-challenge-text').textContent = data.climate_challenge;
-      box.classList.add('visible');
-    }
-
-    function toggleGreyWaterSuggestion(val) {
-      document.getElementById('grey-water-suggestion').style.display = val === 'no' ? 'block' : 'none';
-    }
-    document.getElementById('input-grey-water').addEventListener('change', e => toggleGreyWaterSuggestion(e.target.value));
-
-    // Live CO2 preview on input change
-    ['input-elec', 'input-lpg', 'input-water', 'input-diesel'].forEach(id => {
-      document.getElementById(id).addEventListener('input', updateCO2Preview);
-    });
-
-    function updateCO2Preview() {
-      const elec = parseFloat(document.getElementById('input-elec').value) || 0;
-      const lpg  = parseFloat(document.getElementById('input-lpg').value) || 0;
-      const waterL = parseFloat(document.getElementById('input-water').value) || 0;
-      const diesel = parseFloat(document.getElementById('input-diesel').value) || 0;
-
-      const co2Elec   = engine.calculateModule('energy', 'electricity_kwh', elec);
-      const co2LPG    = engine.calculateModule('energy', 'lpg_cylinder', lpg);
-      const co2Water  = engine.calculateModule('water', 'municipal_piped_m3', waterL / 1000);
-      const co2Diesel = engine.calculateModule('commute', 'diesel_vehicle_litre', diesel);
-      const total = co2Elec + co2LPG + co2Water + co2Diesel;
-
-      if (total > 0) {
-        document.getElementById('co2-preview-box').style.display = 'flex';
-        document.getElementById('co2-preview-val').textContent = `${total.toFixed(2)} kg CO₂e / month`;
-      } else {
-        document.getElementById('co2-preview-box').style.display = 'none';
-      }
-    }
-
-    // Form submit
-    document.getElementById('admin-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const cfg = StorageManager.getAdminConfig();
-      const district = cfg ? cfg.district : null;
-      if (!district) {
-        showToast('⚠️ Please select a district in setup.', 'error');
-        return;
-      }
-
-      const config = {
-        district,
-        schoolName:   cfg ? cfg.schoolName : 'My School',
-        studentCount: parseInt(document.getElementById('student-count').value) || 30,
-        reportMonth:  document.getElementById('report-month').value,
-        reportYear:   StorageManager.getAdminConfig()?.reportYear || new Date().getFullYear(),
-        muniWaste:    document.getElementById('config-muni-waste').value,
-        adminPaperRecycled: parseFloat(document.getElementById('config-admin-paper').value) || 0,
-        electricity:  parseFloat(document.getElementById('input-elec').value) || 0,
-        water:        parseFloat(document.getElementById('input-water').value) || 0,
-        diesel:       parseFloat(document.getElementById('input-diesel').value) || 0,
-        lpg:          parseFloat(document.getElementById('input-lpg').value) || 0,
-        wasteType:    document.getElementById('input-waste-primary').value,
-        wasteSegregated: document.getElementById('input-waste-segregated').value,
-        lunchMethod:  document.getElementById('input-lunch-method').value,
-        leakingTaps:  parseInt(document.getElementById('input-leaking-taps').value) || 0,
-        greyWaterUse: document.getElementById('input-grey-water').value,
-        syncServerUrl: document.getElementById('input-sync-url').value.trim() || null,
-        savedAt:      new Date().toISOString()
-      };
-
-      StorageManager.saveAdminConfig(config);
-      document.getElementById('success-panel').classList.add('visible');
-      document.getElementById('success-panel').scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-      const now = new Date();
-      document.getElementById('last-sync-text').textContent =
-        `Last updated: Today at ${now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}`;
-
-      showToast('✅ School configuration saved!', 'success');
-    });
-
-    // Export setup package for other devices
-    document.getElementById('btn-export-setup')?.addEventListener('click', () => {
-      StorageManager.exportSetupPackage();
-      showToast('📤 Setup file downloaded! Share it with other class laptops.', 'success');
-    });
-
-    // Footer
-    document.getElementById('btn-sync-footer').addEventListener('click', async () => {
-      const result = await StorageManager.syncWithServer();
-      showToast(result.message, result.success ? 'success' : 'error');
-    });
   </script>
 </body>
 </html>

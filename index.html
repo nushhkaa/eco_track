@@ -3,149 +3,148 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Eco-Tracks Nepal — Offline-first carbon accounting system for schools across Nepal. Track, learn, and transform your school's environmental footprint.">
-  <title>Eco-Tracks Nepal — School Carbon Mission</title>
-  
+  <meta name="description" content="Eco-Tracks Nepal — Offline-first carbon footprint tracker for schools.">
+  <title>Eco-Tracks Nepal</title>
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#2D6A2F">
   <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');</script>
   <script src="./js/storage_manager.js"></script>
   <link rel="stylesheet" href="./css/main.css">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    /* ── Homepage-specific styles ── */
+    /* ── Hero ── */
     .hero {
-      padding: 60px 0 80px;
+      padding: 60px 0 48px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 40px;
     }
-
-    .hero__content { flex: 1; max-width: 600px; }
-    
+    .hero__content { flex: 1; max-width: 560px; }
     .hero h1 {
-      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-size: clamp(2rem, 4.5vw, 3.6rem);
       line-height: 1.1;
       color: var(--green-800);
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
-
     .hero p {
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       color: var(--text-body);
-      margin-bottom: 36px;
-      line-height: 1.6;
+      margin-bottom: 32px;
+      line-height: 1.65;
     }
-
-    .hero__buttons {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-
     .hero__visual {
       flex: 1;
       display: flex;
       justify-content: center;
-      position: relative;
     }
-
     .hero-circle {
-      width: 400px;
-      height: 400px;
+      width: 340px;
+      height: 340px;
       border-radius: 50%;
       background: linear-gradient(135deg, #A8E6CF, #DCEDC1);
-      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.06);
     }
-
     .hero-circle::after {
       content: '🌍';
-      font-size: 12rem;
+      font-size: 10rem;
       animation: float 6s ease-in-out infinite;
     }
-
     @keyframes float {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(-20px); }
-      100% { transform: translateY(0px); }
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-18px); }
+    }
+    @media (max-width: 768px) {
+      .hero { flex-direction: column; text-align: center; padding: 36px 0 32px; }
+      .hero-circle { width: 220px; height: 220px; }
+      .hero-circle::after { font-size: 6.5rem; }
     }
 
-    /* Portal Cards */
-    .portal-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 24px;
-      margin-bottom: 64px;
-    }
-
-    .portal-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-xl);
-      padding: 40px 32px;
-      text-align: center;
-      transition: var(--transition);
-      box-shadow: var(--shadow-sm);
+    /* ── Setup prompt state ── */
+    .setup-prompt {
       display: flex;
       flex-direction: column;
       align-items: center;
-    }
-
-    .portal-card:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--shadow-lg);
-      border-color: var(--green-300);
-    }
-
-    .portal-card__icon {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
       justify-content: center;
-      font-size: 2.5rem;
-      margin-bottom: 24px;
+      min-height: 60vh;
+      text-align: center;
+      gap: 24px;
     }
+    .setup-prompt__icon { font-size: 5rem; }
+    .setup-prompt h1 { color: var(--green-800); font-size: clamp(1.8rem,4vw,2.8rem); }
+    .setup-prompt p  { color: var(--text-muted); max-width: 480px; line-height: 1.7; }
 
-    .portal-card__icon--student { background: var(--gold-bg); color: #C8A400; }
-    .portal-card__icon--teacher { background: var(--blue-light); color: var(--blue); }
-
-    .portal-card h3 { margin-bottom: 12px; font-size: 1.4rem; }
-    .portal-card p { color: var(--text-muted); margin-bottom: 24px; line-height: 1.6; flex-grow: 1; }
-
-    /* Dashboard Preview Stats */
-    .stats-preview {
-      background: linear-gradient(135deg, var(--green-700), var(--green-800));
-      border-radius: var(--radius-xl);
-      padding: 48px;
-      color: #fff;
+    /* ── Dashboard state ── */
+    .dash-school-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 40px;
-      margin-bottom: 64px;
-      box-shadow: 0 20px 40px rgba(76, 175, 80, 0.2);
+      gap: 20px;
+      padding: 24px 0 8px;
+      flex-wrap: wrap;
+    }
+    .dash-school-header__name { font-size: clamp(1.4rem,3vw,2rem); font-weight: 900; color: var(--green-800); }
+    .dash-school-header__meta { font-size: 0.9rem; color: var(--text-muted); margin-top: 4px; }
+
+    .dash-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px,1fr));
+      gap: 16px;
+      margin: 20px 0 32px;
+    }
+    .dash-stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 18px;
+      box-shadow: var(--shadow-sm);
+    }
+    .dash-stat-card__val { font-size: 2rem; font-weight: 900; color: var(--green-800); line-height: 1; margin-bottom: 6px; }
+    .dash-stat-card__label { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .dash-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
     }
 
-    .stat-item { text-align: center; }
-    .stat-item__val { font-size: 3rem; font-weight: 900; margin-bottom: 8px; line-height: 1; }
-    .stat-item__label { font-size: 0.9rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; }
-
-    .nav-actions { display: flex; align-items: center; gap: 12px; }
-
-    @media (max-width: 768px) {
-      .hero { flex-direction: column; text-align: center; padding: 40px 0; }
-      .hero-circle { width: 280px; height: 280px; }
-      .hero-circle::after { font-size: 8rem; }
-      .hero__buttons { justify-content: center; }
-      .stats-preview { flex-direction: column; padding: 32px; }
+    .dash-grade-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px,1fr));
+      gap: 12px;
+      margin-bottom: 8px;
     }
+    .dash-grade-chip {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .recent-log {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      box-shadow: var(--shadow-sm);
+    }
+    .recent-log__label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
+    .recent-log__val   { font-size: 1.1rem; font-weight: 800; color: var(--text-primary); }
   </style>
   <script src="./js/geographic_matrix.js"></script>
   <script src="./js/emission_factors.js"></script>
@@ -154,90 +153,166 @@
 </head>
 <body>
   <script>
-    renderNav({
-      activePage: 'index.html',
-      actionsHTML: '<a href="overview.html" class="btn btn-outline btn-sm" data-i18n="footer_overview">📈 Overview</a>'
-    });
+    renderNav({ activePage: 'index.html' });
   </script>
 
-  <!-- ── Main ── -->
   <main class="page-main" id="main-content">
     <div class="container">
-
-      <!-- Hero Section -->
-      <section class="hero" aria-labelledby="hero-heading">
-        <div class="hero__content animate-fade-up">
-          <h1 id="hero-heading" data-i18n="home_title">Eco-Tracks: Our School's<br>Carbon Mission!</h1>
-          <p data-i18n="home_desc">Join the adventure! Track your classroom's energy use, food waste, and green travel to earn badges and save the planet — one step at a time.</p>
-        </div>
-        <div class="hero__visual animate-fade-up delay-1">
-          <div class="hero-circle"></div>
-        </div>
-      </section>
-
-      <!-- Portal Cards -->
-      <section class="portal-cards animate-fade-up delay-2">
-        <div class="portal-card">
-          <div class="portal-card__icon portal-card__icon--student">🎒</div>
-          <h3 data-i18n="home_btn_student">Student Portal</h3>
-          <p>Select your class section, log your daily commute and waste, and commit to climate solutions.</p>
-          <button class="btn btn-primary btn-lg" id="btn-student-portal" style="width:100%">Enter Student Portal</button>
-        </div>
-        
-        <div class="portal-card">
-          <div class="portal-card__icon portal-card__icon--teacher">📊</div>
-          <h3 data-i18n="admin_title">Admin / Teacher Portal</h3>
-          <p>Initial configuration and monthly school-wide data entry (electricity, water, etc).</p>
-          <a href="admin_login.html" class="btn btn-outline btn-lg" style="width:100%">Admin Login</a>
-        </div>
-      </section>
-
-      <!-- Quick Stats Preview -->
-      <section class="stats-preview animate-fade-up delay-2" aria-label="School environmental statistics">
-        <div class="stat-item">
-          <div class="stat-item__val" id="home-stat-sessions">0</div>
-          <div class="stat-item__label">Class Sessions Logged</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-item__val" id="home-stat-co2">0.0</div>
-          <div class="stat-item__label">Total kg CO₂e Tracked</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-item__val" id="home-stat-avg">0.0</div>
-          <div class="stat-item__label">Avg CO₂e per session</div>
-        </div>
-      </section>
-
+      <div id="page-body"></div>
     </div>
   </main>
 
   <script src="./js/i18n.js"></script>
+  <script src="./js/calculator_engine.js"></script>
   <script>
-    renderFooter();
-    I18n.init();
+    (function () {
+      renderFooter({ showHowItWorks: true });
+      I18n.init();
 
-    // Student Portal Lockout Logic
-    document.getElementById('btn-student-portal').addEventListener('click', () => {
-      const config = StorageManager.getAdminConfig();
-      if (!config || config.electricity === undefined) {
-        alert("The Admin must complete the one-time configuration and input school details first!");
-      } else {
-        window.location.href = 'class_select.html';
+      const config  = StorageManager.getAdminConfig();
+      const body    = document.getElementById('page-body');
+
+      const heroHTML = `
+        <section class="hero animate-fade-up" aria-labelledby="hero-heading">
+          <div class="hero__content">
+            <h1 id="hero-heading">Eco-Tracks: Our School's<br>Carbon Mission!</h1>
+            <p>Join the adventure! Track your classroom's energy use, food waste, and green travel to earn badges and save the planet — one step at a time.</p>
+            ${!config
+              ? `<a href="setup.html" class="btn btn-primary btn-lg">🚀 Set Up Your School</a>`
+              : `<a href="class_select.html" class="btn btn-primary btn-lg">📝 Log Class Data</a>`
+            }
+          </div>
+          <div class="hero__visual animate-fade-up delay-1">
+            <div class="hero-circle"></div>
+          </div>
+        </section>`;
+
+      /* ── NOT SET UP ── */
+      if (!config) {
+        body.innerHTML = heroHTML;
+        return;
       }
-    });
 
-    document.getElementById('btn-sync-footer').addEventListener('click', async () => {
-      const result = await StorageManager.syncWithServer();
-      showToast(result.message, result.success ? 'success' : 'error');
-    });
+      /* ── DASHBOARD ── */
+      const history    = StorageManager.getHistory();
+      const stats      = StorageManager.getSummaryStats();
+      const latestLog  = StorageManager.getLatestMonthlyLog();
+      const distData   = (window.GEOGRAPHIC_MATRIX?.districts || {})[config.district] || {};
+      const monthLabel = latestLog ? `${latestLog.month} ${latestLog.year}` : (config.reportMonth ? `${config.reportMonth} ${config.reportYear}` : 'Not logged');
 
-    // Update stats bar if data exists
-    const stats = StorageManager.getSummaryStats();
-    if (stats) {
-      document.getElementById('home-stat-sessions').textContent = stats.totalEntries;
-      document.getElementById('home-stat-co2').textContent = stats.totalCO2;
-      document.getElementById('home-stat-avg').textContent = stats.avgCO2;
-    }
+      // Grade-level recent entries
+      const gradeMap = {};
+      history.forEach(h => {
+        if (!gradeMap[h.grade] || h.timestamp > gradeMap[h.grade].timestamp)
+          gradeMap[h.grade] = h;
+      });
+      const grades = Object.entries(gradeMap).sort((a,b) => b[1].totalCO2 - a[1].totalCO2).slice(0, 8);
+
+      const GRADE_COLORS = { 'A+': '#2D6A2F', A: '#56C15B', B: '#8BC34A', C: '#FFC107', D: '#FF9800', E: '#E53935' };
+      function gradeLabel(co2) {
+        if (co2 <= 30) return 'A+'; if (co2 <= 60) return 'A'; if (co2 <= 100) return 'B';
+        if (co2 <= 150) return 'C'; if (co2 <= 200) return 'D'; return 'E';
+      }
+
+      body.innerHTML = heroHTML + `
+        <div class="dash-school-header animate-fade-up">
+          <div>
+            <div class="dash-school-header__name">🏫 ${config.schoolName || 'My School'}</div>
+            <div class="dash-school-header__meta">
+              📍 ${distData.name || config.district || 'Unknown'} · ${distData.region || ''} · Reporting: ${monthLabel}
+            </div>
+          </div>
+          <a href="class_select.html" class="btn btn-primary">📝 Log Class Data</a>
+        </div>
+
+        <!-- Stats row -->
+        <div class="dash-stats animate-fade-up delay-1">
+          <div class="dash-stat-card">
+            <div class="dash-stat-card__val">${stats ? stats.totalEntries : 0}</div>
+            <div class="dash-stat-card__label">Sessions Logged</div>
+          </div>
+          <div class="dash-stat-card">
+            <div class="dash-stat-card__val">${stats ? stats.totalCO2.toFixed(1) : '0'}</div>
+            <div class="dash-stat-card__label">Total kg CO₂e</div>
+          </div>
+          <div class="dash-stat-card">
+            <div class="dash-stat-card__val">${grades.length}</div>
+            <div class="dash-stat-card__label">Grades Tracked</div>
+          </div>
+          <div class="dash-stat-card">
+            <div class="dash-stat-card__val">${StorageManager.getPendingSyncCount()}</div>
+            <div class="dash-stat-card__label">Pending Sync</div>
+          </div>
+        </div>
+
+        ${latestLog ? `
+        <!-- Latest monthly log info -->
+        <div class="recent-log animate-fade-up delay-1">
+          <div>
+            <div class="recent-log__label">Latest Monthly Log</div>
+            <div class="recent-log__val">${latestLog.month} ${latestLog.year}</div>
+          </div>
+          <div>
+            <div class="recent-log__label">⚡ Electricity</div>
+            <div class="recent-log__val">${latestLog.electricity || 0} kWh</div>
+          </div>
+          <div>
+            <div class="recent-log__label">💧 Water</div>
+            <div class="recent-log__val">${latestLog.water || 0} L</div>
+          </div>
+          <div>
+            <div class="recent-log__label">🔥 LPG</div>
+            <div class="recent-log__val">${latestLog.lpg || 0} cyl</div>
+          </div>
+          <a href="admin.html" class="btn btn-outline btn-sm">Log New Month →</a>
+        </div>` : `
+        <div class="recent-log animate-fade-up delay-1" style="background:var(--green-50);border-color:var(--green-300);">
+          <div>
+            <div class="recent-log__label">Monthly Usage</div>
+            <div class="recent-log__val" style="color:var(--green-700);">No data logged yet</div>
+          </div>
+          <a href="admin.html" class="btn btn-primary btn-sm">Log This Month →</a>
+        </div>`}
+
+        <!-- Per-grade results -->
+        ${grades.length > 0 ? `
+        <h3 style="margin-bottom:14px;color:var(--text-primary);" class="animate-fade-up delay-2">Grade Results</h3>
+        <div class="dash-grade-row animate-fade-up delay-2">
+          ${grades.map(([grade, entry]) => {
+            const gl = gradeLabel(entry.totalCO2);
+            const gc = GRADE_COLORS[gl];
+            return `
+              <div class="dash-grade-chip" style="border-left:4px solid ${gc};">
+                <span>${grade}</span>
+                <span style="background:${gc};color:#fff;padding:2px 8px;border-radius:10px;font-size:0.72rem;">${gl}</span>
+              </div>`;
+          }).join('')}
+        </div>
+        <div style="margin-bottom:32px;" class="animate-fade-up delay-2">
+          <a href="overview.html" style="font-size:0.85rem;color:var(--blue);text-decoration:underline;">View full overview →</a>
+        </div>` : ''}
+
+        <!-- Quick nav actions -->
+        <div class="dash-actions animate-fade-up delay-3">
+          <a href="analytics.html" class="btn btn-outline">📊 Analytics</a>
+          <a href="solutions.html" class="btn btn-outline">🌱 Solutions</a>
+          <a href="goals.html" class="btn btn-outline">🎯 Goals</a>
+          <a href="overview.html" class="btn btn-outline">📈 Overview</a>
+        </div>
+      `;
+
+      // Footer sync
+      document.getElementById('btn-sync-footer').addEventListener('click', async () => {
+        const result = await StorageManager.flushSyncQueue();
+        showToast(result.synced > 0 ? `✅ ${result.synced} synced!` : '✅ Nothing to sync.', 'success');
+      });
+      document.getElementById('btn-reset-data')?.addEventListener('click', () => {
+        if (confirm('Reset ALL app data? This cannot be undone.')) {
+          localStorage.clear(); sessionStorage.clear();
+          location.href = 'setup.html';
+        }
+      });
+    })();
   </script>
 </body>
 </html>
