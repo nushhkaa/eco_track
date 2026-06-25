@@ -142,6 +142,16 @@
                 <label class="form-label text-sm" style="margin-bottom:8px;display:block;" data-i18n="std_car_travel">Private Car (km)</label>
                 <input class="form-input" type="number" id="input-commute-car" value="0" min="0">
               </div>
+              <div style="background:var(--bg-card);border:1px solid #FFCC80;border-radius:12px;padding:16px;text-align:center;">
+                <div style="font-size:2.5rem;margin-bottom:8px;">⛽</div>
+                <label class="form-label text-sm" style="margin-bottom:8px;display:block;">Petrol Used (litres)</label>
+                <input class="form-input" type="number" id="input-commute-petrol" value="0" min="0">
+              </div>
+              <div style="background:var(--bg-card);border:1px solid #B0BEC5;border-radius:12px;padding:16px;text-align:center;">
+                <div style="font-size:2.5rem;margin-bottom:8px;">🛢️</div>
+                <label class="form-label text-sm" style="margin-bottom:8px;display:block;">Diesel Used (litres)</label>
+                <input class="form-input" type="number" id="input-commute-diesel" value="0" min="0">
+              </div>
             </div>
 
             <div class="wizard-nav">
@@ -356,10 +366,15 @@
                      engine.calculateModule('waste', 'anaerobic_pit_burial_kg', wPit);
         }
 
-        const commuteVal = walk + cycle + bus + bike + car;
+        const petrolLitres = parseFloat(document.getElementById('input-commute-petrol')?.value) || 0;
+        const dieselLitres = parseFloat(document.getElementById('input-commute-diesel')?.value) || 0;
+
+        const commuteVal = walk + cycle + bus + bike + car + petrolLitres + dieselLitres;
         const commuteCO2 = engine.calculateModule('commute', 'public_bus_pkm', bus) 
                          + engine.calculateModule('commute', 'motorbike_km', bike)
-                         + engine.calculateModule('commute', 'private_car_km', car);
+                         + engine.calculateModule('commute', 'private_car_km', car)
+                         + engine.calculateModule('commute', 'petrol_vehicle_litre', petrolLitres)
+                         + engine.calculateModule('commute', 'diesel_vehicle_litre', dieselLitres);
 
         const payload = {
           energy: { value: 0, co2: 0 },

@@ -1,17 +1,22 @@
 Category,Material / Asset Type,Emission Factor,Unit,Scope,Underlying Calculation Logic & Source Note
 Energy,Firewood (Biomass),0.006,kg CO₂e / kg,Scope 1,Net impact of non-CO₂ gases (CH₄ and N₂O) under stationary combustion. CO₂ is classified as biogenic.
-Energy,LPG (Cooking Gas) - Weight,2.98,kg CO₂e / kg,Scope 1,Standard fossil fuel combustion factor per unit mass.
+Energy,LPG (Cooking Gas) - Weight,1.51,kg CO₂e / kg,Scope 1,LPG combustion factor per unit mass (Emission factors.xlsx).
 Energy,LPG (Cooking Gas) - Volume,1.51,kg CO₂e / litre,Scope 1,Volumetric fossil fuel factor for liquid phase tracking.
 Energy,LPG (Cooking Gas) - Cylinder,42.3,kg CO₂e / cylinder,Scope 1,Pre-calculated impact for a standard 14.2 kg domestic LPG cylinder.
 Energy,NEA Hydro Grid Electricity (IEA Base),0.02,kg CO₂e / kWh,Scope 2,Standard national indirect baseline reported via IEA.
 Energy,NEA Hydro Grid Electricity (Local Base),0.0124,kg CO₂e / kWh,Scope 2,"Localized, high-accuracy value from Pokhara school study reflecting clean hydropower mix."
-Commute,Staff / Student Motorbike,0.113,kg CO₂e / km,Scope 3,Standard small-displacement petrol engine (125cc–150cc) run per vehicle kilometer.
-Commute,Local Public Bus / Microbus,0.089,kg CO₂e / pass-km,Scope 3,Shared passenger transport metric based on an average occupancy threshold of 40 people.
+Commute,Staff / Student Motorbike,0.066,kg CO₂e / km,Scope 3,Petrol motorbike at avg mileage 35 km/l (Emission factors.xlsx).
+Commute,Local Public Bus / Microbus,0.016,kg CO₂e / pass-km,Scope 3,Bus at avg mileage 4 km/l and 40 passengers (Emission factors.xlsx).
 Waste,Open-Air Plastic Burning,2.89,kg CO₂e / kg,Scope 3,Fossil-derived carbon liberation from standard packaging materials (PE/PP/PET mix).
 Waste,Unmanaged Anaerobic Pit Burial,0.71,kg CO₂e / kg,Scope 3,High-impact methane (CH₄) output based on IPCC First Order Decay (IPCC AR6 GWP = 27.9).
 Water,Groundwater (Borehole Pump),0.04,kg CO₂e / m³,Scope 3,Average electricity footprint drawn during operation (Calculated mid-point of 0.03–0.05).
 Water,Municipal Piped Water Supply,0.34,kg CO₂e / m³,Scope 3,Standard tracking for municipal water utility treatment and pipeline delivery friction.
-Water,Water Tanker Supply,1.02,kg CO₂e / m³,Scope 3,Heavy indirect transport emissions driven by diesel-powered delivery trucks.
-Water,Rainwater Harvesting,0,kg CO₂e / m³,Scope 3,Operational baseline for direct gravity-fed collection setups.
 Paper,Textbooks & Ledger Paper (Virgin),1.84,kg CO₂e / kg,Scope 3,Cradle-to-gate life cycle impact of un-recycled chemical wood pulp.
 Paper,Textbooks & Ledger Paper (Recycled),0.92,kg CO₂e / kg,Scope 3,Defra/EPN regional standard for post-consumer recycled paper assets.
+Energy,Grid Electricity (Nepal Avg),0.23,kg CO₂e / kWh,Scope 2,National grid average for Nepal (Emission factors.xlsx).
+Commute,Petrol Vehicle,2.31,kg CO₂e / litre,Scope 1,IPCC petrol combustion factor (Emission factors.xlsx).
+Commute,Diesel Vehicle,2.65,kg CO₂e / litre,Scope 1,IPCC diesel combustion factor (Emission factors.xlsx).
+Commute,Car Commute,0.19,kg CO₂e / km,Scope 3,Petrol car at avg mileage 12 km/l (Emission factors.xlsx).
+Waste,General Waste (Landfill),0.827,kg CO₂e / kg,Scope 3,IPCC default landfill method for general MSW (Emission factors.xlsx).
+Supplies,Cleaning Agents & Sanitizers,2439.53,kg CO₂e / 1000000 NPR,Scope 3,Climatiq soap/detergents/cleaning preparations (Emission factors.xlsx).
+Supplies,Stationary Supplies,1.728,kg CO₂e / 1000 NPR,Scope 3,Climatiq spend-based stationery factor (Emission factors.xlsx).

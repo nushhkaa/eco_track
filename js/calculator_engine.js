@@ -21,7 +21,7 @@ class CalculatorEngine {
       // Fallback hardcoded factors if fetch fails (offline/file:// edge case)
       this.factors = {
         energy: { firewood_kg: 0.006, lpg_cylinder: 42.3, electricity_kwh: 0.0124 },
-        commute: { motorbike_km: 0.113, public_bus_pkm: 0.089, walking_km: 0 },
+        commute: { motorbike_km: 0.066, public_bus_pkm: 0.016, private_car_km: 0.192, petrol_vehicle_litre: 2.31, diesel_vehicle_litre: 2.65, walking_km: 0 },
         waste: { open_plastic_burning_kg: 2.89, anaerobic_pit_burial_kg: 0.71 },
         water: { groundwater_pump_m3: 0.04, municipal_piped_m3: 0.34, water_tanker_m3: 1.02, rainwater_harvest_m3: 0 },
         paper: { virgin_paper_kg: 1.84, recycled_paper_kg: 0.92 }

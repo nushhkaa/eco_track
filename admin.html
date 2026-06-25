@@ -412,11 +412,13 @@
       const elec = parseFloat(document.getElementById('input-elec').value) || 0;
       const lpg  = parseFloat(document.getElementById('input-lpg').value) || 0;
       const waterL = parseFloat(document.getElementById('input-water').value) || 0;
+      const diesel = parseFloat(document.getElementById('input-diesel').value) || 0;
 
-      const co2Elec  = engine.calculateModule('energy', 'electricity_kwh', elec);
-      const co2LPG   = engine.calculateModule('energy', 'lpg_cylinder', lpg);
-      const co2Water = engine.calculateModule('water', 'municipal_piped_m3', waterL / 1000);
-      const total = co2Elec + co2LPG + co2Water;
+      const co2Elec   = engine.calculateModule('energy', 'electricity_kwh', elec);
+      const co2LPG    = engine.calculateModule('energy', 'lpg_cylinder', lpg);
+      const co2Water  = engine.calculateModule('water', 'municipal_piped_m3', waterL / 1000);
+      const co2Diesel = engine.calculateModule('commute', 'diesel_vehicle_litre', diesel);
+      const total = co2Elec + co2LPG + co2Water + co2Diesel;
 
       if (total > 0) {
         document.getElementById('co2-preview-box').style.display = 'flex';
