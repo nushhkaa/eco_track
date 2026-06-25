@@ -1,4 +1,4 @@
-# Eco-Tracks Nepal: Empowering Classrooms to Fight Climate Change 🌿
+# Eco-Tracks: Empowering Classrooms to Fight Climate Change 🌿
 
 ### The Problem
 Global climate trackers usually ask kids about their family's SUV or their home's central heating. But for a student in a rural Nepali village, these questions just don't make sense. Their reality is often open-air plastic burning, off-grid firewood stoves, and walking miles through the mountains to get to school. 
