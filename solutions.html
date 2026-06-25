@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Geographic Solutions — Eco-Tracks Nepal</title>
-  <script type="module">
-    import { StorageManager } from './js/storage_manager.js';
+  <script src="./js/storage_manager.js"></script>
+  <script>
     if (!StorageManager.getAdminConfig()) { window.location.replace('setup.html'); }
   </script>
   <link rel="stylesheet" href="./css/main.css">
@@ -105,112 +105,112 @@
     </div>
   </main>
 
-  <script type="module">
-    import { geoSolutionsMatrix, categoryLabels, effortColors } from './js/solutions.js';
-    import { StorageManager } from './js/storage_manager.js';
-    import { I18n } from './js/i18n.js';
+  <script src="./js/i18n.js"></script>
+  <script src="./js/solutions.js"></script>
+  <script>
+    (async function() {
+      I18n.init();
 
-    I18n.init();
+      const adminConfig = StorageManager.getAdminConfig();
+      const hotspot     = StorageManager.getHotspot();
 
-    const adminConfig = StorageManager.getAdminConfig();
-    const hotspot     = StorageManager.getHotspot();
+      const regionColors = {
+        Mountain: { bannerClass: 'geo-banner--mountain', badgeStyle: 'background:#E8EAF6;color:#3F51B5', color: '#7986CB' },
+        Hilly:    { bannerClass: 'geo-banner--hilly',    badgeStyle: 'background:var(--green-100);color:var(--green-700)', color: '#56C15B' },
+        Terai:    { bannerClass: 'geo-banner--terai',    badgeStyle: 'background:#FFF9C4;color:#A17900', color: '#FFB74D' },
+      };
 
-    const regionColors = {
-      Mountain: { bannerClass: 'geo-banner--mountain', badgeStyle: 'background:#E8EAF6;color:#3F51B5', color: '#7986CB' },
-      Hilly:    { bannerClass: 'geo-banner--hilly',    badgeStyle: 'background:var(--green-100);color:var(--green-700)', color: '#56C15B' },
-      Terai:    { bannerClass: 'geo-banner--terai',    badgeStyle: 'background:#FFF9C4;color:#A17900', color: '#FFB74D' },
-    };
-
-    function mapPerc(val) {
-      if (val === 'Low') return '30%';
-      if (val === 'Medium') return '60%';
-      if (val === 'High') return '85%';
-      if (val === 'Very High') return '95%';
-      return '50%';
-    }
-
-    async function initSolutions() {
-      try {
-        const res = await fetch('./data/geographic_matrix.json');
-        const geoData = await res.json();
-        const distData = geoData.districts[adminConfig.district] || { region: 'Hilly', name: 'Unknown' };
-        
-        const region = distData.region;
-        document.getElementById('geo-subtitle').textContent = `📍 Targeted tactics for ${distData.name} District (${region})`;
-
-        // Render solution cards
-        const solutionPool = geoSolutionsMatrix[region];
-        const grid         = document.getElementById('solutions-grid');
-        grid.innerHTML     = '';
-
-        const categories = ['energy', 'commute', 'waste', 'water', 'paper'];
-
-        categories.forEach((cat, idx) => {
-          const sol = solutionPool[cat];
-          if (!sol) return;
-
-          const meta = categoryLabels[cat] || { emoji: '📊', label: cat, color: '#888', bg: '#f5f5f5' };
-          const effortPct = mapPerc(sol.effort);
-          const impactPct = mapPerc(sol.impact);
-
-          const card = document.createElement('div');
-          card.className = `eco-card animate-fade-up delay-${Math.min(idx+1, 5)}`;
-
-          card.innerHTML = `
-            <div class="eco-icon-wrapper" style="background:${meta.bg}; color:${meta.color};">
-              ${meta.emoji}
-            </div>
-            
-            <div class="eco-image-placeholder">
-              [Upload Image: src/img/${cat}.jpg]
-            </div>
-
-            <h3>${meta.label}</h3>
-            <p class="eco-quote">"${sol.action.replace('Target: ', '')}"</p>
-
-            <div class="eco-progress-row">
-              <div class="eco-progress-header">
-                <span>Impact</span>
-                <span style="color:#2E7D32">${impactPct}</span>
-              </div>
-              <div class="eco-progress-track">
-                <div class="eco-progress-fill" style="width:${impactPct}; background:#2E7D32;"></div>
-              </div>
-            </div>
-
-            <div class="eco-progress-row">
-              <div class="eco-progress-header">
-                <span>Effort</span>
-                <span style="color:#1976D2">${effortPct}</span>
-              </div>
-              <div class="eco-progress-track">
-                <div class="eco-progress-fill" style="width:${effortPct}; background:#1976D2;"></div>
-              </div>
-            </div>
-
-            <button class="eco-commit-btn commit-btn" data-title="${sol.title}">Commit for a Month</button>
-          `;
-
-          grid.appendChild(card);
-        });
-
-        // Add commit listeners
-        document.querySelectorAll('.commit-btn').forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            const title = e.target.getAttribute('data-title');
-            StorageManager.setActiveMission(StorageManager.getCurrentGrade(), title);
-            alert("Mission Saved!");
-            e.target.textContent = '✅ Committed!';
-            e.target.disabled = true;
-          });
-        });
-
-      } catch (err) {
-        console.error(err);
+      function mapPerc(val) {
+        if (val === 'Low') return '30%';
+        if (val === 'Medium') return '60%';
+        if (val === 'High') return '85%';
+        if (val === 'Very High') return '95%';
+        return '50%';
       }
-    }
 
-    initSolutions();
+      async function initSolutions() {
+        try {
+          const res = await fetch('./data/geographic_matrix.json');
+          const geoData = await res.json();
+          const distData = geoData.districts[adminConfig.district] || { region: 'Hilly', name: 'Unknown' };
+          
+          const region = distData.region;
+          document.getElementById('geo-subtitle').textContent = `📍 Targeted tactics for ${distData.name} District (${region})`;
+
+          // Render solution cards
+          const solutionPool = geoSolutionsMatrix[region];
+          const grid         = document.getElementById('solutions-grid');
+          grid.innerHTML     = '';
+
+          const categories = ['energy', 'commute', 'waste', 'water', 'paper'];
+
+          categories.forEach((cat, idx) => {
+            const sol = solutionPool[cat];
+            if (!sol) return;
+
+            const meta = categoryLabels[cat] || { emoji: '📊', label: cat, color: '#888', bg: '#f5f5f5' };
+            const effortPct = mapPerc(sol.effort);
+            const impactPct = mapPerc(sol.impact);
+
+            const card = document.createElement('div');
+            card.className = `eco-card animate-fade-up delay-${Math.min(idx+1, 5)}`;
+
+            card.innerHTML = `
+              <div class="eco-icon-wrapper" style="background:${meta.bg}; color:${meta.color};">
+                ${meta.emoji}
+              </div>
+              
+              <div class="eco-image-placeholder">
+                [Upload Image: src/img/${cat}.jpg]
+              </div>
+
+              <h3>${meta.label}</h3>
+              <p class="eco-quote">"${sol.action.replace('Target: ', '')}"</p>
+
+              <div class="eco-progress-row">
+                <div class="eco-progress-header">
+                  <span>Impact</span>
+                  <span style="color:#2E7D32">${impactPct}</span>
+                </div>
+                <div class="eco-progress-track">
+                  <div class="eco-progress-fill" style="width:${impactPct}; background:#2E7D32;"></div>
+                </div>
+              </div>
+
+              <div class="eco-progress-row">
+                <div class="eco-progress-header">
+                  <span>Effort</span>
+                  <span style="color:#1976D2">${effortPct}</span>
+                </div>
+                <div class="eco-progress-track">
+                  <div class="eco-progress-fill" style="width:${effortPct}; background:#1976D2;"></div>
+                </div>
+              </div>
+
+              <button class="eco-commit-btn commit-btn" data-title="${sol.title}">Commit for a Month</button>
+            `;
+
+            grid.appendChild(card);
+          });
+
+          // Add commit listeners
+          document.querySelectorAll('.commit-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              const title = e.target.getAttribute('data-title');
+              StorageManager.setActiveMission(StorageManager.getCurrentGrade(), title);
+              alert("Mission Saved!");
+              e.target.textContent = '✅ Committed!';
+              e.target.disabled = true;
+            });
+          });
+
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      await initSolutions();
+    })();
   </script>
 </body>
 </html>

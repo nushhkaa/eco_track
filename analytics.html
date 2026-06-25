@@ -355,19 +355,19 @@
                 ${maxVal > 0 ? '😰' : '🌟'}
               </div>
               <div class="hotspot-card__body">
-                ${maxVal > 0 ? \`
+                ${maxVal > 0 ? `
                   <div class="hotspot-badge">⚠️ Attention Required</div>
                   <h3>Emission Pain Point Found!</h3>
-                  <p>Oh no! Our biggest emission pain point this \${current.timestamp ? 'session' : 'month'} is
-                    <span class="hotspot-category">\${hotspotCatLabel}</span>\${hotspotCatLabel === 'Waste' ? '' : '!'} Let's work together to change it!
+                  <p>Oh no! Our biggest emission pain point this ${current.timestamp ? 'session' : 'month'} is
+                    <span class="hotspot-category">${hotspotCatLabel}</span>${hotspotCatLabel === 'Waste' ? '' : '!'} Let's work together to change it!
                   </p>
                   <a href="solutions.html" class="btn btn-primary" id="btn-help-fix">Help Fix This →</a>
-                \` : \`
+                ` : `
                   <div class="hotspot-badge" style="background:var(--green-100);color:var(--green-700);border-color:var(--green-300);">🌟 Excellent!</div>
                   <h3>Zero Carbon Session!</h3>
                   <p>Amazing! Your class recorded no emissions this session. Keep up the incredible eco-work!</p>
                   <a href="solutions.html" class="btn btn-primary">🌱 View Solutions</a>
-                \`}
+                `}
               </div>
             </div>
 
@@ -379,7 +379,7 @@
                 <div class="summary-stat__icon summary-stat__icon--energy" aria-hidden="true">⚡</div>
                 <div>
                   <div class="summary-stat__label">Total CO₂e This Session</div>
-                  <div class="summary-stat__value">\${totalCO2.toFixed(1)} kg</div>
+                  <div class="summary-stat__value">${totalCO2.toFixed(1)} kg</div>
                 </div>
               </div>
 
@@ -387,21 +387,21 @@
                 <div class="summary-stat__icon summary-stat__icon--trees" aria-hidden="true">🌳</div>
                 <div>
                   <div class="summary-stat__label">Trees Equivalent</div>
-                  <div class="summary-stat__value">\${trees > 0 ? trees + ' Trees' : '< 1 Tree'}</div>
+                  <div class="summary-stat__value">${trees > 0 ? trees + ' Trees' : '< 1 Tree'}</div>
                 </div>
               </div>
 
-              \${improvement !== null ? \`
+              ${improvement !== null ? `
                 <div class="summary-stat">
-                  <div class="summary-stat__icon" style="background:#FFF0F0" aria-hidden="true">\${parseFloat(improvement) >= 0 ? '📉' : '📈'}</div>
+                  <div class="summary-stat__icon" style="background:#FFF0F0" aria-hidden="true">${parseFloat(improvement) >= 0 ? '📉' : '📈'}</div>
                   <div>
                     <div class="summary-stat__label">vs. Last Session</div>
-                    <div class="summary-stat__value" style="color:\${parseFloat(improvement) >= 0 ? 'var(--green-600)' : 'var(--red)'}">
-                      \${parseFloat(improvement) >= 0 ? '↓' : '↑'} \${Math.abs(parseFloat(improvement))}%
+                    <div class="summary-stat__value" style="color:${parseFloat(improvement) >= 0 ? 'var(--green-600)' : 'var(--red)'}">
+                      ${parseFloat(improvement) >= 0 ? '↓' : '↑'} ${Math.abs(parseFloat(improvement))}%
                     </div>
                   </div>
                 </div>
-              \` : ''}
+              ` : ''}
 
               <a href="transparency.html" class="see-math-btn mt-12" id="btn-see-math">
                 📐 See the Math ↗
@@ -419,8 +419,8 @@
                 <p>See where we are doing great and where we can improve.</p>
               </div>
               <div class="flex items-center gap-12">
-                <div class="grade-circle" style="background:\${gradeInfo.color}" title="\${gradeInfo.label}" aria-label="Grade: \${gradeInfo.grade}">
-                  \${gradeInfo.grade}
+                <div class="grade-circle" style="background:${gradeInfo.color}" title="${gradeInfo.label}" aria-label="Grade: ${gradeInfo.grade}">
+                  ${gradeInfo.grade}
                 </div>
                 <div class="tab-group" role="group" aria-label="View toggle">
                   <button class="tab-btn active" id="tab-weekly">Weekly</button>
@@ -435,17 +435,17 @@
                 <div class="legend-dot" style="background:var(--green-500)"></div>
                 Current Quarter
               </div>
-              \${prevData ? \`
+              ${prevData ? `
                 <div class="legend-item">
                   <div class="legend-dot" style="background:var(--text-caption)"></div>
                   Previous Log (Overlay)
                 </div>
-              \` : ''}
+              ` : ''}
             </div>
 
             <!-- Bar Chart -->
             <div class="bar-chart bar-chart-wrap" id="bar-chart-container" role="img" aria-label="Category CO2 breakdown bar chart">
-              \${Object.keys(data).map((cat, i) => {
+              ${Object.keys(data).map((cat, i) => {
                 const co2     = data[cat].co2;
                 const prevCO2 = prevData ? (prevData[cat]?.co2 || 0) : 0;
                 const barHeightPct = ((co2 / globalMax) * 100).toFixed(1);
@@ -455,28 +455,28 @@
                 const meta    = catMeta[cat] || { emoji: '📊', label: cat, color: '#888' };
                 const isHot   = cat === maxCat && maxVal > 0;
 
-                return \`
-                  <div class="bar-col" data-co2="\${co2}" data-cat="\${cat}" style="animation-delay:\${i*0.1}s">
-                    <span class="bar-pct \${isHot ? 'text-red font-bold' : ''}" aria-label="\${pct}%">\${pct}%</span>
+                return `
+                  <div class="bar-col" data-co2="${co2}" data-cat="${cat}" style="animation-delay:${i*0.1}s">
+                    <span class="bar-pct ${isHot ? 'text-red font-bold' : ''}" aria-label="${pct}%">${pct}%</span>
                     <div class="bar-comparison" style="height:160px;align-items:flex-end;">
-                      <div class="bar-current bar-fill bar-fill--\${cat}"
-                           style="height:\${barHeightPct}%;background:\${isHot ? 'var(--red)' : meta.color}"
-                           title="\${meta.label}: \${co2.toFixed(2)} kg CO₂e (\${pct}%)">
+                      <div class="bar-current bar-fill bar-fill--${cat}"
+                           style="height:${barHeightPct}%;background:${isHot ? 'var(--red)' : meta.color}"
+                           title="${meta.label}: ${co2.toFixed(2)} kg CO₂e (${pct}%)">
                       </div>
-                      \${prevData ? \`
+                      ${prevData ? `
                         <div class="bar-past bar-fill"
-                             style="height:\${barHeightPrevPct}%;background:\${meta.color}"
-                             title="Previous: \${prevCO2.toFixed(2)} kg CO₂e (\${prevPct}%)">
+                             style="height:${barHeightPrevPct}%;background:${meta.color}"
+                             title="Previous: ${prevCO2.toFixed(2)} kg CO₂e (${prevPct}%)">
                         </div>
-                      \` : ''}
+                      ` : ''}
                     </div>
                     <div class="bar-category-label">
-                      <span aria-hidden="true">\${meta.emoji}</span>
-                      <span>\${meta.label}</span>
-                      <a href="solutions.html?cat=\${cat}" style="font-size:0.7rem; color:var(--blue); text-decoration:underline; margin-top:4px;">💡 Fix</a>
+                      <span aria-hidden="true">${meta.emoji}</span>
+                      <span>${meta.label}</span>
+                      <a href="solutions.html?cat=${cat}" style="font-size:0.7rem; color:var(--blue); text-decoration:underline; margin-top:4px;">💡 Fix</a>
                     </div>
                   </div>
-                \`;
+                `;
               }).join('')}
             </div>
           </div>
@@ -485,8 +485,8 @@
           <div class="animate-fade-up delay-2 mt-24" style="background:#E3F2FD; border:1px solid #90CAF9; border-radius:12px; padding:16px;">
             <h4 style="margin-bottom:8px; font-size:0.95rem; color:#1565C0;">🏢 School-Wide Baselines (From Admin)</h4>
             <div style="display:flex; gap:24px; font-size:0.85rem; color:#0D47A1;">
-              <div><strong>Municipal Waste:</strong> \${StorageManager.getAdminConfig()?.muniWaste || 'None'}</div>
-              <div><strong>Admin Paper Recycled:</strong> \${StorageManager.getAdminConfig()?.adminPaperRecycled || 0} kg</div>
+              <div><strong>Municipal Waste:</strong> ${StorageManager.getAdminConfig()?.muniWaste || 'None'}</div>
+              <div><strong>Admin Paper Recycled:</strong> ${StorageManager.getAdminConfig()?.adminPaperRecycled || 0} kg</div>
             </div>
           </div>
 
@@ -495,17 +495,17 @@
             <div class="achievement-card" id="ach-best-grade">
               <div class="achievement-card__icon">🏆</div>
               <div class="achievement-card__title">Performance Grade</div>
-              <div class="achievement-card__value">\${gradeInfo.grade} — \${gradeInfo.label}</div>
+              <div class="achievement-card__value">${gradeInfo.grade} — ${gradeInfo.label}</div>
             </div>
             <div class="achievement-card" id="ach-top-improver">
               <div class="achievement-card__icon">📈</div>
               <div class="achievement-card__title">Total Sessions Logged</div>
-              <div class="achievement-card__value">\${StorageManager.getHistory().filter(h=>h.grade===grade).length} Session(s)</div>
+              <div class="achievement-card__value">${StorageManager.getHistory().filter(h=>h.grade===grade).length} Session(s)</div>
             </div>
             <div class="achievement-card" id="ach-eco-warrior">
               <div class="achievement-card__icon">🛡️</div>
               <div class="achievement-card__title">Eco-Warrior Status</div>
-              <div class="achievement-card__value" style="color:var(--green-500);">\${grade}</div>
+              <div class="achievement-card__value" style="color:var(--green-500);">${grade}</div>
             </div>
           </div>
 
@@ -527,7 +527,7 @@
             <a href="solutions.html" class="btn btn-primary btn-lg" id="btn-proceed-solutions">🌱 View Geographic Solutions</a>
             <a href="student.html" class="btn btn-outline" id="btn-log-again">📝 Log Another Session</a>
           </div>
-        \`;
+        `;
 
         document.getElementById('analytics-content').innerHTML = html;
 
@@ -544,14 +544,14 @@
 
       // Footer
       document.getElementById('btn-sync-footer').addEventListener('click', () => {
-        const ok = StorageManager.downloadCSV();
+        const ok = StorageManager.downloadLocalCSV();
         showToast(ok ? '✅ Data exported!' : '⚠️ No data yet.', ok ? 'success' : 'error');
       });
       document.getElementById('btn-refresh-footer').addEventListener('click', () => location.reload());
 
       function showToast(msg, type = 'success') {
         const t = document.createElement('div');
-        t.className = \`toast toast--\${type}\`;
+        t.className = `toast toast--${type}`;
         t.textContent = msg;
         document.body.appendChild(t);
         setTimeout(() => t.remove(), 3500);
