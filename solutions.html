@@ -112,6 +112,8 @@
       I18n.init();
 
       const adminConfig = StorageManager.getAdminConfig();
+      if (!adminConfig) return;
+
       const hotspot     = StorageManager.getHotspot();
 
       const regionColors = {
@@ -130,15 +132,15 @@
 
       async function initSolutions() {
         try {
-          const res = await fetch('./data/geographic_matrix.json');
-          const geoData = await res.json();
-          const distData = geoData.districts[adminConfig.district] || { region: 'Hilly', name: 'Unknown' };
+          const geoData = window.GEOGRAPHIC_MATRIX;
+          const districtKey = adminConfig.district ? adminConfig.district.toLowerCase() : '';
+          const distData = (geoData && geoData.districts && geoData.districts[districtKey]) || { region: 'Hilly', name: 'Unknown' };
           
-          const region = distData.region;
-          document.getElementById('geo-subtitle').textContent = `📍 Targeted tactics for ${distData.name} District (${region})`;
+          const region = distData.region || 'Hilly';
+          document.getElementById('geo-subtitle').textContent = `📍 Targeted tactics for ${distData.name || 'Unknown'} District (${region})`;
 
           // Render solution cards
-          const solutionPool = geoSolutionsMatrix[region];
+          const solutionPool = geoSolutionsMatrix[region] || geoSolutionsMatrix['Hilly'];
           const grid         = document.getElementById('solutions-grid');
           grid.innerHTML     = '';
 
