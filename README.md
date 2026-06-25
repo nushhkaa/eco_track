@@ -92,22 +92,6 @@ Open `index.html` in any modern browser. No build step, no server needed.
 
 All factors are Nepal-localised. Source: IPCC 2006/2019 Refinement, AR6-GWP100.
 
----
-
-## Grading Scale
-
-Based on total monthly CO₂e per classroom (~30 students).
-
-| Grade | Label | Range |
-|---|---|---|
-| A+ | Eco Champion | 0 – 30 kg |
-| A | Green Warrior | 31 – 60 kg |
-| B | Planet Protector | 61 – 100 kg |
-| C | Eco Learner | 101 – 150 kg |
-| D | Needs Action | 151 – 200 kg |
-| E | Needs Immediate Focus | > 200 kg |
-
----
 
 ## Data & Privacy
 
